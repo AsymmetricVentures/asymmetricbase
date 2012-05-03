@@ -1,0 +1,23 @@
+{% macro help_text(test) %}
+	<span class="help-text"><br />{{test}}</span>
+{% endmacro %}
+
+{% macro required_text(marker = '* ') %}
+	<span class="required-marker">{{marker}}</span>
+{% endmacro %}
+
+{% macro vblock_segment(label, required, field, help_text) %}
+	<div class="bf-label vseg">{{label}}{{required}}</div>
+	<br class="line-break-br" />
+	<div class="bf-input vseg\">{{field}}{{help_text}}</div>
+{% endmacro %}
+
+{% macro hblock_segment(label, required, field, help_text) %}
+	<div class="bf-label hseg">{{label}}{{required}}:&nbsp;</div>
+	<div class="bf-input hseg">{{field}}{help_text}}</div>
+{% endmacro %}
+
+{% macro rhblock_segment(label, required, field, help_text) %}
+	<div class="bf-input rhseg">{{field}}{{required}}&nbsp;</div>
+	<div class="bf-label rhseg">{{label}}{{help_text}}</div>
+{% endmacro %}
