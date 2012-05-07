@@ -19,21 +19,37 @@ setup(
 	author = 'Richard Eames',
 	author_email = 'reames@asymmetricventures.com',
 	
-	package = (
+	packages = (
 		'asymmetricbase',
+		'asymmetricbase.fields',
+		'asymmetricbase.forms',
 		'asymmetricbase.jinja',
-		'asymmetricbase.logging',
+		'asymmetricbase.jinja.tags',
 		'asymmetricbase.locale',
 		'asymmetricbase.locale.canada',
 		'asymmetricbase.locale.canada.forms',
+		'asymmetricbase.logging',
+		'asymmetricbase.management',
+		'asymmetricbase.management.commands',
+		'asymmetricbase.middleware',
+		'asymmetricbase.pagination',
+		'asymmetricbase.utils',
+		'asymmetricbase.views',
+		'asymmetricbase.views.mixins',
 	),
 	classifiers = filter(None, classifiers.split('\n')),
 	
 	requires = (
-		'django==1.4',
-		'jinja2==2.6',
+		'django(==1.4)',
+		'jinja2(==2.6)',
 		'pytz', # most recent
-		'south==0.7.4'
+		'south(==0.7.4)'
 	),
-	install_requires = (),
+	
+	package_dir = {'asymmetricbase' : 'asymmetricbase'},
+	package_data = {
+		'asymmetricbase' : [
+			'templates/asymmetricbase/boundfield/*.djhtml',
+			'templates/asymmetricbase/forms/*.djhtml',
+		]},
 )
