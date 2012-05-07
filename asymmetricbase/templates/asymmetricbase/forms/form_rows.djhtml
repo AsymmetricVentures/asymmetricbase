@@ -44,7 +44,7 @@
 	{% else %}
 		<br /><span>{{errors}}</span>
 	{% endif %}
-{% endmacro}
+{% endmacro %}
 
 {% macro as_table_twocol(label, field, help_text, errors, required_mark, html_class_attr, is_error_row) %}
 	{% if not is_error_row %}
