@@ -1,6 +1,6 @@
 import logging
 
-from django.utils.functional import lazy
+from django.utils.functional import SimpleLazyObject
 
 class NullHandler(logging.Handler):
 	def emit(self, record):
@@ -14,4 +14,4 @@ def init_logger():
 	_logger.addHandler(NullHandler())
 	return _logger
 
-logger = lazy(init_logger, logging.Logger)
+logger = SimpleLazyObject(init_logger)

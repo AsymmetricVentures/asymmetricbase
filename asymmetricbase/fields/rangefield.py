@@ -19,4 +19,4 @@ class IntegerRangeField(IntegerField):
 		return super(IntegerRangeField, self).formfield(**defaults)
 
 
-add_introspection_rules([], ['^project\.shared\.fields\.rangefield\.IntegerRangeField'])
+add_introspection_rules([], ['^asymmetricbase\.fields\.rangefield\.IntegerRangeField'])
