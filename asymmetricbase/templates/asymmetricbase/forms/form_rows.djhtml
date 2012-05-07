@@ -1,0 +1,60 @@
+
+{% macro as_table(label, field, help_text, errors, required_mark, html_class_attr, is_error_row) %}
+	{% if not is_error_row %}
+		<tr {{html_class_attr}}>
+			<th>{{label}}{{required_mark}}</th>
+			<td>{{errors}}{{field}}<br /><span class="helptext">{{help_text}}</span></td>
+		</tr>
+	{% else %}
+		<tr>
+			<td colspan="2">{{errors}}</td>
+		</tr>
+	{% endif %}
+{% endmacro %}
+
+
+{% macro as_ul(label, field, help_text, errors, required_mark, html_class_attr, is_error_row) %}
+	{% if not is_error_row %}
+		<li {{html_class_attr}}>
+			{{errors}}{{label}}{{required_mark}} {{field}}<span class="helptext">{{help_text}}</span></td>
+		</li>
+	{% else %}
+		<li>
+			{{errors}}
+		</li>
+	{% endif %}
+{% endmacro %}
+
+
+{% macro as_p(label, field, help_text, errors, required_mark, html_class_attr, is_error_row) %}
+	{% if not is_error_row %}
+		<p {{html_class_attr}}>
+			{{label}}{{required_mark}}{{field}}<span class="helptext">{{help_text}}</span></td>
+		</p>
+	{% else %}
+		{{errors}}
+	{% endif %}
+{% endmacro %}
+
+{% macro as_tr(label, field, help_text, errors, required_mark, html_class_attr, is_error_row) %}
+	{% if not is_error_row %}
+		<td {{html_class_attr}}>
+			{{field}}{{required_mark}}{{errors}}{{help_text}}
+		</td>
+	{% else %}
+		<br /><span>{{errors}}</span>
+	{% endif %}
+{% endmacro}
+
+{% macro as_table_twocol(label, field, help_text, errors, required_mark, html_class_attr, is_error_row) %}
+	{% if not is_error_row %}
+		<tr {{html_class_attr}}>
+			<th>{{label}}</th>
+			<td>{{field}}{{required_mark}}{{errors}}<span class="helptext"><br />{{help_text}}</span></td>
+		</tr>
+	{% else %}
+		<tr>
+			<td colspan="2">{{errors}}</td>
+		</tr>
+	{% endif %}
+{% endmacro %}

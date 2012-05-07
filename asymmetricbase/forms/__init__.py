@@ -8,9 +8,10 @@ from django.conf import settings
 import jinja2
 
 from asymmetricbase.forms.boundfield import BoundField
+from asymmetricbase.jinja import jinja_env
 
 HTML5 = getattr(settings, 'ASYM_HTML5', False)
-HTML5_WIDGETS = getattr(settings, 'ASYM_HTML5_WIDGETS',  {})
+HTML5_WIDGETS = getattr(settings, 'ASYM_HTML5_WIDGETS', {})
 
 if HTML5:
 	from asymmetricbase.forms.html5_widgets import * # pylint: disable-msg=W0401
@@ -60,7 +61,7 @@ class BaseFormMixin(object):
 				field.localize = True
 				field.widget.is_localized = True
 			
-			if HTML5_WIDGETS.get('email', False) and isinstance(field, forms.EmailField): # Jayson global accepts 'na' in their email input
+			if HTML5_WIDGETS.get('email', False) and isinstance(field, forms.EmailField): 
 				field.widget.input_type = 'email'
 			
 			if HTML5_WIDGETS.get('number', False) and isinstance(field, forms.IntegerField):
@@ -99,120 +100,86 @@ class Form(BaseFormMixin, forms.Form):
 		return jinja2.Markup(super(Form, self)._html_output(*args, **kwargs))
 
 class ModelForm(BaseFormMixin, forms.ModelForm):
+	template_module = jinja_env.get_template('asymmetricbase/forms/form_rows.djhtml').module
 	
-	def _html_output(self, normal_row, error_row, row_ender, help_text_html, errors_on_separate_row, required_mark, surround = None):
-		"Helper function for outputting HTML. Used by as_table(), as_ul(), as_p()."
-		top_errors = self.non_field_errors() # Errors that should be displayed above all fields.
+	def _html_output(self, *args, **kwargs):
+		
+		return jinja2.Markup(super(ModelForm, self)._html_output(*args, **kwargs))
+	
+	def _render_html_template(self, template_macro, errors_on_separate_row, required_mark):
+		top_errors = self.non_field_errors()
 		output, hidden_fields = [], []
 		
 		for name, field in self.fields.items():
-			html_class_attr = ''
-			bf = BoundField(self, field, name)
-			bf_errors = self.error_class([conditional_escape(error) for error in bf.errors]) # Escape and cache in local variable.
+			macro_args = {
+				'label' : '',
+				'field' : unicode(field),
+				'help_text' : '',
+				'errors' : '',
+				'html_class_attr' : '',
+				'is_error' : errors_on_separate_row,
+				'required_mark' : ''
+			}
 			
-			local_required_mark = required_mark
+			bf = self[name]
+			bf_errors = self.error_class([conditional_escape(error for error in bf.errors)])
+			macro_args['errors'] = force_unicode(bf_errors)
 			
-			if not field.required:
-				local_required_mark = ''
+			macro_args['required_mark'] = required_mark if field.required else u''
 			
 			if bf.is_hidden:
-				if bf_errors:
-					top_errors.extend([u'(Hidden field %s) %s' % (name, force_unicode(e)) for e in bf_errors])
+				if bf.errors:
+					top_errors.extend([u'(Hidden field {}) {}'.format(name, force_unicode(e)) for e in bf_errors])
 				hidden_fields.append(unicode(bf))
+			
 			else:
-				# Create a 'class="..."' attribute if the row should have any
-				# CSS classes applied.
 				css_classes = bf.css_classes()
 				if css_classes:
-					html_class_attr = ' class="%s"' % css_classes
+					macro_args['html_class_attr'] = ' class="{}"'.format(css_classes)
 				
 				if errors_on_separate_row and bf_errors:
-					output.append(error_row % force_unicode(bf_errors))
+					output.append(template_macro(**macro_args))
 				
 				if bf.label:
 					label = conditional_escape(force_unicode(bf.label))
-					# Only add the suffix if the label does not end in
-					# punctuation.
+					
 					if self.label_suffix:
 						if label[-1] not in ':?.!':
 							label += self.label_suffix
+							
+					label_css = 'required' if field.required else u''
 					
+					macro_args['label'] = bf.label_tag(label, attrs = {'class' : label_css}) or u''
 					
-					label_css = 'required' if field.required else ''
-					
-					label = bf.label_tag(label, attrs = {'class':label_css}) or ''
 				else:
-					label = ''
+					macro_args['label'] = u''
 				
 				if field.help_text:
-					help_text = help_text_html % force_unicode(field.help_text)
+					macro_args['help_text'] = force_unicode(field.help_text)
 				else:
-					help_text = u''
+					macro_args['help_text'] = u''
 				
-				output.append(normal_row % {
-					'errors': force_unicode(bf_errors),
-					'label': force_unicode(label),
-					'field': unicode(bf),
-					'help_text': help_text,
-					'html_class_attr': html_class_attr,
-					'required_mark' : local_required_mark,
-				})
-		
+				output.append(template_macro(**macro_args))
+			
 		if top_errors:
-			output.insert(0, error_row % force_unicode(top_errors))
+			output.insert(0, template_macro(label = '', field = '', help_text = '', html_class_attr = '', is_error_row = True, errors = top_errors))
 		
-		if hidden_fields: # Insert any hidden fields in the last row.
-			str_hidden = u''.join(hidden_fields)
-			if output:
-				last_row = output[-1]
-				# Chop off the trailing row_ender (e.g. '</td></tr>') and
-				# insert the hidden fields.
-				if not last_row.endswith(row_ender):
-					# This can happen in the as_p() case (and possibly others
-					# that users write): if there are only top errors, we may
-					# not be able to conscript the last row for our purposes,
-					# so insert a new, empty row.
-					last_row = (normal_row % {'errors': '', 'label': '',
-											  'field': '', 'help_text':'',
-											  'html_class_attr': html_class_attr,
-											  'required_mark' : required_mark,
-											 })
-					output.append(last_row)
-				output[-1] = last_row[:-len(row_ender)] + str_hidden + row_ender
-			else:
-				# If there aren't any rows in the output, just append the
-				# hidden fields.
-				output.append(str_hidden)
-		
-		output = u'\n'.join(output)
-		
-		if isinstance(surround, basestring):
-			output = surround % output
+		if hidden_fields:
+			output.append(u''.join(hidden_fields))
 		
 		return jinja2.Markup(output)
 	
 	def as_table(self):
-		return self._html_output(
-			normal_row = u'''<tr%(html_class_attr)s>
-				<th>%(required_mark)s%(label)s</th>
-				<td>%(field)s%(errors)s%(help_text)s</td></tr>\n''',
-			error_row = u'<tr><td colspan="2">%s</td></tr>\n',
-			row_ender = u'</td></tr>\n',
-			help_text_html = u'<span class="help-text"><br />%s</span>',
-			errors_on_separate_row = False,
-			required_mark = '<span class="required-marker">* </span>'
-			)
+		return self._render_html_template(self.template_module.as_table, False)
 	
-	def as_table_row(self):
-		return self._html_output(
-			normal_row = '<td%(html_class_attr)s>%(field)s%(errors)s%(help_text)s</td>\n',
-			error_row = '<br /><span>%s</span>\n',
-			row_ender = '</td>\n',
-			help_text_html = '<br/><span class="help-text>%s</span>\n',
-			errors_on_separate_row = False,
-			required_mark = '',
-			surround = '<tr>%s</tr>'
-		)
+	def as_tr(self):
+		return '<tr>{}</tr>'.format(self._render_html_template(self.template_module.as_tr, False))
+	
+	def as_ul(self):
+		return self._render_html_template(self.template_module.as_ul, False)
+	
+	def as_p(self):
+		return self._render_html_template(self.template_module.as_p, True)
 		
 	def is_valid_and_save(self, commit = True):
 		if self.is_valid():
@@ -229,16 +196,7 @@ class TwoColumnTableLayout(object):
 	classes that implement the as_table() method to take advantage of C3 MRO
 	"""
 	def as_table(self):
-		return self._html_output(
-			normal_row = u'''<tr%(html_class_attr)s>
-				<th>%(label)s</th>
-				<td>%(field)s%(required_mark)s%(errors)s%(help_text)s</td></tr>\n''',
-			error_row = u'<tr><td colspan="2">%s</td></tr>\n',
-			row_ender = u'</td></tr>\n',
-			help_text_html = u'<span class="help-text"><br />%s</span>',
-			errors_on_separate_row = False,
-			required_mark = '<span class="required-marker"> *</span>'
-		)
+		return self._render_html_template(self.template_module.as_table_twocol, False)
 
 class MyBaseModelFormSet(BaseModelFormSet):
 	
