@@ -4,8 +4,8 @@ from django.dispatch import Signal
 
 from asymmetricbase.logging import logger #@UnusedImport
 
-pre_merge = Signal(providing_args = ['attr'])
-post_merge = Signal(providing_args = ['attr', 'merged'])
+pre_merge = Signal(providing_args = ['instance', 'attr'])
+post_merge = Signal(providing_args = ['instance', 'attr', 'merged'])
 
 class MergeAttrMixin(object):
 	@classmethod
@@ -38,9 +38,8 @@ class MergeAttrMixin(object):
 		
 		return attr_ret
 	
-	@classmethod
-	def _merge_attr_signal(cls, attrname, process = None):
-		pre_merge.send(sender = cls, attr = attrname)
-		ret = cls._merge_attr(attrname, process)
-		post_merge.send(sender = cls, attr = attrname, merged = ret)
+	def _merge_attr_signal(self, attrname, process = None):
+		pre_merge.send(sender = self, instance = self, attr = attrname)
+		ret = self._merge_attr(attrname, process)
+		post_merge.send(sender = self, instance = self, attr = attrname, merged = ret)
 		return ret
