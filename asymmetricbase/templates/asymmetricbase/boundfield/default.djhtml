@@ -9,12 +9,12 @@
 {% macro vblock_segment(label, required, field, help_text) %}
 	<div class="bf-label vseg">{{label}}{{required}}</div>
 	<br class="line-break-br" />
-	<div class="bf-input vseg\">{{field}}{{help_text}}</div>
+	<div class="bf-input vseg">{{field}}{{help_text}}</div>
 {% endmacro %}
 
 {% macro hblock_segment(label, required, field, help_text) %}
 	<div class="bf-label hseg">{{label}}{{required}}:&nbsp;</div>
-	<div class="bf-input hseg">{{field}}{help_text}}</div>
+	<div class="bf-input hseg">{{field}}{{help_text}}</div>
 {% endmacro %}
 
 {% macro rhblock_segment(label, required, field, help_text) %}

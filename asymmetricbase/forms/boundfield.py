@@ -50,6 +50,45 @@ class BoundField(forms.BoundField):
 	vseg = property(lambda self: self._render_with_template('vblock_segment'))
 	hseg = property(lambda self: self._render_with_template('hblock_segment'))
 	rhseg = property(lambda self: self._render_with_template('rhblock_segment'))
+	
+	# methods to replace django widget_tweaks
+	
+	def _process_attributes(self, name, value, process):
+		
+		widget = self.field.widget
+		attrs = getattr(widget, 'attrs', {})
+		
+		process(widget, attrs, name, value)
+	
+	def attr(self, name, value):
+		def process(widget, attrs, name, value):
+			attrs[name] = value
+		self._process_attributes(name, value, process)
+		
+		return self
+	
+	def append_attr(self, name, value):
+		def process(widget, attrs, name, value):
+			if attrs.get(name):
+				attrs[name] += ' ' + value
+			else:
+				attrs[name] = value
+		self._process_attributes(name, value, process)
+		
+		return self
+	
+	def add_class(self, value):
+		return self.append_attr('class', value)
+	
+	def add_error_class(self, value):
+		if hasattr(self.field, 'errors') and self.field.errors:
+			return self.add_class(value)
+		return self
+	
+	def set_data(self, name, value):
+		return self.attr('data-' + name, value)
+	
+	
 
 # Give other parts of the code a chance to register custom functions on boundfield
 boundfield_props.send(sender = BoundField)
