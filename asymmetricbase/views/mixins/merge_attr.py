@@ -39,6 +39,19 @@ class MergeAttrMixin(object):
 		return attr_ret
 	
 	def _merge_attr_signal(self, attrname, process = None):
+		'''
+		To use the signals:
+		> def _post_merge(sender, **kwargs):
+		>   instance = kwargs.pop('instance')
+		>   attr = kwargs.pop('attr')
+		>   merged = kwargs.pop('merged')
+		>   if attr != 'css_files':
+		>      return
+		>   if instance.login_required and instance.request.user.is_authenticated():
+		>     merged['loggedin.css'] = True
+		> 
+		> post_merge.connect(_post_merge)
+		'''
 		pre_merge.send(sender = self, instance = self, attr = attrname)
 		ret = self._merge_attr(attrname, process)
 		post_merge.send(sender = self, instance = self, attr = attrname, merged = ret)
