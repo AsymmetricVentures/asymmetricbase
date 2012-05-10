@@ -43,7 +43,7 @@ setup(
 		'django(==1.4)',
 		'jinja2(==2.6)',
 		'pytz', # most recent
-		'south(==0.7.4)'
+		'south(==0.7.5)'
 	),
 	
 	package_dir = {'asymmetricbase' : 'asymmetricbase'},

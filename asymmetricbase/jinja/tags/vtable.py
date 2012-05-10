@@ -81,64 +81,76 @@ class VTableExtension(Extension):
 	
 	def preprocess(self, source, name, filename = None):
 		
-		tag_match = begin_tag_m.search(source)
+		ret_source = []
 		
-		if tag_match:
-			header_start = tag_match.end()
-			pre_header = source[:header_start]
-			row_match = begin_row_m.search(source, tag_match.end())
+		tag_match = begin_tag_m.search(source)
+		if  tag_match:
+			last_end = 0
 			
-			if not row_match:
-				lineno = self._get_lineno(pre_header)
-				raise jinja2.TemplateSyntaxError("vtable_row tag not found", lineno)
+			while tag_match:
+				header_start = tag_match.end()
+				pre_header = source[last_end:header_start]
+				row_match = begin_row_m.search(source, tag_match.end())
+				
+				if not row_match:
+					lineno = self._get_lineno(pre_header)
+					raise jinja2.TemplateSyntaxError("vtable_row tag not found", lineno)
+				
+				empty_match = empty_m.search(source, row_match.end())
+				tail_match = tail_m.search(source, row_match.end())
+				end_tag_match = end_tag_m.search(source, tail_match.end())
+				
+				if not all([empty_match, tail_match]):
+					lineno = self._get_lineno(pre_header) + self._get_lineno(row_match.group(0))
+					raise jinja2.TemplateSyntaxError("Expecting 'empty' tag or 'vtable_tail' tag", lineno)
+				
+				
+				header_end = row_match.start()
+				row_start = row_match.end()
+				
+				header_text = source[header_start:header_end]
+				
+				
+				if empty_match:
+					row_end = empty_match.start()
+					empty_start = empty_match.end()
+				else:
+					row_end = tail_match.start()
+					empty_start = tail_match.start()
+				
+				empty_end = tail_match.start()
+				
+				row_text = source[row_start:row_end]
+				empty_text = source[empty_start:empty_end]
+				tail_text = source[empty_end:end_tag_match.start()]
+				
+				self.lineno = self._get_lineno(pre_header)
+				header_text = self.vtable_parse(header_text, is_header = True)
+				self.lineno = self._get_lineno(pre_header) + self._get_lineno(header_text)
+				row_text = self.vtable_parse(row_text, has_loop = True)
+				self.lineno = self._get_lineno(pre_header) + self._get_lineno(header_text) + self._get_lineno(row_text)
+				empty_text = self.vtable_parse(empty_text)
+				self.lineno = self._get_lineno(pre_header) + self._get_lineno(header_text) + self._get_lineno(row_text) + self._get_lineno(empty_text)
+				tail_text = self.vtable_parse(tail_text, is_header = True)
 			
-			empty_match = empty_m.search(source, row_match.end())
-			tail_match = tail_m.search(source, row_match.end())
-			end_tag_match = end_tag_m.search(source, tail_match.end())
+				last_end = end_tag_match.end()
 			
-			if not all([empty_match, tail_match]):
-				lineno = self._get_lineno(pre_header) + self._get_lineno(row_match.group(0))
-				raise jinja2.TemplateSyntaxError("Expecting 'empty' tag or 'vtable_tail' tag", lineno)
+				ret_source.append(
+					pre_header + '\n' + 
+					header_text + '\n' + 
+					source[header_end:row_start] + '\n' + 
+					row_text + '\n' + 
+					source[row_end:empty_start] + '\n' + 
+					empty_text + '\n' + 
+					tail_text + '\n' + 
+					source[end_tag_match.start():end_tag_match.end()]
+				)
+				
+				tag_match = begin_tag_m.search(source, end_tag_match.end())
 			
-			
-			header_end = row_match.start()
-			row_start = row_match.end()
-			
-			header_text = source[header_start:header_end]
-			
-			
-			if empty_match:
-				row_end = empty_match.start()
-				empty_start = empty_match.end()
-			else:
-				row_end = tail_match.start()
-				empty_start = tail_match.start()
-			
-			empty_end = tail_match.start()
-			
-			row_text = source[row_start:row_end]
-			empty_text = source[empty_start:empty_end]
-			tail_text = source[empty_end:end_tag_match.start()]
-			
-			self.lineno = self._get_lineno(pre_header)
-			header_text = self.vtable_parse(header_text, is_header = True)
-			self.lineno = self._get_lineno(pre_header) + self._get_lineno(header_text)
-			row_text = self.vtable_parse(row_text, has_loop = True)
-			self.lineno = self._get_lineno(pre_header) + self._get_lineno(header_text) + self._get_lineno(row_text)
-			empty_text = self.vtable_parse(empty_text)
-			self.lineno = self._get_lineno(pre_header) + self._get_lineno(header_text) + self._get_lineno(row_text) + self._get_lineno(empty_text)
-			tail_text = self.vtable_parse(tail_text, is_header = True)
-			
-			return (
-				pre_header + 
-				header_text + 
-				source[header_end:row_start] + 
-				row_text + 
-				source[row_end:empty_start] + 
-				empty_text + 
-				tail_text + 
-				source[end_tag_match.start():]
-			)
+			ret_source.append(source[end_tag_match.end():])
+
+			return '\n'.join(ret_source)
 		
 		else:
 			return super(VTableExtension, self).preprocess(source, name, filename)
@@ -147,7 +159,7 @@ class VTableExtension(Extension):
 		if not len(source):
 			return ''
 		
-		self.cell_wrapper = "<th {}>{}</th>" if is_header else "<td {}>{}</td>"
+		self.cell_wrapper = "\n\t<th {}>\n\t\t{}\n\t</th>\n" if is_header else "\n\t<td {}>\n\t\t{}\n\t</td>\n"
 		
 		# Sanity check, make sure there are balanced [[ and ]]
 		if self._count_lb(source) != self._count_rb(source):
@@ -166,11 +178,11 @@ class VTableExtension(Extension):
 		self.inner_nodelist = []
 		if has_loop:
 			self.ret_nodelist = [
-				'\n<tr class="{{ loop.cycle("odd", "even") }}">\n'
+				'\n\t<tr class="{{ loop.cycle("odd", "even") }}">\n\t\t'
 			]
 		else:
 			self.ret_nodelist = [
-				'\n<tr>\n'
+				'\n\t<tr>\n\t\t'
 			]
 	
 	def parse_string(self, text):
@@ -203,7 +215,7 @@ class VTableExtension(Extension):
 					# does close it
 					s = self.parse_endtag(s)
 		
-		self.ret_nodelist.append('\n</tr>')
+		self.ret_nodelist.append('\n</tr>\n')
 	
 	def parse_endtag(self, s):
 		self.lineno += self._get_lineno(s)
