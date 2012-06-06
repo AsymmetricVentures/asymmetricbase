@@ -3,59 +3,65 @@ from django.db.models.signals import post_init
 
 UNSAVED = {}
 
-def track_data():
+def track_data(**kwargs):
 	"""
-	Tracks property changes on a model instance.
+	Original implementation: http://justcramer.com/2010/12/06/tracking-changes-to-fields-in-django/
 	
-	The changed list of properties is refreshed on model initialization
-	and save.
-	
-	@track_data('name')
-	class Post(models.Model):
-		name = models.CharField(...)
-	
-	@classmethod
-	def post_save(cls, sender, instance, created, **kwargs):
-		if instance.has_changed('name'):
-			print "Hooray!"
-			
+	Tracks property changes to a model.
+	It can optionally track changes down foreign keys as long as they also are
+	decorated with track_data.
 	"""
-	UNSAVED = dict()
-
+	
+	UNSAVED = {}
+	
+	foreign_keys = kwargs.get('fk', [])
+	
 	def _store(self):
-		"Updates a local copy of attributes values"
+		"Updates local copy of attributes"
 		if self.id:
-			self.__data = {}
+			self.__track_data = {}
 			for field_info in self._meta.fields:
 				if hasattr(field_info, 'related') and field_info.related.parent_model == field_info.related.model and field_info.value_from_object(self) == getattr(self, field_info.rel.field_name):
 					logger.warning("Not tracking attribute '%s' on %s because it is self-referential." % (field_info.name, repr(self)))
 					continue
-				self.__data[field_info.name] = getattr(self, field_info.name)
+				self.__track_data[field_info.name] = getattr(self, field_info.name)
+				
+				try:
+					related_class = reduce(getattr, ('field', 'related', 'parent_model'), field_info)
+					
+					if hasattr(related_class, '__track_data') and field_info.name in foreign_keys:
+						changed = getattr(self, field_info.name).whats_changed()
+						
+						for k, v in changed:
+							self.__track_data['{}{}'.format(field_info.name, k)] = v
+						
+				except AttributeError:
+					pass
 		else:
-			self.__data = UNSAVED
+			self.__track_data = UNSAVED
 	
 	def inner(cls):
-		# contains a local copy of the previous values of attributes
-		cls.__data = {}
 		
+		# local copy of the previous values
+		cls.__track_data = {}
 		def has_changed(self, field):
 			"Returns ``True`` if ``field`` has changed since initialization."
-			if self.__data is UNSAVED:
+			if self.__track_data is UNSAVED:
 				return False
-			return self.__data.get(field) is not getattr(self, field)
+			return self.__track_data.get(field) is not getattr(self, field)
 		cls.has_changed = has_changed
 		
 		def old_value(self, field):
 			"Returns the previous value of ``field``"
-			return self.__data.get(field)
+			return self.__track_data.get(field)
 		cls.old_value = old_value
 		
 		def whats_changed(self):
 			"Returns a list of changed attributes."
 			changed = {}
-			if self.__data is UNSAVED:
+			if self.__track_data is UNSAVED:
 				return changed
-			for k, v in self.__data.iteritems():
+			for k, v in self.__track_data.iteritems():
 				if v != getattr(self, k):
 					changed[k] = v
 			return changed
@@ -74,3 +80,5 @@ def track_data():
 		cls.save = save
 		return cls
 	return inner
+
+del UNSAVED

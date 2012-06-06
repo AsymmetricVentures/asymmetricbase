@@ -14,7 +14,7 @@ Topic :: Utilities
 
 setup(
 	name = 'asymmetricbase',
-	version = '20120503-1',
+	version = '20120606-2',
 	
 	author = 'Richard Eames',
 	author_email = 'reames@asymmetricventures.com',
