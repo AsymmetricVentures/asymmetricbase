@@ -41,9 +41,8 @@ class BaseFormMixin(object):
 	
 	def __init__(self, *args, **kwargs):
 		super(BaseFormMixin, self).__init__(*args, **kwargs)
-		try:
-			self.Meta
-		except AttributeError:
+
+		if not hasattr(self, 'Meta'):
 			return
 		
 		validate = getattr(self.Meta, 'validate', {})
@@ -198,7 +197,7 @@ class TwoColumnTableLayout(object):
 	def as_table(self):
 		return self._render_html_template(self.template_module.as_table_twocol, False)
 
-class MyBaseModelFormSet(BaseModelFormSet):
+class AsymBaseModelFormSet(BaseModelFormSet):
 	
 	def is_valid_and_save(self, commit = True):
 		if self.is_valid():
@@ -219,7 +218,7 @@ def make_modelformset_factory(model, form = ModelForm, *args, **kwargs):
 				del self.fields[fname]		
 	
 	kwargs.update(dict(form = WrapperClass))	
-	return modelformset_factory(model, formset = MyBaseModelFormSet, *args, **kwargs)
+	return modelformset_factory(model, formset = AsymBaseModelFormSet, *args, **kwargs)
 
 
 monkey_patch_django()
