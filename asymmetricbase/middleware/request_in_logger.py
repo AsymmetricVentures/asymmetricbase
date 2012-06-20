@@ -7,5 +7,6 @@ class AddRequestToLoggerMiddleware(object):
 	logging classes'''
 	
 	def process_request(self, request):
-		setattr(logger, 'django_request', request)
-		setattr(audit_logger, 'django_request', request)
+		for l in (logger, audit_logger):
+			for handler in l.handlers:
+				setattr(handler, 'django_request', request)

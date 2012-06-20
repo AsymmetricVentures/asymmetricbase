@@ -11,7 +11,7 @@ from asymmetricbase.logging import audit_logger
 
 class AsymBaseModel(models.Model):
 	uuid = models.CharField(max_length = 40, blank = True)
-	date_created = models.DateTimeField(default = timezone.now)
+	date_created = models.DateTimeField(auto_now_add = True, default = timezone.now)
 	date_updated = models.DateTimeField(auto_now = True, default = timezone.now)
 	
 	class Meta(object):

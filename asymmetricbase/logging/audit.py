@@ -1,9 +1,5 @@
 import logging
 
-from django.conf import settings
-from asymmetricbase.models import AuditEntry, AccessType, LogEntryType, \
-	ObjectContent
-
 class AuditLoggingHandler(logging.Handler):
 	"""
 		Performs our Audit logging. If there is a model included in the record,
@@ -14,11 +10,12 @@ class AuditLoggingHandler(logging.Handler):
 		pass
 	
 	def emit(self, record):
-		log_generator = AuditLogGenerator(record)
+		log_generator = AuditLogGenerator(self.django_request, record)
 		log_generator.generate()
 
 class AuditLogGenerator(object):
-	def __init__(self, record):
+	def __init__(self, request, record):
+		self.request = request
 		self.record = record
 	
 	def generate(self):
@@ -36,6 +33,8 @@ class AuditLogGenerator(object):
 	
 	def _save_log_entry(self):
 		from django.db import transaction
+		from asymmetricbase.models import AuditEntry
+		
 		with transaction.commit_on_success():
 			l = AuditEntry(
 				log_type = self.log_type,
@@ -51,11 +50,12 @@ class AuditLogGenerator(object):
 			l.save()
 	
 	def _save_object_contnt(self):
+		from asymmetricbase.models import ObjectContent
+		from django.core import serializers
+
 		if not self._is_save_object_content_required():
 			self.object_content = None
 			return
-		
-		from django.core import serializers
 		
 		# serializer only accepts iterables!
 		content_in_json = serializers.serialize('json', [self.model], ensure_ascii = False)
@@ -65,6 +65,8 @@ class AuditLogGenerator(object):
 		self.object_content = oc
 	
 	def _is_save_object_content_required(self):
+		from asymmetricbase.models import LogEntryType, AccessType
+
 		if self.log_type != LogEntryType.MODEL:
 			return False
 		if self.access_type not in (AccessType.ADD, AccessType.WRITE):
@@ -74,28 +76,27 @@ class AuditLogGenerator(object):
 		return True
 	
 	def _get_current_user_info(self):
-#		from project.shared import thread_globals
-#		try:
-#			self.user = thread_globals.request.user
-#		except AttributeError:
-#			self.user = None
+		try:
+			self.user = self.request.user
+		except AttributeError:
+			self.user = None
 		pass
 	
 	def _get_ip(self):
-		#from project.shared import thread_globals
-		#self.ip = thread_globals.request.META['REMOTE_ADDR']
-		pass
+		self.ip = self.request.META['REMOTE_ADDR']
 	
 	def _get_access_type(self):
 		try:
 			self.access_type = self.record.access_type
 		except AttributeError:
+			from asymmetricbase.models import AccessType
 			self.access_type = AccessType.OTHER
 	
 	def _get_log_type(self):
 		try:
 			self.log_type = self.record.log_type
 		except AttributeError:
+			from asymmetricbase.models import LogEntryType
 			self.log_type = LogEntryType.OTHER
 	
 	def _get_model(self):
@@ -119,6 +120,9 @@ class AuditLogGenerator(object):
 			self.success = None
 	
 	def _do_ignore_log(self):
+		from django.conf import settings
+		from asymmetricbase.models import LogEntryType, AccessType
+
 		if (not settings.LOG_MODEL_ACCESS_READ) and \
 			self.log_type == LogEntryType.MODEL and \
 			self.access_type == AccessType.READ and \
