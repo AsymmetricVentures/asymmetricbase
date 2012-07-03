@@ -105,7 +105,7 @@ class ModelForm(BaseFormMixin, forms.ModelForm):
 		
 		return jinja2.Markup(super(ModelForm, self)._html_output(*args, **kwargs))
 	
-	def _render_html_template(self, template_macro, errors_on_separate_row, required_mark):
+	def _render_html_template(self, template_macro, errors_on_separate_row, required_mark = '*'):
 		top_errors = self.non_field_errors()
 		output, hidden_fields = [], []
 		
@@ -116,7 +116,7 @@ class ModelForm(BaseFormMixin, forms.ModelForm):
 				'help_text' : '',
 				'errors' : '',
 				'html_class_attr' : '',
-				'is_error' : errors_on_separate_row,
+				'is_error_row' : errors_on_separate_row,
 				'required_mark' : ''
 			}
 			
