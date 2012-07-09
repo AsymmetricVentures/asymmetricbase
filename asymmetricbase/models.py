@@ -164,3 +164,10 @@ class LogEntry(models.Model):
 	args = models.TextField(blank = True)
 	exc_info = models.TextField(blank = True)
 	func = models.TextField(blank = True)
+
+class TraceEntry(models.Model):
+	date_created = models.DateTimeField(default = timezone.now)
+	get = models.TextField(blank = True)
+	msg = models.TextField(blank = True)
+	exc_info = models.TextField(blank = True)
+	

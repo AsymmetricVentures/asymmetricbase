@@ -71,12 +71,11 @@ def jinja_getdate():
 	return timezone.now()
 
 def jinja_date_filter(d, fmt = "%d/%b/%y %I:%M%p"):
-	return d.strftime(fmt)
-
+	return timezone.localtime(d).strftime(fmt)
 
 jinja_env.globals.update({
 	'url' : jinja_url,
-	'getdatetime' : jinja_getdate
+	'getdatetime' : jinja_getdate,
 })
 
 jinja_env.filters.update({

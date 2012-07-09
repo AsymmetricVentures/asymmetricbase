@@ -1,5 +1,4 @@
-from asymmetricbase.logging import logger, audit_logger
-
+from asymmetricbase.logging import logger, audit_logger, line_logger
 
 class AddRequestToLoggerMiddleware(object):
 	''' Adds the request object to all the loggers.
@@ -7,6 +6,6 @@ class AddRequestToLoggerMiddleware(object):
 	logging classes'''
 	
 	def process_request(self, request):
-		for l in (logger, audit_logger):
+		for l in (logger, audit_logger, line_logger):
 			for handler in l.handlers:
 				setattr(handler, 'django_request', request)
