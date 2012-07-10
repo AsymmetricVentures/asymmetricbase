@@ -14,7 +14,7 @@ Topic :: Utilities
 
 setup(
 	name = 'asymmetricbase',
-	version = '20120620-1',
+	version = '20120710-2',
 	
 	author = 'Richard Eames',
 	author_email = 'reames@asymmetricventures.com',
@@ -32,6 +32,7 @@ setup(
 		'asymmetricbase.management',
 		'asymmetricbase.management.commands',
 		'asymmetricbase.middleware',
+		'asymmetricbase.migrations',
 		'asymmetricbase.pagination',
 		'asymmetricbase.testing',
 		'asymmetricbase.utils',

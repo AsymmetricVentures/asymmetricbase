@@ -89,6 +89,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 	
 	def dispatch(self, request, *args, **kwargs):
 		try:
+			self.request = request
 			logger.debug('BEGIN REQUEST *********** {}'.format(request.path))
 			if not self._login_requirement_ok(request):
 				logger.debug('Login requirement is not ok, redirecting')
@@ -142,6 +143,9 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			return True
 		
 		return False
+	
+	def has_permissions(self, perms):
+		return self.request.user.has_perms(perms)
 	
 	@staticmethod
 	def forbidden():

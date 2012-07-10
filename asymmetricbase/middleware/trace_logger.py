@@ -1,6 +1,5 @@
 from asymmetricbase.logging import logger, line_logger
 
-
 class TraceLogger(object):
 	
 	def _flush(self):
