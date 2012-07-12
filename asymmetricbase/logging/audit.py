@@ -27,6 +27,9 @@ class AuditLogGenerator(object):
 		if getattr(settings, 'IS_IN_TEST', False):
 			return
 		
+		if not hasattr(self, 'django_request') or self.django_request is None:
+			return
+		
 		self._get_access_type()
 		self._get_log_type()
 		self._get_success()

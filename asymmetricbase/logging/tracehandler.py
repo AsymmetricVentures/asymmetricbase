@@ -9,6 +9,8 @@ class DBTraceHandler(logging.Handler):
 		super(DBTraceHandler, self).__init__()
 	
 	def emit(self, record):
+		if self.django_request is None:
+			return
 		self.rows.append(DBTraceLogGenerator(self.django_request, record).generate())
 	
 	def flush(self):
