@@ -32,7 +32,7 @@ class BaseTestCase(TestCase, MergeAttrMixin):
 	
 	def _get_inherited_initializers(self):
 		"Returns a list of all initializers defined in this class and all its parents"
-		return self._merge_attr('initializers')
+		return self._merge_attr('initializers').keys()
 		# TODO: check if this is equivalent to _merge_attr
 #		initializers = []
 #		curr_class = self.__class__

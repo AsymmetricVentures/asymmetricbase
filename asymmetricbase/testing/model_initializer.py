@@ -10,7 +10,7 @@ class ModelInitializer(object):
 	# list of initializers that need to be installed before me
 	requirements = []
 	
-	def initialize(self, obj_callback):
+	def initialize(self, obj_callback = None):
 		
 		self.initialized_objects = self.get_objects_to_initialize()
 		
@@ -27,7 +27,7 @@ class ModelInitializer(object):
 		pass
 	
 	class Constants(object):
-		"Any extrea constant one needs comes here, but in the subclass"
+		"Any extra constants one needs come here, but in the subclass"
 		pass
 
 def install_initializers(initializer_classes):

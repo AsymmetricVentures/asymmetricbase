@@ -5,6 +5,9 @@ class AuditLoggingHandler(logging.Handler):
 		Performs our Audit logging. If there is a model included in the record,
 		we will also include Object Retention info
 	"""
+	def __init__(self, *args, **kwargs):
+		super(AuditLoggingHandler, self).__init__(*args, **kwargs)
+		self.django_request = None
 	
 	def _get_current_user_info(self):
 		pass
@@ -19,6 +22,11 @@ class AuditLogGenerator(object):
 		self.record = record
 	
 	def generate(self):
+		from django.conf import settings
+		
+		if getattr(settings, 'IS_IN_TEST', False):
+			return
+		
 		self._get_access_type()
 		self._get_log_type()
 		self._get_success()

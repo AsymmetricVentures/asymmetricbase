@@ -46,7 +46,7 @@ class UndefinedVar(jinja2.Undefined):
 			return super(UndefinedVar, self).__getattribute__(name, *args, **kwargs)
 		except AttributeError:
 			if settings.TEMPLATE_DEBUG:
-				warnings.warn("Trying to access undefined attribute '{}.{}' on variable".format(self._undefined_name, name))
+				warnings.warn("Trying to access undefined attribute '{}.{}' on {} variable".format(self._undefined_name, name, type(self._undefined_name)))
 			return UndefinedVar()
 		
 		return None
