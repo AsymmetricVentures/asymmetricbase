@@ -131,7 +131,7 @@ class VTableExtension(Extension):
 				self.lineno = self._get_lineno(pre_header) + self._get_lineno(header_text) + self._get_lineno(row_text)
 				empty_text = self.vtable_parse(empty_text)
 				self.lineno = self._get_lineno(pre_header) + self._get_lineno(header_text) + self._get_lineno(row_text) + self._get_lineno(empty_text)
-				tail_text = self.vtable_parse(tail_text, is_header = True)
+				tail_text = self.vtable_parse(tail_text, is_header = True, in_table = False)
 			
 				last_end = end_tag_match.end()
 			
@@ -155,7 +155,7 @@ class VTableExtension(Extension):
 		else:
 			return super(VTableExtension, self).preprocess(source, name, filename)
 	
-	def vtable_parse(self, source, is_header = False, has_loop = False):
+	def vtable_parse(self, source, is_header = False, has_loop = False, in_table = True):
 		if not len(source):
 			return ''
 		
@@ -170,22 +170,22 @@ class VTableExtension(Extension):
 			raise jinja2.TemplateSyntaxError("Unbalanced parenthesis", self.lineno)
 		
 		self._reset(has_loop)
-		self.parse_string(source)
-		return ''.join([s.strip() for s in self.ret_nodelist])
+		self.parse_string(source, in_table = in_table)
+		return ''.join([s for s in self.ret_nodelist])
 	
 	def _reset(self, has_loop = True):
 		self.in_node = False
 		self.inner_nodelist = []
 		if has_loop:
 			self.ret_nodelist = [
-				'\n\t<tr class="{{ loop.cycle("odd", "even") }}">\n\t\t'
+				'\n<tr class="{{ loop.cycle("odd", "even") }}">\n\t\t'
 			]
 		else:
 			self.ret_nodelist = [
 				'\n\t<tr>\n\t\t'
 			]
 	
-	def parse_string(self, text):
+	def parse_string(self, text, in_table = True):
 		self.lineno += self._get_lineno(text)
 		s = text.replace('\n', '').replace('\r', '').strip()
 		while len(s):
@@ -214,8 +214,8 @@ class VTableExtension(Extension):
 				else:
 					# does close it
 					s = self.parse_endtag(s)
-		
-		self.ret_nodelist.append('\n</tr>\n')
+		if in_table:
+			self.ret_nodelist.append('\n</tr>\n')
 	
 	def parse_endtag(self, s):
 		self.lineno += self._get_lineno(s)

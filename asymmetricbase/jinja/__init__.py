@@ -4,7 +4,7 @@ import os, warnings
 from django.template.loaders.app_directories import fs_encoding, \
 	app_template_dirs
 from django.core.urlresolvers import reverse
-from django.template.defaultfilters import floatformat, yesno, date as date_filter
+from django.template.defaultfilters import floatformat, yesno, date as date_filter, urlencode
 from django.utils.importlib import import_module
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import timezone
@@ -72,7 +72,7 @@ def jinja_url(view_name, *args, **kwargs):
 	return reverse(view_name, args = args, kwargs = kwargs)
 
 def jinja_getdate():
-	return timezone.now()
+	return timezone.localtime(timezone.now())
 
 def jinja_date_filter(d, fmt = "%d/%b/%y %I:%M%p"):
 	return timezone.localtime(d).strftime(fmt)
@@ -86,4 +86,5 @@ jinja_env.filters.update({
 	'date' : jinja_date_filter,
 	'floatformat' : floatformat,
 	'yesno' : yesno,
+	'urlencode' : urlencode,
 })
