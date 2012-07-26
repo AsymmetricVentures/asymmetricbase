@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.dispatch.dispatcher import receiver
 from django.db.models import signals
 from django.db.utils import IntegrityError
+from django.forms.models import model_to_dict
 
 from asymmetricbase.logging import audit_logger
 
@@ -29,6 +30,9 @@ class AsymBaseModel(models.Model):
 	def _object_saved_before(self):
 		''' Returns True if this object has been saved before '''
 		return hasattr(self, 'id') and self.id is not None
+	
+	def __json__(self, encoder):
+		return model_to_dict(self, exclude = ['id'])
 
 @receiver(signal = signals.pre_save, dispatch_uid = 'create_model_uuid')
 def asym_model_base_presave(sender, instance, raw, using, **kwargs):

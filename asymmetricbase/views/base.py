@@ -13,6 +13,7 @@ from asymmetricbase.views.mixins.multi_format_response import MultiFormatRespons
 from asymmetricbase.utils.exceptions import DeveloperTODO, ForceRollback
 
 from asymmetricbase.logging import logger #@UnusedImport
+from asymmetricbase.jinja import jinja_env
 
 class AsymBaseView(MultiFormatResponseMixin, View):
 	""" Base class for all views """
@@ -147,14 +148,6 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 	def has_permissions(self, perms):
 		return self.request.user.has_perms(perms)
 	
-	@staticmethod
-	def forbidden():
-		return HttpResponseForbidden()
-	
-	@staticmethod
-	def not_found():
-		return HttpResponseNotFound()
-	
 	def error(self, msg):
 		messages.error(self.request, msg)
 	
@@ -190,6 +183,33 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			>>> self.context['MyEnum'] = MyEnum
 		"""
 		self.context[enum_class.__name__] = enum_class
+	
+	def get_rendered_template(self, request):
+		return self.response_class(
+			request = request,
+			template = self.get_template_names(),
+			context = self.context
+		).rendered_content
+	
+	def get_rendered_macro(self, macro_name, template_name = None, **context):
+		if template_name is None:
+			template_name = self.get_template_names()
+		
+		template = jinja_env.get_template(template_name).module
+		template_block = getattr(template, macro_name, None)
+		
+		if template_block is None:
+			return ''
+		
+		return template_block(**context)
+	
+	@staticmethod
+	def forbidden():
+		return HttpResponseForbidden()
+	
+	@staticmethod
+	def not_found():
+		return HttpResponseNotFound()
 	
 	@staticmethod
 	def redirect(to_string, *args, **kwargs):

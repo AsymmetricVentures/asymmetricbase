@@ -1,23 +1,22 @@
 from collections import defaultdict
 
 from django.core.exceptions import ImproperlyConfigured
-from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 from django.utils.http import urlquote
 from django.conf import settings
 
 from asymmetricbase.jinja.response import JinjaTemplateResponse
 from asymmetricbase.views.mixins.merge_attr import MergeAttrMixin
-
 from asymmetricbase.logging import logger #@UnusedImport
+from asymmetricbase.utils.jsonencoder import AsymJSONEncoder
 
 class MultiFormatResponseMixin(MergeAttrMixin):
 	""" A mixin that can be used to render a djhtml templates or return json data. """
 	template_name = None
 	output_type = 'html'
 	response_class = JinjaTemplateResponse
-	css_files = getattr(settings, 'ASYM_DEFAULT_CSS',  ())
-	js_files = getattr(settings, 'ASYM_DEFAULT_JS',  ())
+	css_files = getattr(settings, 'ASYM_DEFAULT_CSS', ())
+	js_files = getattr(settings, 'ASYM_DEFAULT_JS', ())
 	
 	def __init__(self):
 		def dd(): return defaultdict(dd)
@@ -41,7 +40,7 @@ class MultiFormatResponseMixin(MergeAttrMixin):
 			)
 			
 		elif self.output_type == 'json':
-			json_str = DjangoJSONEncoder().encode(self.context)
+			json_str = AsymJSONEncoder().encode(self.context)
 			return HttpResponse(json_str, mimetype = 'application/json')
 		
 		elif self.output_type == 'pdf':
