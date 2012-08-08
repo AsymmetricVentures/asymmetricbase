@@ -55,8 +55,10 @@ class UndefinedVar(jinja2.Undefined):
 		
 		return None
 
+template_loader = getattr(settings, 'ASYM_TEMPLATE_LOADER', jinja2.FileSystemLoader(app_template_dirs))
+
 jinja_env = jinja2.Environment(
-	loader = jinja2.FileSystemLoader(app_template_dirs),
+	loader = template_loader,
 	undefined = UndefinedVar,
 	autoescape = True,
 	extensions = [

@@ -9,6 +9,8 @@ from asymmetricbase.jinja.response import JinjaTemplateResponse
 from asymmetricbase.views.mixins.merge_attr import MergeAttrMixin
 from asymmetricbase.logging import logger #@UnusedImport
 from asymmetricbase.utils.jsonencoder import AsymJSONEncoder
+from asymmetricbase.utils.resources import ResourceSet
+import os
 
 class MultiFormatResponseMixin(MergeAttrMixin):
 	""" A mixin that can be used to render a djhtml templates or return json data. """
@@ -26,12 +28,18 @@ class MultiFormatResponseMixin(MergeAttrMixin):
 	def render_to_response(self, **response_kwargs):
 		""" Returns a response with a template rendered with the given context. """
 		if self.output_type == 'html':
-			self.context['css_files'] = self._merge_attr_signal('css_files', lambda x: x.replace('scss', 'css'))
+			css_files = self._merge_attr_signal('css_files', lambda x: os.path.join('stylesheets', x.replace('scss', 'css')))
+			css_resources = ResourceSet()
+			css_resources.add(css_files)
 			
-			#if self.login_required and self.request.user.is_authenticated():
-			#	self.context['css_files']['loggedin.css'] = True
+			self.context['css_files'] = css_resources 
 			
-			self.context['js_files'] = self._merge_attr_signal('js_files')
+			js_files = self._merge_attr_signal('js_files', lambda x: os.path.join('js', x))
+			js_resources = ResourceSet()
+			js_resources.add(js_files)
+			
+			self.context['js_files'] = js_resources
+			
 			return self.response_class(
 				request = self.request,
 				template = self.get_template_names(),
