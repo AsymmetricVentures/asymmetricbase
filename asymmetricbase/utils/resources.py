@@ -103,7 +103,8 @@ def _get_resources():
 		for file_path in _list_files_of_type(rootdir, resource_type.extension):
 			deps = _get_file_dependencies(file_path)
 			relfile = _normalize_resource_filename(file_path)
-			resources[relfile] = Resource(resource_type, relfile, deps)
+			class_name = os.path.basename(file_path)
+			resources[class_name] = Resource(resource_type, relfile, deps)
 	
 	_validate_dependencies(resources)
 	
@@ -158,7 +159,7 @@ def _get_file_dependencies(file_path):
 	deps = []
 	
 	for line in open(file_path, 'rb'):
-		m = re.search(r'#require\s+(\S+)', line)
+		m = re.search(r'^\s*\/\/\s*import\s+(\S+);', line)
 		if m:
 			deps.append(m.group(1))
 	
