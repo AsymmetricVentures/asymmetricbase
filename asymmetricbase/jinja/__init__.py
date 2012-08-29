@@ -79,6 +79,9 @@ def jinja_getdate():
 def jinja_date_filter(d, fmt = "%d/%b/%y %I:%M%p"):
 	return timezone.localtime(d).strftime(fmt)
 
+def jinja_fmt(fmt, *args, **kwargs):
+	return fmt.format(*args, **kwargs)
+
 jinja_env.globals.update({
 	'url' : jinja_url,
 	'getdatetime' : jinja_getdate,
@@ -89,4 +92,5 @@ jinja_env.filters.update({
 	'floatformat' : floatformat,
 	'yesno' : yesno,
 	'urlencode' : urlencode,
+	'fmt' : jinja_fmt,
 })
