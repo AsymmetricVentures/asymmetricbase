@@ -58,9 +58,10 @@ class FormFactory(object):
 		return self.form_instance
 	
 	def process_callbacks(self):
+		is_valid = self.form_instance.is_valid()
 		for callback in self.callbacks:
 			if callback is not None:
-				callback(self.form_instance, self.form_instance.is_valid())
+				callback(self.form_instance, is_valid)
 	
 	def __deepcopy__(self, memo):
 		form = deepcopy(self.form, memo)
@@ -71,3 +72,16 @@ class FormFactory(object):
 		kwargs['parents'] = deepcopy(self.parents, memo)
 		kwargs['use_GET'] = self.use_GET
 		return FormFactory(form, *args, callbacks = callbacks, **kwargs)
+
+def form_callback(form, position = None, is_init = False):
+	callback_list = form.callbacks if not is_init else form.init_callbacks
+	
+	def wrapper(fn):
+		if not isinstance(position, int):
+			callback_list.append(fn)
+		else:
+			callback_list.insert(position, fn)
+		
+		return fn
+	return wrapper
+		
