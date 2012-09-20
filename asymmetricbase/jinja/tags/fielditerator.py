@@ -16,7 +16,9 @@ NOTE: This code takes advantage of django internal interfaces.
   Radio-Iterator was developed under Django 1.2.1.
   
   
-  - (reames 20/9/12): Allow the choices to have access to the model they represent
+  - (reames 20/9/12): 
+    - Allow the choices to have access to the model they represent
+    - Add jinja support
 
 HOW TO USE:
   copy this code into my_app/templatetags/fielditerator.py
@@ -48,6 +50,7 @@ from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 from django.forms.util import flatatt
 import django.forms
+import jinja2
 
 
 register = template.Library()
@@ -118,6 +121,9 @@ class _PseudoBoundField(object):
 
 	def __unicode__(self):
 		return self.labeled()
+	
+	def __html__(self):
+		return jinja2.escape(unicode(self))
 
 class _PseudoCheckboxBoundField(_PseudoBoundField):
 	def __init__(self, *args, **kwargs):
