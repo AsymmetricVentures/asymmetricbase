@@ -159,8 +159,6 @@ class _ValueGrabber(object):
 		self.data = data
 		self.attrs = attrs
 
-
-
 def _iterator(bound_field, widget_type, display_name):
 	"""
 	Generator that yields the html of the bound field's choices
@@ -189,7 +187,7 @@ def _iterator(bound_field, widget_type, display_name):
 	for i, (option_value, option_label) in enumerate(widget.choices):
 		extra = None
 		if isinstance(option_value, (list, tuple)):
-			option_value, extra = option_value
+			extra, option_value = option_value
 		option_value = force_unicode(option_value)
 		final_attrs = partial_attrs
 		if widget_id is not False:
