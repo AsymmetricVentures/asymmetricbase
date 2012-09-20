@@ -81,6 +81,7 @@ class VTableExtension(Extension):
 	
 	def preprocess(self, source, name, filename = None):
 		
+		self.max_lines = len(filter(lambda x: x == '\n', source)) - 1
 		ret_source = []
 		
 		tag_match = begin_tag_m.search(source)
@@ -279,7 +280,7 @@ class VTableExtension(Extension):
 		return args
 	
 	def _get_lineno(self, source):
-		return len(filter(lambda x: x == '\n', source))
+		return min(len(filter(lambda x: x == '\n', source)), self.max_lines)
 	
 	def _count_rb(self, source):
 		return len(filter(lambda x: x == ']', source))

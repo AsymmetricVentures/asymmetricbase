@@ -17,6 +17,7 @@ from asymmetricbase.jinja.tags.csrf_token import CSRFTokenExtension
 from asymmetricbase.jinja.tags.vtable import VTableExtension
 from asymmetricbase.jinja.tags.haml import HamlishTagExtension, \
 	HamlishExtension
+from asymmetricbase.jinja.tags.fielditerator import checkboxiterator, checkboxiterator_named, radioiterator, radioiterator_named
 
 class UndefinedVar(jinja2.Undefined):
 	def __int__(self):
@@ -85,6 +86,8 @@ def jinja_fmt(fmt, *args, **kwargs):
 jinja_env.globals.update({
 	'url' : jinja_url,
 	'getdatetime' : jinja_getdate,
+	'type' : type,
+	'dir' : dir
 })
 
 jinja_env.filters.update({
@@ -93,4 +96,8 @@ jinja_env.filters.update({
 	'yesno' : yesno,
 	'urlencode' : urlencode,
 	'fmt' : jinja_fmt,
+	'checkboxiterator' : checkboxiterator,
+	'checkboxiterator_named' : checkboxiterator_named,
+	'radioiterator' : radioiterator,
+	'radioiterator_named' : radioiterator_named
 })
