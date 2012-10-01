@@ -28,6 +28,7 @@ class VTableExtension(Extension):
 	tags = set(['vtable'])
 	
 	def parse(self, parser):
+		
 		lineno = parser.stream.next().lineno
 		
 		table_name = parser.parse_expression()

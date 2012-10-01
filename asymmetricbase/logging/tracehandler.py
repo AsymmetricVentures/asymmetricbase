@@ -1,5 +1,4 @@
 import logging
-
 from logging import CRITICAL, DEBUG, ERROR, FATAL, INFO, WARN
 
 class DBTraceHandler(logging.Handler):
@@ -14,6 +13,8 @@ class DBTraceHandler(logging.Handler):
 		self.rows.append(DBTraceLogGenerator(self.django_request, record).generate())
 	
 	def flush(self):
+		from django.db import connection
+		from django.db.utils import DatabaseError
 		from asymmetricbase.models import TraceEntry
 		entry = TraceEntry(get = getattr(self.django_request, 'path', ''))
 		msg = ''
@@ -28,7 +29,14 @@ class DBTraceHandler(logging.Handler):
 		
 		if len(msg) > 1:
 			entry.msg = msg
-			entry.save()
+			try:
+				# "current transaction is aborted, commands ignored until end of transaction block"
+				# If there is a database error before this point, then this
+				# insert may fail because we may still be inside a transaction
+				# block. So, we rollback and allow the code to continue. 
+				entry.save()
+			except DatabaseError:
+				connection._rollback()
 		self.rows = []
 		
 class DBTraceLogGenerator(object):
