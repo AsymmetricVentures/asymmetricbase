@@ -1,0 +1,18 @@
+
+{% macro print_or_call(thing) -%}
+	{%- if thing is callable -%}
+		{{ thing() }}
+	{%- else -%}
+		{{thing|d('')}}
+	{%- endif -%}
+{% endmacro %}
+
+{% macro vtable(table, header = '', tail = '') %}
+	<div class="vtable-container">
+		{{ print_or_call(header) }}
+		<div class="vtable-rounded-container">
+			{{ print_or_call(table) }}
+			{{ print_or_call(tail) }}
+		</div>
+	</div>
+{% endmacro %}

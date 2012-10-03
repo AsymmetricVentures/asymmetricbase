@@ -24,6 +24,12 @@ empty_m = re.compile(empty_rx)
 tail_m = re.compile(tail_rx)
 end_tag_m = re.compile(end_tag_rx)
 
+import warnings
+warnings.warn(
+	'The Vtable tag will be deprecated in favour of the displaymanager module',
+	DeprecationWarning
+)
+
 class VTableExtension(Extension):
 	tags = set(['vtable'])
 	

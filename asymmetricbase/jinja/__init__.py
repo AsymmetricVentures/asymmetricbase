@@ -82,11 +82,19 @@ def jinja_date_filter(d, fmt = "%d/%b/%y %I:%M%p"):
 def jinja_fmt(fmt, *args, **kwargs):
 	return fmt.format(*args, **kwargs)
 
+
+
+
+def jinja_vtable(table, header = '', tail = ''):
+	return jinja_env.get_template('asymmetricbase/displaymanager/vtable.djhtml').module.vtable(table, header, tail)
+
 jinja_env.globals.update({
 	'url' : jinja_url,
 	'getdatetime' : jinja_getdate,
 	'type' : type,
-	'dir' : dir
+	'dir' : dir,
+	
+	'vtable' : jinja_vtable,
 })
 
 jinja_env.filters.update({
