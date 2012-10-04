@@ -1,0 +1,8 @@
+
+{% macro charfield(obj) %}
+	{{obj}}
+{% endmacro %}
+
+{% macro intfield(obj) %}
+	{{obj}}
+{% endmacro %}
