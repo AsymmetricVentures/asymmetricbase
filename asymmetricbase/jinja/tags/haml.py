@@ -73,7 +73,7 @@ class HamlishTagExtension(HamlishExtension):
 		parser.stream.expect('name:endhaml')
 		
 		return [
-			nodes.Output([haml_data])
+			Output([haml_data])
 		]
 	
 	def preprocess(self, source, name, filename = None):

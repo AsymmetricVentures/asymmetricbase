@@ -15,8 +15,7 @@ from jinja2.ext import WithExtension
 
 from asymmetricbase.jinja.tags.csrf_token import CSRFTokenExtension
 from asymmetricbase.jinja.tags.vtable import VTableExtension
-from asymmetricbase.jinja.tags.haml import HamlishTagExtension, \
-	HamlishExtension
+from asymmetricbase.jinja.tags.hamlpy_tag import HamlpyExtension
 from asymmetricbase.jinja.tags.fielditerator import checkboxiterator, checkboxiterator_named, radioiterator, radioiterator_named
 
 class UndefinedVar(jinja2.Undefined):
@@ -64,8 +63,7 @@ jinja_env = jinja2.Environment(
 	extensions = [
 		CSRFTokenExtension,
 		VTableExtension,
-		HamlishExtension,
-		HamlishTagExtension,
+		HamlpyExtension,
 		WithExtension
 	]
 )
@@ -81,9 +79,6 @@ def jinja_date_filter(d, fmt = "%d/%b/%y %I:%M%p"):
 
 def jinja_fmt(fmt, *args, **kwargs):
 	return fmt.format(*args, **kwargs)
-
-
-
 
 def jinja_vtable(table, header = '', tail = ''):
 	return jinja_env.get_template('asymmetricbase/displaymanager/vtable.djhtml').module.vtable(table, header, tail)

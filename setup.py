@@ -14,7 +14,7 @@ Topic :: Utilities
 
 setup(
 	name = 'asymmetricbase',
-	version = '20120904-1',
+	version = '20121009-1',
 	
 	author = 'Richard Eames',
 	author_email = 'reames@asymmetricventures.com',
@@ -45,13 +45,15 @@ setup(
 		'django(==1.4)',
 		'jinja2(==2.6)',
 		'pytz', # most recent
-		'south(==0.7.5)'
+		'south(==0.7.5)',
+		'hamlpy', # most recent
 	),
 	
 	package_dir = {'asymmetricbase' : 'asymmetricbase'},
 	package_data = {
 		'asymmetricbase' : [
 			'templates/asymmetricbase/boundfield/*.djhtml',
+			'templates/asymmetricbase/displaymanager/*.djhtml',
 			'templates/asymmetricbase/forms/*.djhtml',
 		]},
 )

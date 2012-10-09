@@ -17,6 +17,7 @@ class AsymBaseModel(models.Model):
 	
 	class Meta(object):
 		abstract = True
+		app_label = 'shared'
 	
 	def _audit_log(self, access_type, success):
 		msg = 'Model Access'
