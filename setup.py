@@ -44,10 +44,12 @@ setup(
 	requires = (
 		'django(==1.4)',
 		'jinja2(==2.6)',
-		'pytz', # most recent
+		'pytz',  # most recent
 		'south(==0.7.5)',
-		'hamlpy', # most recent
+		'hamlpy',  # most recent
 	),
+	
+	dependency_links = ['https://github.com/Naddiseo/HamlPy/tree/key_space_fix#egg=hamlpy=0.92.2-key_space_fix'],
 	
 	package_dir = {'asymmetricbase' : 'asymmetricbase'},
 	package_data = {
