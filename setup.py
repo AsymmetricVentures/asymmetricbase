@@ -14,7 +14,7 @@ Topic :: Utilities
 
 setup(
 	name = 'asymmetricbase',
-	version = '20121009-1',
+	version = '20121015-1',
 	
 	author = 'Richard Eames',
 	author_email = 'reames@asymmetricventures.com',
@@ -49,7 +49,7 @@ setup(
 		'hamlpy',  # most recent
 	),
 	
-	dependency_links = ['https://github.com/Naddiseo/HamlPy/tree/key_space_fix#egg=hamlpy=0.92.2-key_space_fix'],
+	dependency_links = ['https://github.com/jessemiller/HamlPy/tarball/master#egg=hamlpy=0.82.2'],
 	
 	package_dir = {'asymmetricbase' : 'asymmetricbase'},
 	package_data = {
