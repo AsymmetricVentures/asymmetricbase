@@ -1,5 +1,5 @@
-from django.forms import * #@UnusedWildImport pylint: disable-msg=W0401
-from django import forms #@Reimport
+from django.forms import *  # @UnusedWildImport pylint: disable-msg=W0401
+from django import forms  # @Reimport
 from django.forms.models import modelformset_factory, BaseModelFormSet
 from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
@@ -14,7 +14,7 @@ HTML5 = getattr(settings, 'ASYM_HTML5', False)
 HTML5_WIDGETS = getattr(settings, 'ASYM_HTML5_WIDGETS', {})
 
 if HTML5:
-	from asymmetricbase.forms.html5_widgets import * # pylint: disable-msg=W0401
+	from asymmetricbase.forms.html5_widgets import *  # pylint: disable-msg=W0401
 
 # from https://gist.github.com/972162/3230682034aefe517e0c08b4ff38a6c37509a0e9
 def monkey_patch_django():
@@ -208,6 +208,7 @@ class AsymBaseModelFormSet(BaseModelFormSet):
 def make_modelformset_factory(model, form = ModelForm, *args, **kwargs):
 	formargs = kwargs.pop('formargs', {})
 	exclude = kwargs.pop('exclude', ())
+	kwargs.setdefault('formset', AsymBaseModelFormSet)
 	
 	class WrapperClass(form):
 		def __init__(self, *args, **kwargs):
@@ -215,10 +216,10 @@ def make_modelformset_factory(model, form = ModelForm, *args, **kwargs):
 			super(WrapperClass, self).__init__(*args, **kwargs)
 			
 			for fname in exclude:
-				del self.fields[fname]		
+				del self.fields[fname]
 	
-	kwargs.update(dict(form = WrapperClass))	
-	return modelformset_factory(model, formset = AsymBaseModelFormSet, *args, **kwargs)
+	kwargs.update(dict(form = WrapperClass))
+	return modelformset_factory(model, *args, **kwargs)
 
 
 monkey_patch_django()

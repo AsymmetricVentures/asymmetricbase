@@ -1,9 +1,8 @@
 from django.test import TestCase
+from django.conf import settings
 
 from asymmetricbase.views.mixins.merge_attr import MergeAttrMixin
 from asymmetricbase.testing.model_initializer import install_initializers
-
-from django.conf import settings
 
 class BaseTestCase(TestCase, MergeAttrMixin):
 	"""Base class for all tests"""
@@ -34,13 +33,13 @@ class BaseTestCase(TestCase, MergeAttrMixin):
 		"Returns a list of all initializers defined in this class and all its parents"
 		return self._merge_attr('initializers').keys()
 		# TODO: check if this is equivalent to _merge_attr
-#		initializers = []
-#		curr_class = self.__class__
-#		while(issubclass(curr_class, BaseTestCase)):
-#			new_initializers = [
-#				initializer for initializer in getattr(curr_class, 'initializers', [])
-#				if initializer not in initializers
-#			]
-#			initializers = new_initializers + initializers
-#			curr_class = curr_class.__bases__[0]
-#		return initializers
+# 		initializers = []
+# 		curr_class = self.__class__
+# 		while(issubclass(curr_class, BaseTestCase)):
+# 			new_initializers = [
+# 				initializer for initializer in getattr(curr_class, 'initializers', [])
+# 				if initializer not in initializers
+# 			]
+# 			initializers = new_initializers + initializers
+# 			curr_class = curr_class.__bases__[0]
+# 		return initializers

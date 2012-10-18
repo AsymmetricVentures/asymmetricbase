@@ -1,6 +1,6 @@
 from django.forms.formsets import formset_factory, BaseFormSet
 
-from asymmetricbase.logging import logger #@UnusedImport
+from asymmetricbase.logging import logger  # @UnusedImport
 from asymmetricbase.forms.form_factory import FormFactory
 from asymmetricbase.forms import ModelForm, make_modelformset_factory
 
@@ -38,4 +38,5 @@ class ModelFormSetFactoryFactory(FormSetFactoryFactory):
 			can_delete = self.can_delete
 		)
 		
-		return super(ModelFormSetFactoryFactory, self).__call__(request)
+		# Call the super of the super to bypass the super
+		return super(FormSetFactoryFactory, self).__call__(request)

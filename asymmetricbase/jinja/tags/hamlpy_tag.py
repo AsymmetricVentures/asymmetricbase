@@ -6,7 +6,7 @@ from jinja2.ext import Extension
 
 from hamlpy import hamlpy
 
-from asymmetricbase.logging import logger #@UnusedImport
+from asymmetricbase.logging import logger  # @UnusedImport
 
 begin_tag_rx = r'\{%\-?\s*haml.*?%\}'
 end_tag_rx = r'\{%\-?\s*endhaml\s*\-?%\}'
@@ -24,7 +24,7 @@ class HamlpyExtension(Extension):
 		return 0
 	
 	def parse(self, parser):
-		#lineno = parser.stream.next().lineno
+		# lineno = parser.stream.next().lineno
 		haml_data = parser.parse_statements(['name:endhaml']) 
 		parser.stream.expect('name:endhaml')
 		return [
