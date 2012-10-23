@@ -72,6 +72,20 @@ class FormFactory(object):
 		kwargs['parents'] = deepcopy(self.parents, memo)
 		kwargs['use_GET'] = self.use_GET
 		return FormFactory(form, *args, callbacks = callbacks, **kwargs)
+	
+	def change_field_properties(self, field_name, *callables, **new_attrs):
+		@form_callback(self, is_init = True)
+		def property_update_callback(form):
+			field = form.fields[field_name]
+			
+			for update_fn in callables:
+				update_fn(field)
+			
+			for k, v in new_attrs.items():
+				if callable(v):
+					v(getattr(field, k))
+				else:
+					setattr(field, k, v)
 
 def form_callback(form, position = None, is_init = False):
 	callback_list = form.callbacks if not is_init else form.init_callbacks
@@ -85,3 +99,4 @@ def form_callback(form, position = None, is_init = False):
 		return fn
 	return wrapper
 		
+
