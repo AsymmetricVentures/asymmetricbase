@@ -4,6 +4,7 @@ from asymmetricbase.logging import logger  # @UnusedImport
 from asymmetricbase.forms.form_factory import FormFactory
 from asymmetricbase.forms import ModelForm, make_modelformset_factory
 from copy import deepcopy
+from django.forms.models import BaseModelFormSet
 
 class FormSetFactoryFactory(FormFactory):
 	
@@ -48,6 +49,8 @@ class FormSetFactoryFactory(FormFactory):
 class ModelFormSetFactoryFactory(FormSetFactoryFactory):
 	def __init__(self, model, form = ModelForm, *args, **kwargs):
 		self.model = model
+		# use BaseModelFormSet if none is given (since super defaults to BaseFormSet
+		kwargs.setdefault('formset', BaseModelFormSet)
 		super(ModelFormSetFactoryFactory, self).__init__(form, *args, **kwargs)
 	
 	def __call__(self, request):
