@@ -7,10 +7,9 @@ from django.conf import settings
 
 from asymmetricbase.jinja.response import JinjaTemplateResponse
 from asymmetricbase.views.mixins.merge_attr import MergeAttrMixin
-from asymmetricbase.logging import logger #@UnusedImport
+from asymmetricbase.logging import logger # @UnusedImport
 from asymmetricbase.utils.jsonencoder import AsymJSONEncoder
 from asymmetricbase.utils.resources import ResourceSet
-import os
 
 class MultiFormatResponseMixin(MergeAttrMixin):
 	""" A mixin that can be used to render a djhtml templates or return json data. """
