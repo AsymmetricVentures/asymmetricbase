@@ -2,7 +2,7 @@ from copy import deepcopy
 
 from django.http import QueryDict
 
-from asymmetricbase.logging import logger #@UnusedImport
+from asymmetricbase.logging import logger # @UnusedImport
 from asymmetricbase import forms
 
 class FormFactory(object):
@@ -47,7 +47,7 @@ class FormFactory(object):
 			
 		if self.init_callbacks:
 			class NewForm(self.form):
-				def __init__(this, *args, **kwargs): #@NoSelf
+				def __init__(this, *args, **kwargs): # @NoSelf
 					super(NewForm, this).__init__(*args, **kwargs)
 					for callback in self.init_callbacks:
 						callback(this)
