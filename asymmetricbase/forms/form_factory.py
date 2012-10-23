@@ -41,7 +41,7 @@ class FormFactory(object):
 			self.kwargs['initial'].update(self.initial)
 		else:
 			self.kwargs['initial'] = self.initial
-
+		
 		if issubclass(self.form, forms.ModelForm) and 'instance' not in self.kwargs:
 			self.kwargs['instance'] = self.instance
 			
@@ -73,10 +73,12 @@ class FormFactory(object):
 		kwargs['use_GET'] = self.use_GET
 		return FormFactory(form, *args, callbacks = callbacks, **kwargs)
 	
-	def change_field_properties(self, field_name, *callables, **new_attrs):
+	def change_field_properties(self, field_name, field_data = {}, *callables, **new_attrs):
 		@form_callback(self, is_init = True)
 		def property_update_callback(form):
 			field = form.fields[field_name]
+			
+			field.widget.attrs.update({'data-{}'.format(k) : v for k, v in field_data.items()})
 			
 			for update_fn in callables:
 				update_fn(field)
