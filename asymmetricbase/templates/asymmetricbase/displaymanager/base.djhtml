@@ -13,5 +13,10 @@
 				{% endfor %}
 			</tr>
 		{% endfor %}
+		<tr style="display:none" class="empty_form">
+			{% for h in obj.columns %}
+				<td>{{ h(obj.empty_form) }}</td>
+			{% endfor %}
+		</tr>
 	</table>
 {% endmacro %}

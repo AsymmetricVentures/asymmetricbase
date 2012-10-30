@@ -12,4 +12,8 @@ class SimpleTableDisplay(Display):
 	def items(self):
 		return self.obj
 	
+	@property
+	def empty_form(self):
+		return self.obj.empty_form
+	
 	

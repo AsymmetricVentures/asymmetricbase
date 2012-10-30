@@ -48,7 +48,6 @@ class TemplateField(DisplayField):
 	
 	@cached_property
 	def template_macro(self):
-		print "HELLO"
 		return self.model.get_macro(self.macro_name)
 	
 	def __call__(self, instance):

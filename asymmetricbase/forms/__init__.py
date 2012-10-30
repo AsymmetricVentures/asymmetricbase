@@ -99,6 +99,9 @@ class Form(BaseFormMixin, forms.Form):
 	
 	def _html_output(self, *args, **kwargs):
 		return jinja2.Markup(super(Form, self)._html_output(*args, **kwargs))
+	
+	def __html__(self):
+		return self.as_table()
 
 class ModelForm(BaseFormMixin, forms.ModelForm):
 	template_module = jinja_env.get_template('asymmetricbase/forms/form_rows.djhtml').module
