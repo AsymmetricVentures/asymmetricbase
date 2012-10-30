@@ -16,6 +16,9 @@ class FormSetFactoryFactory(FormFactory):
 		self.formset = kwargs.pop('formset', BaseFormSet)
 		
 		super(FormSetFactoryFactory, self).__init__(form, *args, **kwargs)
+		
+		# formsets have lists of dictionaries as initial
+		self.initial = []
 	
 	def __call__(self, request):
 		self.form = formset_factory(

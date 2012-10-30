@@ -38,7 +38,10 @@ class FormFactory(object):
 		self.args = (form_data or None,) + filter(lambda x: x is not None, self.args)
 		
 		if 'initial' in self.kwargs:
-			self.kwargs['initial'].append(self.initial)
+			if isinstance(self.kwargs['initial'], dict):
+				self.kwargs['initial'].update(self.initial)
+			else:
+				self.kwargs['initial'].append(self.initial)
 		else:
 			self.kwargs['initial'] = self.initial
 		
