@@ -15,7 +15,7 @@ from jinja2.ext import WithExtension
 
 from asymmetricbase.jinja.tags.csrf_token import CSRFTokenExtension
 from asymmetricbase.jinja.tags.vtable import VTableExtension
-from asymmetricbase.jinja.tags.hamlpy_tag import HamlpyExtension
+from asymmetricbase.jinja.tags.haml import HamlishTagExtension
 from asymmetricbase.jinja.tags.fielditerator import checkboxiterator, checkboxiterator_named, radioiterator, radioiterator_named
 
 class UndefinedVar(jinja2.Undefined):
@@ -32,7 +32,7 @@ class UndefinedVar(jinja2.Undefined):
 		class EmptyIter(object):
 			def __iter__(self):
 				return self
-			def next(self): #@ReservedAssignment
+			def next(self): # @ReservedAssignment
 				raise StopIteration()
 			
 		return EmptyIter()
@@ -63,7 +63,7 @@ jinja_env = jinja2.Environment(
 	extensions = [
 		CSRFTokenExtension,
 		VTableExtension,
-		HamlpyExtension,
+		HamlishTagExtension,
 		WithExtension
 	]
 )
