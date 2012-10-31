@@ -14,13 +14,14 @@ Topic :: Utilities
 
 setup(
 	name = 'asymmetricbase',
-	version = '20121030-1',
+	version = '20121031-1',
 	
 	author = 'Richard Eames',
 	author_email = 'reames@asymmetricventures.com',
 	
 	packages = (
 		'asymmetricbase',
+		'asymmetricbase.displaymanager',
 		'asymmetricbase.fields',
 		'asymmetricbase.forms',
 		'asymmetricbase.jinja',
