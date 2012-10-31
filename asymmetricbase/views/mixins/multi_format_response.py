@@ -8,7 +8,7 @@ from django.conf import settings
 from asymmetricbase.jinja.response import JinjaTemplateResponse
 from asymmetricbase.views.mixins.merge_attr import MergeAttrMixin
 from asymmetricbase.logging import logger # @UnusedImport
-from asymmetricbase.utils.jsonencoder import AsymJSONEncoder
+from asymmetricbase.utils.jsonencoder import AsymJSONEncoder, AsymJSTreeEncoder
 from asymmetricbase.utils.resources import ResourceSet
 
 class MultiFormatResponseMixin(MergeAttrMixin):
@@ -48,6 +48,10 @@ class MultiFormatResponseMixin(MergeAttrMixin):
 			
 		elif self.output_type == 'json':
 			json_str = AsymJSONEncoder().encode(self.context)
+			return HttpResponse(json_str, mimetype = 'application/json')
+		
+		elif self.output_type == 'jstree':
+			json_str = AsymJSTreeEncoder().encode(self.context)
 			return HttpResponse(json_str, mimetype = 'application/json')
 		
 		elif self.output_type == 'pdf':

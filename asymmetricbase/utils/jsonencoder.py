@@ -9,3 +9,12 @@ class AsymJSONEncoder(DjangoJSONEncoder):
 			return o.__json__(self.default)
 		else:
 			return super(AsymJSONEncoder, self).default(o)
+
+class AsymJSTreeEncoder(DjangoJSONEncoder):
+	
+	def default(self, o):
+		
+		if hasattr(o, '__jstree__'):
+			return o.__jstree__(self.default)
+		else:
+			return super(AsymJSTreeEncoder, self).default(o)
