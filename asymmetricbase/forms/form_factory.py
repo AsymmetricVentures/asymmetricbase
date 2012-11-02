@@ -27,6 +27,7 @@ class FormFactory(object):
 	def __call__(self, request):
 		form_data = QueryDict('', mutable = True)
 		form_data.update(self.data)
+		
 		if self.use_GET:
 			form_data.update(request.GET)
 		else:
@@ -48,16 +49,9 @@ class FormFactory(object):
 		if issubclass(self.form, forms.ModelForm) and 'instance' not in self.kwargs:
 			self.kwargs['instance'] = self.instance
 			
-		if self.init_callbacks:
-			class NewForm(self.form):
-				def __init__(this, *args, **kwargs): # @NoSelf
-					super(NewForm, this).__init__(*args, **kwargs)
-					for callback in self.init_callbacks:
-						callback(this)
-			
-			self.form = NewForm
-		
 		self.form_instance = self.form(*self.args, **self.kwargs)
+		for callback in self.init_callbacks:
+			callback(self.form_instance)
 		return self.form_instance
 	
 	def process_callbacks(self):
@@ -70,11 +64,18 @@ class FormFactory(object):
 		form = deepcopy(self.form, memo)
 		args = deepcopy(self.args, memo)
 		callbacks = deepcopy(self.callbacks, memo)
+		init_callbacks = deepcopy(self.init_callbacks, memo)
 		kwargs = deepcopy(self.kwargs, memo)
 		kwargs['children'] = deepcopy(self.children, memo)
 		kwargs['parents'] = deepcopy(self.parents, memo)
 		kwargs['use_GET'] = self.use_GET
-		return FormFactory(form, *args, callbacks = callbacks, **kwargs)
+		ret = FormFactory(form, *args, callbacks = callbacks, init_callbacks = init_callbacks, **kwargs)
+		
+		ret.data = deepcopy(self.data, memo)
+		ret.instance = deepcopy(self.instance, memo)
+		ret.initial = deepcopy(self.initial, memo)
+		
+		return ret
 	
 	def change_field_properties(self, field_name, field_data = {}, *callables, **new_attrs):
 		@form_callback(self, is_init = True)
