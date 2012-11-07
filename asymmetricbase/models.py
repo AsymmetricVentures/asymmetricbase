@@ -1,4 +1,4 @@
-from collections import OrderedDict
+# from collections import OrderedDict
 import uuid
 
 from django.db import models
@@ -9,6 +9,7 @@ from django.db.utils import IntegrityError
 from django.forms.models import model_to_dict
 
 from asymmetricbase.logging import audit_logger
+from asymmetricbase.utils.enum import Enum
 
 class AsymBaseModel(models.Model):
 	uuid = models.CharField(max_length = 40, blank = True)
@@ -72,22 +73,29 @@ def _generate_unique_uuid(instance):
 	raise IntegrityError('Unable to generate a unique uuid for model: {}'.format(kls))
 
 
-class LogEntryType(object):
+class LogEntryType(Enum):
 	MODEL = 'model'
 	VIEW = 'view'
 	LOGIN = 'login'
 	ASSIGN = 'assign'
 	OTHER = 'other'
-	
-	Choices = OrderedDict([
-		(MODEL, 'Model'),
-		(VIEW, 'View'),
-		(LOGIN, 'Login'),
-		(ASSIGN, 'Assign'),
-		(OTHER, 'OTHER')
-	])
 
-class AccessType(object):
+# class LogEntryType(object):
+# 	MODEL = 'model'
+# 	VIEW = 'view'
+# 	LOGIN = 'login'
+# 	ASSIGN = 'assign'
+# 	OTHER = 'other'
+# 	
+# 	Choices = OrderedDict([
+# 		(MODEL, 'Model'),
+# 		(VIEW, 'View'),
+# 		(LOGIN, 'Login'),
+# 		(ASSIGN, 'Assign'),
+# 		(OTHER, 'OTHER')
+# 	])
+
+class AccessType(Enum):
 	READ = 'read'
 	WRITE = 'write'
 	ADD = 'add'
@@ -96,17 +104,27 @@ class AccessType(object):
 	UNASSIGN = 'unassign'
 	VIEW = 'view'
 	OTHER = 'other'
-	
-	Choices = OrderedDict([
-		(READ, 'Read'),
-		(WRITE, 'Write'),
-		(ADD, 'Add'),
-		(GRANT, 'Grant'),
-		(ASSIGN, 'assign'),
-		(UNASSIGN, 'unassign'),
-		(VIEW, 'View'),
-		(OTHER, 'OTHER')
-	])
+
+# class AccessType(object):
+# 	READ = 'read'
+# 	WRITE = 'write'
+# 	ADD = 'add'
+# 	GRANT = 'grant'
+# 	ASSIGN = 'assign'
+# 	UNASSIGN = 'unassign'
+# 	VIEW = 'view'
+# 	OTHER = 'other'
+# 	
+# 	Choices = OrderedDict([
+# 		(READ, 'Read'),
+# 		(WRITE, 'Write'),
+# 		(ADD, 'Add'),
+# 		(GRANT, 'Grant'),
+# 		(ASSIGN, 'assign'),
+# 		(UNASSIGN, 'unassign'),
+# 		(VIEW, 'View'),
+# 		(OTHER, 'OTHER')
+# 	])
 
 
 class ObjectContent(models.Model):
