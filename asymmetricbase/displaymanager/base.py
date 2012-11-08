@@ -154,7 +154,7 @@ class DisplayMeta(type):
 			new_class._meta.parents[base] = base
 		
 		# build template dictionary
-		template_dict = DisplayMeta._load_templates(OrderedDict(), getattr(meta, 'template_name', None))
+		template_dict = DisplayMeta._load_templates(OrderedDict(), getattr(new_class._meta, 'template_name', None))
 		
 		new_class.template_dict = template_dict
 		
