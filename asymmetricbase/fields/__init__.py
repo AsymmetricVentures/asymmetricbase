@@ -1,1 +1,3 @@
 from rangefield import IntegerRangeField
+from extended_modelmultiplechoicefield import ExtendedModelMultipleChoiceField
+from dollarfield import DollarField
