@@ -115,26 +115,21 @@ class DisplayMeta(type):
 		for base in parents:
 			if not hasattr(base, '_meta'):
 				continue
-			parent_meta = base._meta 
+			parent_meta = base._meta
 			parent_fields = parent_meta.local_fields
 			
 			for field in parent_fields:
 				if field.attrname in field_names:
 					raise FieldError('Local Field {!r} in class {!r} clashes with field of similar name from base class {!r}'.format(field.attrname, name, base.__name__))
 			
-			if hasattr(meta, 'template_name'):
-				# turn template_name into a tuple if it isn't
-				meta.template_name = meta.template_name if isinstance(meta.template_name, (tuple)) else (meta.template_name,)
-				# concatenate with parent template_name
-				for name in getattr(parent_meta, 'template_name', None):
-					if name not in meta.template_name:
-						meta.template_name += (name,)
+			# turn template_name into a tuple if it isn't
+			new_class._meta.template_name = new_class._meta.template_name if isinstance(new_class._meta.template_name, (tuple)) else (new_class._meta.template_name,)
+			# concatenate with parent template_name
+			for name in parent_meta.template_name:
+				if name not in new_class._meta.template_name:
+					new_class._meta.template_name += (name,)
 			
 			new_class._meta.parents[base] = base
-		
-		# replace template_name with assembled template_name that includes parent templates
-		if hasattr(meta, 'template_name'):
-			new_class._meta.template_name = meta.template_name
 		
 		# build template dictionary
 		template_dict = DisplayMeta._load_templates(OrderedDict(), getattr(meta, 'template_name', None))
