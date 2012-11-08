@@ -4,15 +4,16 @@ from collections import OrderedDict
 from django.core.exceptions import FieldError
 
 from asymmetricbase.jinja import jinja_env
+from asymmetricbase.utils.orderedset import OrderedSet
 
-DEFAULT_NAMES = ('ordering', 'template_name', 'structural_name',)
+DEFAULT_NAMES = ('ordering', 'structural_name',)
 
 class DisplayOptions(object):
 	def __init__(self, meta):
 		self.meta = meta
 		self.local_fields = []
 		self.ordering = []
-		self.template_name = []
+		self.template_name = OrderedSet()
 		self.structural_name = []
 		self.concrete_model = None
 		self.parents = OrderedDict()
@@ -25,6 +26,17 @@ class DisplayOptions(object):
 			for name in self.meta.__dict__:
 				if name.startswith('_'):
 					del meta_attrs[name]
+			
+			# special case template_name because it's an orderedset
+			if 'template_name' in meta_attrs:
+				template_names = meta_attrs.pop('template_name')
+			elif hasattr(self.meta, 'template_name'):
+				template_names = self.meta.template_name
+			
+			if isinstance(template_names, (list, tuple, OrderedSet, set)):
+				self.template_name.update(template_names)
+			else:
+				self.template_name.add(template_names)
 			
 			for attr_name in DEFAULT_NAMES:
 				if attr_name in meta_attrs:
@@ -78,7 +90,7 @@ class DisplayMeta(type):
 	@staticmethod
 	def _load_templates(template_dict, template_name):
 		if template_name is not None:
-			if isinstance(template_name, (list, tuple)):
+			if isinstance(template_name, (list, tuple, OrderedSet)):
 				for name in template_name:
 					if name not in template_dict:
 						template_dict.update({name : jinja_env.get_template(name).module})
@@ -100,7 +112,7 @@ class DisplayMeta(type):
 		else:
 			meta = attr_meta
 		
-		#base_meta = getattr(new_class, '_meta', None)
+		# base_meta = getattr(new_class, '_meta', None)
 		
 		new_class.add_to_class('_meta', DisplayOptions(meta))
 		
@@ -122,12 +134,22 @@ class DisplayMeta(type):
 				if field.attrname in field_names:
 					raise FieldError('Local Field {!r} in class {!r} clashes with field of similar name from base class {!r}'.format(field.attrname, name, base.__name__))
 			
-			# turn template_name into a tuple if it isn't
-			new_class._meta.template_name = new_class._meta.template_name if isinstance(new_class._meta.template_name, (tuple)) else (new_class._meta.template_name,)
-			# concatenate with parent template_name
-			for name in parent_meta.template_name:
-				if name not in new_class._meta.template_name:
-					new_class._meta.template_name += (name,)
+			# new_class._meta.template_name is always going to be an OrderedSet
+			# because DisplayOptions always sets it as one.
+			new_class._meta.template_name.update(parent_meta.template_name)
+# 			if not isinstance(new_class._meta.template_name, OrderedSet):
+# 				s = OrderedSet()
+# 				
+# 				if isinstance(new_class._meta.template_name, (set, tuple, list)):
+# 					s.update(new_class._meta.template_name)
+# 					
+# 				new_class._meta.template_name = OrderedSet()
+# 			# turn template_name into a tuple if it isn't
+# 			new_class._meta.template_name = new_class._meta.template_name if isinstance(new_class._meta.template_name, tuple) else (new_class._meta.template_name,)
+# 			# concatenate with parent template_name
+# 			for name in parent_meta.template_name:
+# 				if name not in new_class._meta.template_name:
+# 					new_class._meta.template_name += (name,)
 			
 			new_class._meta.parents[base] = base
 		
@@ -140,14 +162,14 @@ class DisplayMeta(type):
 		
 		return new_class
 	
-	def _prepare(cls): #@NoSelf
+	def _prepare(cls): # @NoSelf
 		opts = cls._meta
 		opts._prepare(cls)
 		
 		if cls.__doc__ is None:
 			cls.__doc__ = '{}({})'.format(cls.__name__, ', '.join([f.attrname for f in opts.fields]))
 	
-	def add_to_class(cls, name, value): #@NoSelf
+	def add_to_class(cls, name, value): # @NoSelf
 		if hasattr(value, 'contribute_to_class'):
 			value.contribute_to_class(cls, name)
 		else:
@@ -175,4 +197,4 @@ class Display(object):
 				return getattr(template_module, name)
 		raise AttributeError(name)
 	
-	#get_macro = memoize(_get_macro, _macro_cache, 1)
+	# get_macro = memoize(_get_macro, _macro_cache, 1)
