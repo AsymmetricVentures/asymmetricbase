@@ -4,6 +4,7 @@ all: clean build sync
 	
 clean:
 	rm -rf build dist *.deb MANIFEST
+	- sudo rm -rf asymmetricbase.egg-info
 
 build: clean
 	python setup.py bdist_rpm
