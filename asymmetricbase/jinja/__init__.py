@@ -50,7 +50,7 @@ class UndefinedVar(jinja2.Undefined):
 				f = inspect.currentframe().f_back.f_back.f_code
 				file_name = f.co_filename
 				lineno = f.co_firstlineno
-				warnings.warn("[{}:{}]Trying to access undefined attribute '{}.{}' on {} variable".format(file_name, lineno, self._undefined_name, name, type(self._undefined_name)))
+				warnings.warn("[{}:{}] Trying to access attribute '{}' on undefined variable '{}'".format(file_name, lineno, name, self._undefined_name))
 			return UndefinedVar()
 		
 		return None
