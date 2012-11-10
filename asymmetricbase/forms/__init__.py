@@ -41,7 +41,7 @@ class BaseFormMixin(object):
 	
 	def __init__(self, *args, **kwargs):
 		super(BaseFormMixin, self).__init__(*args, **kwargs)
-
+		
 		if not hasattr(self, 'Meta'):
 			return
 		
