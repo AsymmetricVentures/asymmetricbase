@@ -15,7 +15,11 @@
 		{% endfor %}
 		<tr style="display:none" class="empty_form">
 			{% for h in obj.columns %}
-				<td>{{ h(obj.empty_form) }}</td>
+				<td>
+					{% if obj.empty_form %}
+						{{ h(obj.empty_form) }}
+					{% endif %}
+				</td>
 			{% endfor %}
 		</tr>
 	</table>

@@ -17,5 +17,3 @@ class SimpleTableDisplay(Display):
 		if hasattr(self.obj, 'empty_form'):
 			return self.obj.empty_form
 		return None
-	
-	
