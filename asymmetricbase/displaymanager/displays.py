@@ -14,6 +14,8 @@ class SimpleTableDisplay(Display):
 	
 	@property
 	def empty_form(self):
-		return self.obj.empty_form
+		if hasattr(self.obj, 'empty_form'):
+			return self.obj.empty_form
+		return None
 	
 	
