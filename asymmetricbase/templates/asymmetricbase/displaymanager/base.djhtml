@@ -6,13 +6,6 @@
 				<th>{{h.header_name}}</th>
 			{% endfor %}
 		</tr>
-		{% for item in obj.items %}
-			<tr class="{{ loop.cycle('odd', 'even') }}">
-				{% for h in obj.columns %}
-					<td>{{ h(item) }}</td>
-				{% endfor %}
-			</tr>
-		{% endfor %}
 		<tr style="display:none" class="empty_form">
 			{% for h in obj.columns %}
 				<td>
@@ -22,5 +15,12 @@
 				</td>
 			{% endfor %}
 		</tr>
+		{% for item in obj.items %}
+			<tr class="{{ loop.cycle('odd', 'even') }}">
+				{% for h in obj.columns %}
+					<td>{{ h(item) }}</td>
+				{% endfor %}
+			</tr>
+		{% endfor %}
 	</table>
 {% endmacro %}
