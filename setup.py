@@ -21,6 +21,7 @@ setup(
 	
 	packages = (
 		'asymmetricbase',
+		'asymmetricbase._models',
 		'asymmetricbase.displaymanager',
 		'asymmetricbase.fields',
 		'asymmetricbase.forms',
