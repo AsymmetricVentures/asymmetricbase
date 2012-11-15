@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from datetime import datetime
 from distutils.core import setup
 
 classifiers = """
@@ -14,7 +15,7 @@ Topic :: Utilities
 
 setup(
 	name = 'asymmetricbase',
-	version = '20121031-1',
+	version = datetime.now().strftime('%Y%m%d%H%M'),
 	
 	author = 'Richard Eames',
 	author_email = 'reames@asymmetricventures.com',
