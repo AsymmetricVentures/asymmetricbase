@@ -42,7 +42,8 @@ class FormFactory(object):
 			if isinstance(self.kwargs['initial'], dict):
 				self.kwargs['initial'].update(self.initial)
 			else:
-				self.kwargs['initial'].append(self.initial)
+				# we don't want to append here, since self.initial is also a list
+				self.kwargs['initial'] += (self.initial)
 		else:
 			self.kwargs['initial'] = self.initial
 		
