@@ -213,6 +213,10 @@ if __name__ == '__main__':
 	
 	assert MyEnum4.A in MyEnum4
 	
+	assert 1 not in MyEnum4
+	if 1 in MyEnum4:
+		assert False, 'Cannot test ints in Enums'
+	
 	try:
 		class MyEnum5(Enum):
 			A = 'a'

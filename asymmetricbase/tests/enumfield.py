@@ -48,3 +48,17 @@ class EnumFieldTests(BaseTestCaseWithModels):
 		
 		self.assertEqual(TestEnumModel.objects.filter(field1 = TestEnum.VALUE1).count(), 3)
 		self.assertEqual(TestEnumModel.objects.filter(field1 = '1').count(), 3)
+		
+	def test_querying2(self):
+		TestEnumModel.objects.bulk_create([
+			TestEnumModel(field1 = TestEnum.VALUE1),
+			TestEnumModel(field1 = TestEnum.VALUE2),
+			TestEnumModel(field1 = TestEnum.VALUE1),
+			TestEnumModel(field1 = TestEnum.VALUE2),
+			TestEnumModel(field1 = TestEnum.VALUE1),
+		])
+		
+		v1 = TestEnumModel.objects.filter(field1 = '1')
+		
+		self.assertEqual(v1[0].field1, TestEnum.VALUE1)
+		self.assertNotEqual(v1[0].field1, 1)

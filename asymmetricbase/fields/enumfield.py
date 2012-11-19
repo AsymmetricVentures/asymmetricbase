@@ -1,13 +1,16 @@
 from django.db import models
 from django.core import exceptions
+from django.db.models.fields import NOT_PROVIDED
+from django.db.models.fields.subclassing import SubfieldBase
 
 from south.modelsinspector import add_introspection_rules
 
 from asymmetricbase.logging import logger # @UnusedImport
-from django.db.models.fields import NOT_PROVIDED
 from asymmetricbase.utils.enum import Enum, EnumItem
 
 class EnumField(models.IntegerField):
+	__metaclass__ = SubfieldBase
+	
 	empty_strings_allowed = False
 	
 	def __init__(self, enum, *args, **kwargs):
