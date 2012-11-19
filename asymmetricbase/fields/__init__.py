@@ -1,3 +1,4 @@
-from rangefield import IntegerRangeField
-from extended_modelmultiplechoicefield import ExtendedModelMultipleChoiceField
 from dollarfield import DollarField
+from enumfield import EnumField
+from extended_modelmultiplechoicefield import ExtendedModelMultipleChoiceField
+from rangefield import IntegerRangeField

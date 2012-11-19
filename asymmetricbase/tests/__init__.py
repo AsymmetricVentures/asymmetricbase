@@ -1,1 +1,2 @@
 from formset_factory_tests import FormsetFactoryFactoryTests
+from enumfield import EnumFieldTests

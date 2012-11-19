@@ -14,6 +14,11 @@ class EnumItem(object):
 	def __str__(self):
 		return self.label
 	
+	def __int__(self):
+		return self.value
+	
+	__long__ = __int__
+	
 	def __eq__(self, other):
 		if isinstance(other, type(self)):
 			return self.value == other.value
@@ -25,12 +30,16 @@ class EnumItem(object):
 		return False
 
 class EnumMeta(type):
+	
 	def __new__(cls, name, bases, attributes):
 		
 		Choices = OrderedDict()
 		new_attributes = {
 			'reverse' : OrderedDict(),
-			'__iter__' : lambda self: self.reverse.value()
+			'__iter__' : lambda self: self.reverse.values(),
+			'max_value' :-1,
+			'min_value' : 0,
+			'__repr__' : name,
 		}
 		enum_values = {}
 		items = {}
@@ -57,7 +66,8 @@ class EnumMeta(type):
 				
 			item_type_attrs = {
 				'label' : k.replace('_', ' ').title(),
-				'_enum_name_' : k
+				'_enum_name_' : k,
+				'_enum_type_' : None
 			}
 			
 			if isinstance(v, tuple):
@@ -73,6 +83,9 @@ class EnumMeta(type):
 				enum_values[k] = v
 				item_type_attrs['value'] = v
 			
+			if not isinstance(item_type_attrs['value'], (int, long)):
+				raise TypeError('Enum ordinals must be integers')
+			
 			items[k] = item_type_attrs
 		
 		ItemType = type('{}Item'.format(name), (EnumItem,), item_attrs)
@@ -80,12 +93,26 @@ class EnumMeta(type):
 		for k, v in items.items():
 			new_attributes[k] = ItemType(**v)
 		
-		for item in sorted(items.values(), key = lambda x: x['value']):
-			Choices[item['value']] = item['label']
-			new_attributes['reverse'][item['value']] = new_attributes[item['_enum_name_']]
+		sorted_items = sorted(items.values(), key = lambda x: x['value'])
 		
+		if len(items):
+			item_values = map(lambda x: long(x['value']), sorted_items)
+			
+			new_attributes['min_value'] = item_values[0]
+			new_attributes['max_value'] = item_values[-1]
+		
+			for item in sorted_items:
+				Choices[item['value']] = item['label']
+				new_attributes['reverse'][item['value']] = new_attributes[item['_enum_name_']]
+			
 		new_attributes['Choices'] = Choices
-		return super(EnumMeta, cls).__new__(cls, name, bases, new_attributes)
+		EnumType = super(EnumMeta, cls).__new__(cls, name, bases, new_attributes)
+		
+		
+		for item in EnumType:
+			setattr(item, '_enum_type_', EnumType)
+		
+		return EnumType
 	
 	def __iter__(self):
 		return iter(self.reverse.values())
@@ -115,6 +142,8 @@ if __name__ == '__main__':
 	b1 = MyEnum.B
 	a2 = MyEnum2.A
 	b2 = MyEnum2.B
+	
+	assert MyEnum.A._enum_type_ == MyEnum
 	
 	assert a1 == MyEnum.A
 	assert a1 != MyEnum.B
@@ -183,3 +212,11 @@ if __name__ == '__main__':
 	assert tuple(MyEnum4) == (MyEnum4.A, MyEnum4.B, MyEnum4.UPPER_CASE_WORD)
 	
 	assert MyEnum4.A in MyEnum4
+	
+	try:
+		class MyEnum5(Enum):
+			A = 'a'
+			B = 'b'
+		assert False, 'Enum ordinals must be integers'
+	except TypeError:
+		pass

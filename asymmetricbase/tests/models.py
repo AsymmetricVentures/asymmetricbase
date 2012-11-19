@@ -1,6 +1,20 @@
-from django.db import models 
-from asymmetricbase.models import AsymBaseModel
+from asymmetricbase import models
+from asymmetricbase.utils.enum import Enum
 
-class TestModel(AsymBaseModel):
+class TestEnum(Enum):
+	VALUE1 = 1
+	VALUE2 = 2
+
+class TestModel(models.AsymBaseModel):
 	field1 = models.IntegerField()
 	field2 = models.CharField(max_length = 255)
+	
+	class Meta(object):
+		app_label = 'tests'
+
+
+class TestEnumModel(models.AsymBaseModel):
+	field1 = models.EnumField(TestEnum)
+	
+	class Meta(object):
+		app_label = 'tests'

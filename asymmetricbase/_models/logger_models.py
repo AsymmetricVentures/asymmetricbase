@@ -4,11 +4,11 @@ from django.utils import timezone
 from asymmetricbase.utils.enum import Enum
 
 class LogEntryType(Enum):
-	MODEL = 'model'
-	VIEW = 'view'
-	LOGIN = 'login'
-	ASSIGN = 'assign'
-	OTHER = 'other'
+	MODEL = 1, 'model'
+	VIEW = 2, 'view'
+	LOGIN = 3, 'login'
+	ASSIGN = 4, 'assign'
+	OTHER = 5, 'other'
 
 # class LogEntryType(object):
 # 	MODEL = 'model'
@@ -26,14 +26,14 @@ class LogEntryType(Enum):
 # 	])
 
 class AccessType(Enum):
-	READ = 'read'
-	WRITE = 'write'
-	ADD = 'add'
-	GRANT = 'grant'
-	ASSIGN = 'assign'
-	UNASSIGN = 'unassign'
-	VIEW = 'view'
-	OTHER = 'other'
+	READ = 1, 'read'
+	WRITE = 2, 'write'
+	ADD = 3, 'add'
+	GRANT = 4, 'grant'
+	ASSIGN = 5, 'assign'
+	UNASSIGN = 6, 'unassign'
+	VIEW = 7, 'view'
+	OTHER = 8, 'other'
 
 # class AccessType(object):
 # 	READ = 'read'
