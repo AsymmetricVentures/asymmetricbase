@@ -18,3 +18,9 @@ class TestEnumModel(models.AsymBaseModel):
 	
 	class Meta(object):
 		app_label = 'tests'
+
+class TestEnumModelWithDefault(models.AsymBaseModel):
+	field1 = models.EnumField(TestEnum, default = TestEnum.VALUE1)
+	
+	class Meta(object):
+		app_label = 'tests'

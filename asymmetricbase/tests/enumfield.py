@@ -1,7 +1,7 @@
 from django.test.client import RequestFactory
 
 from asymmetricbase.testing.base_with_models import BaseTestCaseWithModels
-from asymmetricbase.tests.models import TestEnum, TestEnumModel
+from asymmetricbase.tests.models import TestEnum, TestEnumModel, TestEnumModelWithDefault
 from asymmetricbase import forms
 
 class TestForm(forms.Form):
@@ -62,3 +62,7 @@ class EnumFieldTests(BaseTestCaseWithModels):
 		
 		self.assertEqual(v1[0].field1, TestEnum.VALUE1)
 		self.assertNotEqual(v1[0].field1, 1)
+	
+	def test_get_default(self):
+		model = TestEnumModelWithDefault()
+		model.save()
