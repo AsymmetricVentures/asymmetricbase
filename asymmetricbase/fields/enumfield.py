@@ -20,6 +20,13 @@ class EnumField(models.IntegerField):
 			null = False,
 			blank = False
 		)
+		# This is a hack to fix django's use of get_default on fields.
+		# If default isn't callable, get_fields() calls force_unicode() on it,
+		# which breaks to_python() (below) since value is a string, not an enum.
+		default = kwargs.get('default', None)
+		if default and not callable(default):
+			kwargs['default'] = lambda: default
+			
 		super(EnumField, self).__init__(*args, **kwargs)
 	
 	def to_python(self, value):
