@@ -81,7 +81,10 @@ def jinja_fmt(fmt, *args, **kwargs):
 	return fmt.format(*args, **kwargs)
 
 def jinja_vtable(table, header = '', tail = ''):
-	return jinja_env.get_template('asymmetricbase/displaymanager/vtable.djhtml').module.vtable(table, header, tail)
+	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml').module.vtable(table, header, tail)
+
+def jinja_gridlayout(layout):
+	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml').module.gridlayout(layout)
 
 jinja_env.globals.update({
 	'url' : jinja_url,
@@ -90,6 +93,7 @@ jinja_env.globals.update({
 	'dir' : dir,
 	
 	'vtable' : jinja_vtable,
+	'gridlayout' : jinja_gridlayout,
 })
 
 jinja_env.filters.update({

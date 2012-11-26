@@ -1,0 +1,14 @@
+{% macro display(obj) %}
+	<table class='gridlayout-table'>
+		{% for row in obj.grid.values() %}
+			<tr>
+				{% for field in row.values() %}
+					<td colspan='{{ field.colspan }}' rowspan='{{ field.rowspan }}'>
+						{{ field(obj.item) }}
+					</td>
+				{% endfor %}
+			</tr>
+		{% endfor %}
+	</table>
+{% endmacro %}
+

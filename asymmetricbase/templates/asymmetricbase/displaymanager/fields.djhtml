@@ -1,3 +1,6 @@
+{% macro objfield(obj) %}
+	{{obj}}
+{% endmacro %}
 
 {% macro charfield(obj) %}
 	{{obj}}

@@ -40,6 +40,17 @@ class AttrGetField(DisplayField):
 	@property
 	def field_name(self):
 		return self.attr if self.attr is not None else self.attrname
+
+class RecurAttrGetField(DisplayField):
+	def __init__(self, *args, **kwargs):
+		super(RecurAttrGetField, self).__init__(kwargs.get('header_name', ''))
+		self.attr_list = kwargs.get('attr_list', [])
+	
+	def __call__(self, instance):
+		obj = instance
+		for attr in self.attr_list:
+			obj = getattr(obj, attr)
+		return obj
 	
 class TemplateField(DisplayField):
 	def __init__(self, header_name = '', macro_name = ''):
@@ -65,3 +76,15 @@ class AutoTemplateField(TemplateField, AttrGetField):
 	
 class IntField(AutoTemplateField): pass
 class CharField(AutoTemplateField): pass
+
+class GridLayoutField(TemplateField):
+	def __init__(self, *args, **kwargs):
+		self.row = kwargs.pop('row', 0)
+		self.col = kwargs.pop('col', 0)
+		self.rowspan = kwargs.pop('rowspan', 1)
+		self.colspan = kwargs.pop('colspan', 1)
+		kwargs['macro_name'] = kwargs.get('macro_name','objfield')
+		super(GridLayoutField, self).__init__(*args, **kwargs)
+#	
+#	def __call__(self, instance):
+#		return TemplateField.__call__(self, RecurAttrGetField.__call__(self, instance))
