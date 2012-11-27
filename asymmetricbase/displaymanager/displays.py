@@ -39,7 +39,7 @@ class GridLayoutDisplay(Display):
 	
 	@property
 	def grid(self):
-		# singelton pattern
+		# singleton pattern
 		if not self._grid:
 			self._grid = {}
 			self._make_grid(self._grid)
