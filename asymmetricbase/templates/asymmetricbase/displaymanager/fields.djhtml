@@ -1,5 +1,5 @@
-{% macro objfield(obj) %}
-	{{obj}}
+{% macro default(obj, attr) %}
+	{{ getattr(obj, attr) }}
 {% endmacro %}
 
 {% macro charfield(obj) %}
