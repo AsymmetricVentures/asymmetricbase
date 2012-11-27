@@ -92,6 +92,8 @@ def jinja_getattr(obj, attr_string):
 		
 	will resolve obj.user.name
 	"""
+	if attr_string == '':
+		return obj
 	attrs = attr_string.split(".")
 	for attr in attrs:
 		obj = jinja_env.getattr(obj, attr)
