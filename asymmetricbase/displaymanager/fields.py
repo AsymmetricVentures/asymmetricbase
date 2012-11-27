@@ -47,7 +47,7 @@ class TemplateField(DisplayField):
 	Can be given additional positional or keyword arguments, which will be passed
 	to the macro if the macro supports varargs or kwargs (see jinja2 docs).
 	"""
-	def __init__(self, header_name = '', macro_name = 'default', *args, **kwargs):
+	def __init__(self, header_name = '', macro_name = '', *args, **kwargs):
 		self.macro_name = macro_name
 		self.args = args
 		self.kwargs = kwargs
@@ -58,14 +58,7 @@ class TemplateField(DisplayField):
 		return self.model.get_macro(self.macro_name)
 	
 	def __call__(self, instance):
-		if self.template_macro.catch_varargs and self.template_macro.catch_kwargs:
-			return self.template_macro(instance, *self.args, **self.kwargs)
-		elif self.template_macro.catch_varargs:
-			return self.template_macro(instance, *self.args)
-		elif self.template_macro.catch_kwargs:
-			return self.template_macro(instance, **self.kwargs)
-		else:
-			return self.template_macro(instance)
+		return self.template_macro(instance, *self.args, **self.kwargs)
 
 class AutoTemplateField(TemplateField, AttrGetField):
 	
