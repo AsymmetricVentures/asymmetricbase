@@ -1,4 +1,6 @@
 from base import Display
+import operator
+from collections import OrderedDict
 
 class SimpleTableDisplay(Display):
 	class Meta(object):
@@ -28,7 +30,8 @@ class GridLayoutDisplay(Display):
 	def __init__(self, obj, *args, **kwargs):
 		super(GridLayoutDisplay, self).__init__(obj, *args, **kwargs)
 	
-	def _make_grid(self, grid):
+	def _make_grid(self):
+		grid = {}
 		for field in self._meta.fields:
 			if field.row not in grid.keys():
 				grid[field.row] = {}
@@ -36,13 +39,23 @@ class GridLayoutDisplay(Display):
 				grid[field.row][field.col] = field
 			else:
 				raise AttributeError('Grid elements at row {}, col {} already defined.'.format(field.row, field.col))
+		# sort rows and columns
+		# TODO: efficiency optimization
+		# if there's a data structure that can do ordered insert based on the row and col
+		# index, this would be more efficient than sorting
+		ordered_rows = OrderedDict(sorted(grid.items(), key = operator.itemgetter(0)))
+		for row_num, col_dict in ordered_rows.items():
+			ordered_rows[row_num] = OrderedDict(sorted(col_dict.items(), key = operator.itemgetter(0)))
+		
+		return ordered_rows
+		
 	
 	@property
 	def grid(self):
 		# singleton pattern
 		if not self._grid:
-			self._grid = {}
-			self._make_grid(self._grid)
+			self._grid = OrderedDict()
+			self._grid = self._make_grid()
 		return self._grid
 	
 	@property
