@@ -195,6 +195,6 @@ class Display(object):
 		for template_module in cls.template_dict.values():
 			if hasattr(template_module, name):
 				return getattr(template_module, name)
-		raise AttributeError(name)
+		raise AttributeError('Cannot get macro \'{}\''.format(name))
 	
 	# get_macro = memoize(_get_macro, _macro_cache, 1)
