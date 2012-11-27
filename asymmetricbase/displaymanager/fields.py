@@ -82,21 +82,8 @@ class CharField(AutoTemplateField): pass
 class GridLayoutField(TemplateField):
 	
 	def __init__(self, *args, **kwargs):
-		self.element_attrs = kwargs.pop
 		self.row = 'row-' + str(kwargs.pop('row', 0))
 		self.col = 'col-' + str(kwargs.pop('col', 0))
 		self.rowspan = kwargs.pop('rowspan', 1)
 		self.colspan = kwargs.pop('colspan', 1)
 		super(GridLayoutField, self).__init__(*args, **kwargs)
-
-class VsegGridLayoutField(GridLayoutField):
-	"""
-	Like GridLayoutField, but the attr string is concatenated with '.vseg' to
-	ease form field rendering.
-	"""
-	def __init__(self, *args, **kwargs):
-		attr = kwargs.get('attr', None)
-		if attr:
-			attr = attr + '.vseg'
-			kwargs['attr'] = attr
-		super(VsegGridLayoutField, self).__init__(*args, **kwargs)
