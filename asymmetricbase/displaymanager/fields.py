@@ -41,8 +41,16 @@ class AttrGetField(DisplayField):
 		return self.attr if self.attr is not None else self.attrname
 
 class TemplateField(DisplayField):
-	def __init__(self, header_name = '', macro_name = ''):
+	"""
+	Renders using the macro defined in macro_name.
+	
+	Can be given additional positional or keyword arguments, which will be passed
+	to the macro if the macro supports varargs or kwargs (see jinja2 docs).
+	"""
+	def __init__(self, header_name = '', macro_name = 'default', *args, **kwargs):
 		self.macro_name = macro_name
+		self.args = args
+		self.kwargs = kwargs
 		super(TemplateField, self).__init__(header_name)
 	
 	@cached_property
@@ -50,28 +58,14 @@ class TemplateField(DisplayField):
 		return self.model.get_macro(self.macro_name)
 	
 	def __call__(self, instance):
-		return self.template_macro(instance)
-
-class GenericTemplateField(TemplateField):
-	"""
-	A TemplateField that takes an attr string for resolving attributes of the obj.
-	
-	It uses a default macro for rendering the obj after resolving all attributes
-	in the attr string. This cuts repetition for many cases where the macro only
-	serves to resolve attributes. Example:
-	
-	-macro user_address_phone(obj):
-		={ obj.user.address.phone }
-	
-	can be replaced with a GenericTemplateField that has the default macro and
-	attr = 'user.address.phone'
-	"""
-	def __init__(self, header_name = '', macro_name = 'default', attr = ''):
-		self.attr = attr
-		super(GenericTemplateField, self).__init__(header_name, macro_name)
-	
-	def __call__(self, instance):
-		return self.template_macro(instance, self.attr)
+		if self.template_macro.catch_varargs and self.template_macro.catch_kwargs:
+			return self.template_macro(instance, *self.args, **self.kwargs)
+		elif self.template_macro.catch_varargs:
+			return self.template_macro(instance, *self.args)
+		elif self.template_macro.catch_kwargs:
+			return self.template_macro(instance, **self.kwargs)
+		else:
+			return self.template_macro(instance)
 
 class AutoTemplateField(TemplateField, AttrGetField):
 	
@@ -85,11 +79,12 @@ class AutoTemplateField(TemplateField, AttrGetField):
 class IntField(AutoTemplateField): pass
 class CharField(AutoTemplateField): pass
 
-class GridLayoutField(GenericTemplateField):
+class GridLayoutField(TemplateField):
 	
 	def __init__(self, *args, **kwargs):
-		self.row = kwargs.pop('row', 0)
-		self.col = kwargs.pop('col', 0)
+		self.element_attrs = kwargs.pop
+		self.row = 'row-' + str(kwargs.pop('row', 0))
+		self.col = 'col-' + str(kwargs.pop('col', 0))
 		self.rowspan = kwargs.pop('rowspan', 1)
 		self.colspan = kwargs.pop('colspan', 1)
 		super(GridLayoutField, self).__init__(*args, **kwargs)
