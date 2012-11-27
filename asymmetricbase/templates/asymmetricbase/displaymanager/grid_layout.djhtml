@@ -1,9 +1,9 @@
 {% macro display(obj) %}
 	<table class='gridlayout-table'>
-		{% for row in obj.grid.values() %}
+		{% for rownum, column_dict in obj.grid.items() %}
 			<tr>
-				{% for field in row.values() %}
-					<td colspan='{{ field.colspan }}' rowspan='{{ field.rowspan }}'>
+				{% for colnum, field in column_dict.items() %}
+					<td class = '{{ rownum }} {{ colnum }}' colspan='{{ field.colspan }}' rowspan='{{ field.rowspan }}'>
 						{{ field(obj.item) }}
 					</td>
 				{% endfor %}
