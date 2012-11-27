@@ -28,7 +28,6 @@ class DisplayField(object):
 	def __lt__(self, other):
 		return self.creation_counter < other.creation_counter
 
-
 class AttrGetField(DisplayField):
 	def __init__(self, header_name = '', attr = None):
 		super(AttrGetField, self).__init__(header_name)
@@ -41,17 +40,6 @@ class AttrGetField(DisplayField):
 	def field_name(self):
 		return self.attr if self.attr is not None else self.attrname
 
-class RecurAttrGetField(DisplayField):
-	def __init__(self, *args, **kwargs):
-		super(RecurAttrGetField, self).__init__(kwargs.get('header_name', ''))
-		self.attr_list = kwargs.get('attr_list', [])
-	
-	def __call__(self, instance):
-		obj = instance
-		for attr in self.attr_list:
-			obj = getattr(obj, attr)
-		return obj
-	
 class TemplateField(DisplayField):
 	def __init__(self, header_name = '', macro_name = ''):
 		self.macro_name = macro_name
@@ -63,7 +51,27 @@ class TemplateField(DisplayField):
 	
 	def __call__(self, instance):
 		return self.template_macro(instance)
+
+class GenericTemplateField(TemplateField):
+	"""
+	A TemplateField that takes an attr string for resolving attributes of the obj.
 	
+	It uses a default macro for rendering the obj after resolving all attributes
+	in the attr string. This cuts repetition for many cases where the macro only
+	serves to resolve attributes. Example:
+	
+	-macro user_address_phone(obj):
+		={ obj.user.address.phone }
+	
+	can be replaced with a GenericTemplateField that has the default macro and
+	attr = 'user.address.phone'
+	"""
+	def __init__(self, header_name = '', macro_name = 'default', attr = ''):
+		self.attr = attr
+		super(GenericTemplateField, self).__init__(header_name, macro_name)
+	
+	def __call__(self, instance):
+		return self.template_macro(instance, self.attr)
 
 class AutoTemplateField(TemplateField, AttrGetField):
 	
@@ -77,14 +85,23 @@ class AutoTemplateField(TemplateField, AttrGetField):
 class IntField(AutoTemplateField): pass
 class CharField(AutoTemplateField): pass
 
-class GridLayoutField(TemplateField):
+class GridLayoutField(GenericTemplateField):
+	
 	def __init__(self, *args, **kwargs):
 		self.row = kwargs.pop('row', 0)
 		self.col = kwargs.pop('col', 0)
 		self.rowspan = kwargs.pop('rowspan', 1)
 		self.colspan = kwargs.pop('colspan', 1)
-		kwargs['macro_name'] = kwargs.get('macro_name','objfield')
 		super(GridLayoutField, self).__init__(*args, **kwargs)
-#	
-#	def __call__(self, instance):
-#		return TemplateField.__call__(self, RecurAttrGetField.__call__(self, instance))
+
+class VsegGridLayoutField(GridLayoutField):
+	"""
+	Like GridLayoutField, but the attr string is concatenated with '.vseg' to
+	ease form field rendering.
+	"""
+	def __init__(self, *args, **kwargs):
+		attr = kwargs.get('attr', None)
+		if attr:
+			attr = attr + '.vseg'
+			kwargs['attr'] = attr
+		super(VsegGridLayoutField, self).__init__(*args, **kwargs)
