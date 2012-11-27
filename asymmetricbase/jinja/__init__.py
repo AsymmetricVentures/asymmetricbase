@@ -1,6 +1,8 @@
 import datetime
 import os, warnings
 
+from operator import attrgetter
+
 from django.template.loaders.app_directories import fs_encoding, \
 	app_template_dirs
 from django.core.urlresolvers import reverse
@@ -80,6 +82,21 @@ def jinja_date_filter(d, fmt = "%d/%b/%y %I:%M%p"):
 def jinja_fmt(fmt, *args, **kwargs):
 	return fmt.format(*args, **kwargs)
 
+def jinja_getattr(obj, attr_string):
+	"""
+	Resolve attributes using jinja's getattr() rather than the default python method.
+	
+	Will also resolve chained attributes, for example:
+	
+		getattr(obj, 'user.name')
+		
+	will resolve obj.user.name
+	"""
+	attrs = attr_string.split(".")
+	for attr in attrs:
+		obj = jinja_env.getattr(obj, attr)
+	return obj
+
 def jinja_vtable(table, header = '', tail = ''):
 	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml').module.vtable(table, header, tail)
 
@@ -91,6 +108,7 @@ jinja_env.globals.update({
 	'getdatetime' : jinja_getdate,
 	'type' : type,
 	'dir' : dir,
+	'getattr' : jinja_getattr,
 	
 	'vtable' : jinja_vtable,
 	'gridlayout' : jinja_gridlayout,
