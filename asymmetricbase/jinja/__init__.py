@@ -77,6 +77,8 @@ def jinja_getdate():
 	return timezone.localtime(timezone.now())
 
 def jinja_date_filter(d, fmt = "%d/%b/%y %I:%M%p"):
+	if not d:
+		return ''
 	return timezone.localtime(d).strftime(fmt)
 
 def jinja_fmt(fmt, *args, **kwargs):
