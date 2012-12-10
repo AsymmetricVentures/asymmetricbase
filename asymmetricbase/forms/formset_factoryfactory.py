@@ -1,7 +1,7 @@
 from django.forms.formsets import formset_factory, BaseFormSet
 
 from asymmetricbase.logging import logger  # @UnusedImport
-from asymmetricbase.forms.form_factory import FormFactory
+from asymmetricbase.forms.form_factory import FormFactory, form_callback
 from asymmetricbase.forms import ModelForm, make_modelformset_factory
 from copy import deepcopy
 from django.forms.models import BaseModelFormSet
@@ -52,6 +52,7 @@ class FormSetFactoryFactory(FormFactory):
 class ModelFormSetFactoryFactory(FormSetFactoryFactory):
 	def __init__(self, model, form = ModelForm, *args, **kwargs):
 		self.model = model
+		self.formargs = kwargs.pop('formargs', {})
 		# use BaseModelFormSet if none is given (since super defaults to BaseFormSet
 		kwargs.setdefault('formset', BaseModelFormSet)
 		super(ModelFormSetFactoryFactory, self).__init__(form, *args, **kwargs)
@@ -61,7 +62,8 @@ class ModelFormSetFactoryFactory(FormSetFactoryFactory):
 			self.model, self.form,
 			formset = self.formset, extra = self.extra,
 			max_num = self.max_num, can_order = self.can_order,
-			can_delete = self.can_delete
+			can_delete = self.can_delete,
+			formargs = self.formargs,
 		)
 		
 		# Call the super of the super to bypass the super
