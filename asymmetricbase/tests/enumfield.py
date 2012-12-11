@@ -63,6 +63,17 @@ class EnumFieldTests(BaseTestCaseWithModels):
 		self.assertEqual(v1[0].field1, TestEnum.VALUE1)
 		self.assertNotEqual(v1[0].field1, 1)
 	
+	def test_widget_selected(self):
+		model = TestEnumModel()
+		model.field1 = TestEnum.VALUE2
+		
+		form = TestModelForm(instance = model)
+		
+		substring_html = '<option value="{}" selected="selected">{}</option>'.format(int(TestEnum.VALUE2), str(TestEnum.VALUE2))
+		
+		self.assertHTMLContains(form, substring_html)
+		
+	
 	def test_get_default(self):
 		model = TestEnumModelWithDefault()
 		model.save()

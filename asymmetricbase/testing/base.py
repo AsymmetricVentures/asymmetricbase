@@ -3,6 +3,7 @@ from django.conf import settings
 
 from asymmetricbase.views.mixins.merge_attr import MergeAttrMixin
 from asymmetricbase.testing.model_initializer import install_initializers
+from django.test.testcases import assert_and_parse_html
 
 class BaseTestCase(TestCase, MergeAttrMixin):
 	"""Base class for all tests"""
@@ -32,14 +33,20 @@ class BaseTestCase(TestCase, MergeAttrMixin):
 	def _get_inherited_initializers(self):
 		"Returns a list of all initializers defined in this class and all its parents"
 		return self._merge_attr('initializers').keys()
-		# TODO: check if this is equivalent to _merge_attr
-# 		initializers = []
-# 		curr_class = self.__class__
-# 		while(issubclass(curr_class, BaseTestCase)):
-# 			new_initializers = [
-# 				initializer for initializer in getattr(curr_class, 'initializers', [])
-# 				if initializer not in initializers
-# 			]
-# 			initializers = new_initializers + initializers
-# 			curr_class = curr_class.__bases__[0]
-# 		return initializers
+	
+	def assertHTMLContains(self, html_content, html_substring, count = None, msg_prefix = ''):
+		"""
+		Asserts that a HTML string contains another HTML string
+		"""
+		
+		if msg_prefix:
+			msg_prefix += ": "
+		
+		content = assert_and_parse_html(self, unicode(html_content), None, u"Content is not valid HTML:")
+		text = assert_and_parse_html(self, unicode(html_substring), None, u"Second argument is not valid HTML:")
+		
+		real_count = content.count(text)
+		if count is not None:
+			self.assertEqual(real_count, count, msg_prefix + "Found %d instances of '%s' in content (expected %d)" % (real_count, text, count))
+		else:
+			self.assertTrue(real_count != 0, msg_prefix + "Couldn't find '%s' in content" % text)

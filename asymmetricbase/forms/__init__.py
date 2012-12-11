@@ -115,9 +115,11 @@ class ModelForm(BaseFormMixin, forms.ModelForm):
 		output, hidden_fields = [], []
 		
 		for name, field in self.fields.items():
+			bf = self[name]
+			
 			macro_args = {
 				'label' : '',
-				'field' : unicode(field),
+				'field' : bf,
 				'help_text' : '',
 				'errors' : '',
 				'html_class_attr' : '',
@@ -125,8 +127,7 @@ class ModelForm(BaseFormMixin, forms.ModelForm):
 				'required_mark' : ''
 			}
 			
-			bf = self[name]
-			bf_errors = self.error_class([conditional_escape(error for error in bf.errors)])
+			bf_errors = self.error_class([conditional_escape(error) for error in bf.errors])
 			macro_args['errors'] = force_unicode(bf_errors)
 			
 			macro_args['required_mark'] = required_mark if field.required else u''
@@ -139,7 +140,7 @@ class ModelForm(BaseFormMixin, forms.ModelForm):
 			else:
 				css_classes = bf.css_classes()
 				if css_classes:
-					macro_args['html_class_attr'] = ' class="{}"'.format(css_classes)
+					macro_args['html_class_attr'] = jinja2.Markup(' class="{}"'.format(css_classes))
 				
 				if errors_on_separate_row and bf_errors:
 					output.append(template_macro(**macro_args))
@@ -171,7 +172,7 @@ class ModelForm(BaseFormMixin, forms.ModelForm):
 		if hidden_fields:
 			output.append(u''.join(hidden_fields))
 		
-		return jinja2.Markup(output)
+		return jinja2.Markup('\n'.join(output))
 	
 	def as_table(self):
 		return self._render_html_template(self.template_module.as_table, False)
