@@ -113,7 +113,7 @@ class AuditLogGenerator(object):
 	def _get_model(self):
 		try:
 			self.model = self.record.model
-			self.model_str = "{model.__class__.__name__}.{model.id}".format(model = self.model)
+			self.model_str = u"{model.__class__.__name__}.{model.id}".format(model = self.model)
 		except AttributeError:
 			self.model = None
 			self.model_str = None

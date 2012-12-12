@@ -20,7 +20,7 @@ class DBTraceHandler(logging.Handler):
 		msg = ''
 		
 		for row in self.rows:
-			msg_row = '''[{level}] {file_name}:{lineno} {msg}\n'''
+			msg_row = u'''[{level}] {file_name}:{lineno} {msg}\n'''
 			
 			if row['exc_info']:
 				entry.exc_info = row['exc_info']
