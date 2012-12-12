@@ -16,7 +16,8 @@ from asymmetricbase.utils.exceptions import DeveloperTODO, ForceRollback
 
 from asymmetricbase.logging import logger #@UnusedImport
 from asymmetricbase.jinja import jinja_env
-from asymmetricbase.utils.permissions import default_content_type, create_codename
+from asymmetricbase.utils.permissions import create_codename, \
+	default_content_type_appname
 
 class AsymBaseView(MultiFormatResponseMixin, View):
 	""" Base class for all views """
@@ -110,11 +111,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			logger.debug('The required permissions are {}'.format(permissions_required))
 			
 			if self.login_required:
-				view_perm = Permission.objects.get(
-					name = self.permission_name,
-					content_type = default_content_type(),
-					codename = create_codename(self.__class__.__module__, self.__class__.__name__),
-				)
+				view_perm = '{}.{}'.format(default_content_type_appname(), create_codename(self.__class__.__module__, self.__class__.__name__))
 				if not request.user.has_perm(view_perm):
 						messages.error(request, 'You do not have permission to view that page')
 						logger.debug('Failed permission check {}'.format(view_perm))
