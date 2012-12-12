@@ -10,7 +10,7 @@ Inspired by flufl.enum
 class EnumItem(object):
 	def __init__(self, **attrs):
 		self.__dict__.update(**attrs)
-		
+	
 	def __str__(self):
 		return self.label
 	
@@ -30,27 +30,26 @@ class EnumItem(object):
 		return False
 
 class EnumMeta(type):
-	
 	def __new__(cls, name, bases, attributes):
-		
-		Choices = OrderedDict()
 		new_attributes = {
-			'reverse' : OrderedDict(),
-			'__iter__' : lambda self: self.reverse.values(),
-			'max_value' :-1,
-			'min_value' : 0,
+			'reverse'  : OrderedDict(),
 			'__repr__' : name,
 		}
-		enum_values = {}
-		items = {}
+		enum_values = []
 		
 		meta = attributes.pop('Meta', {})
-		tuple_properties = getattr(meta, 'properties', ('value', 'label'))
+		properties = getattr(meta, 'properties', ())
 		
-		if 'value' not in tuple_properties:
-			tuple_properties = ('value',) + tuple_properties
+		if 'value' not in properties:
+			properties = ('value',) + properties
 		
-		item_attrs = {
+		if 'label' not in properties:
+			properties = properties + ('label',)
+		
+		if 'ordinal' not in properties:
+			properties = properties + ('ordinal',)
+		
+		value_type_attrs = {
 			'__repr__' : lambda self: '{}.{}'.format(name, self._enum_name_)
 		}
 		
@@ -59,58 +58,54 @@ class EnumMeta(type):
 			if not k.isupper():
 				# All instance methods get placed onto the enum values
 				if callable(v) and getattr(v, 'im_self', None) is None and k != '__new__':
-					item_attrs[k] = v
+					value_type_attrs[k] = v
 				else:
 					new_attributes[k] = v
 				continue
 				
-			item_type_attrs = {
-				'label' : k.replace('_', ' ').title(),
+			enum_value_attrs = {
 				'_enum_name_' : k,
 				'_enum_type_' : None
 			}
 			
-			if isinstance(v, tuple):
-				if len(v) > len(tuple_properties):
-					raise ValueError('Too many items for the properties')
-				
-				item_type_attrs.update(dict(izip_longest(tuple_properties, v)))
-				
-				if item_type_attrs['value'] is None:
-					raise ValueError('Enum values cannot be None')
-				
-			elif isinstance(v, (int, basestring)):
-				enum_values[k] = v
-				item_type_attrs['value'] = v
+			if not isinstance(v, tuple):
+				v = (v,)
 			
-			if not isinstance(item_type_attrs['value'], (int, long)):
-				raise TypeError('Enum ordinals must be integers')
+			if len(v) > len(properties):
+				raise ValueError("Too many items for the properties")
 			
-			items[k] = item_type_attrs
-		
-		ItemType = type('{}Item'.format(name), (EnumItem,), item_attrs)
-		
-		for k, v in items.items():
-			new_attributes[k] = ItemType(**v)
-		
-		sorted_items = sorted(items.values(), key = lambda x: x['value'])
-		
-		if len(items):
-			item_values = map(lambda x: long(x['value']), sorted_items)
+			enum_value_attrs.update(dict(izip_longest(properties, v)))
 			
-			new_attributes['min_value'] = item_values[0]
-			new_attributes['max_value'] = item_values[-1]
-		
-			for item in sorted_items:
-				Choices[item['value']] = item['label']
-				new_attributes['reverse'][item['value']] = new_attributes[item['_enum_name_']]
+			if not enum_value_attrs.get('label'):
+				enum_value_attrs['label'] = k.replace('_', ' ').title()
 			
-		new_attributes['Choices'] = Choices
+			if not isinstance(enum_value_attrs['value'], (int, long)):
+				raise TypeError("Enum ordinals must be integers")
+			
+			if enum_value_attrs.get('ordinal') is None:
+				enum_value_attrs['ordinal'] = enum_value_attrs['id']
+			
+			enum_values.append(enum_value_attrs)
+		
+		ValueType = type('{}Value'.format(name), (EnumItem,), value_type_attrs)
+		enum_values = sorted(enum_values, key = lambda x: x['value'])
+		
+		for (index, enum_value_attrs) in enumerate(enum_values):
+			enum_value_attrs['ordinal'] = index + 1
+			enum_value = ValueType(**enum_value_attrs)
+			
+			new_attributes[enum_value_attrs['_enum_name_']] = enum_value
+			new_attributes['reverse'][enum_value.value] = enum_value
+		
+		new_attributes['Choices'] = OrderedDict(
+			(enum_value.value, enum_value.label)
+			for enum_value in enum_values
+		)
+		
 		EnumType = super(EnumMeta, cls).__new__(cls, name, bases, new_attributes)
 		
-		
-		for item in EnumType:
-			setattr(item, '_enum_type_', EnumType)
+		for enum_value in EnumType:
+			setattr(enum_value, '_enum_type_', EnumType)
 		
 		return EnumType
 	
@@ -118,8 +113,11 @@ class EnumMeta(type):
 		return iter(self.reverse.values())
 	
 class Enum(object):
-	'''Baseclass for Enums. 
-	   ** DO NOT define methods in here'''
+	"""
+		Baseclass for Enums. 
+		** DO NOT define methods in here
+	"""
+	
 	__metaclass__ = EnumMeta
 	Choices = {}
 	
@@ -127,7 +125,7 @@ class Enum(object):
 		try:
 			return cls.reverse[value]
 		except KeyError:
-			raise ValueError('{} has no "{}" value'.format(cls.__name__, value))
+			raise ValueError("{} has no value for '{}'".format(cls.__name__, value))
 
 if __name__ == '__main__':
 	class MyEnum(Enum):
@@ -158,8 +156,8 @@ if __name__ == '__main__':
 		class Meta(object):
 			properties = ('label', 'value')
 		
-		A = 'Hello', 3
-		B = 'Foo', 1
+		A = "Hello", 3
+		B = "Foo", 1
 		
 		def enum(self):
 			return self.label
@@ -168,14 +166,14 @@ if __name__ == '__main__':
 		def getBLabel(cls):
 			return cls.B.label
 	
-	assert str(MyEnum3.A) == 'Hello'
-	assert str(MyEnum3.B) == 'Foo'
+	assert str(MyEnum3.A) == "Hello"
+	assert str(MyEnum3.B) == "Foo"
 	assert MyEnum3.A != 3
-	assert MyEnum3.A.enum() == 'Hello'
-	assert MyEnum3.getBLabel() == 'Foo'
+	assert MyEnum3.A.enum() == "Hello"
+	assert MyEnum3.getBLabel() == "Foo"
 	try:
 		MyEnum3.enum()
-		assert False, 'MyEnum3.enum() exists'
+		assert False, "MyEnum3.enum() exists"
 	except AttributeError:
 		pass
 	
@@ -183,7 +181,7 @@ if __name__ == '__main__':
 	
 	try:
 		_ = MyEnum3.A > MyEnum.A
-		assert False, 'Should not be able to compare MyEnum3.A > MyEnum.A'
+		assert False, "Should not be able to compare MyEnum3.A > MyEnum.A"
 	except:
 		pass
 	
@@ -191,23 +189,23 @@ if __name__ == '__main__':
 	
 	class MyEnum4(Enum):
 		A = 1
-		B = 3, 'Hello'
+		B = 3, "Hello"
 		UPPER_CASE_WORD = 4
 	
-	assert str(MyEnum4.A) == 'A'
-	assert str(MyEnum4.B) == 'Hello'
-	assert str(MyEnum4.UPPER_CASE_WORD) == 'Upper Case Word'
+	assert str(MyEnum4.A) == "A"
+	assert str(MyEnum4.B) == "Hello"
+	assert str(MyEnum4.UPPER_CASE_WORD) == "Upper Case Word"
 	
 	assert MyEnum4(1) == MyEnum4.A
 	assert MyEnum4(1) is MyEnum4.A
 	
 	try:
 		MyEnum4(2)
-		assert False, 'MyEnum4(2) Should fail.'
+		assert False, "MyEnum4(2) should fail."
 	except ValueError:
 		pass
 	
-	assert MyEnum4(1).label == 'A'
+	assert MyEnum4(1).label == "A"
 	
 	assert tuple(MyEnum4) == (MyEnum4.A, MyEnum4.B, MyEnum4.UPPER_CASE_WORD)
 	
@@ -215,12 +213,12 @@ if __name__ == '__main__':
 	
 	assert 1 not in MyEnum4
 	if 1 in MyEnum4:
-		assert False, 'Cannot test ints in Enums'
+		assert False, "Cannot test ints in Enums"
 	
 	try:
 		class MyEnum5(Enum):
-			A = 'a'
-			B = 'b'
-		assert False, 'Enum ordinals must be integers'
+			A = "a"
+			B = "b"
+		assert False, "Enum ordinals must be integers"
 	except TypeError:
 		pass

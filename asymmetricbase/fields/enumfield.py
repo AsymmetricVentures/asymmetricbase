@@ -2,11 +2,13 @@ from django.db import models
 from django.core import exceptions
 from django.db.models.fields import NOT_PROVIDED
 from django.db.models.fields.subclassing import SubfieldBase
+from django.utils.encoding import smart_unicode
+from django.forms import TypedChoiceField
 
 from south.modelsinspector import add_introspection_rules
 
 from asymmetricbase.logging import logger # @UnusedImport
-from asymmetricbase.utils.enum import Enum, EnumItem
+from asymmetricbase.utils.enum import Enum, EnumValue
 
 class EnumField(models.IntegerField):
 	__metaclass__ = SubfieldBase
@@ -15,32 +17,17 @@ class EnumField(models.IntegerField):
 	
 	def __init__(self, enum, *args, **kwargs):
 		self.enum = enum
-		kwargs.update(
-			choices = enum.Choices.items(),
-			null = False,
-			blank = False
-		)
-		
+		kwargs['choices'] = enum.Choices.items()
 		super(EnumField, self).__init__(*args, **kwargs)
 	
 	def get_default(self):
-		"""
-		Returns the default value for this field.
-		
-		The default implementation on models.Field calls force_unicode
-		on the default, which means you can't set arbitrary Python
-		objects as the default. To fix this, we just return the value
-		without calling force_unicode on it. Note that if you set a
-		callable as a default, the field will still call it.
-		
-		From: http://djangosnippets.org/snippets/1694/
-		
-		"""
 		if self.has_default():
-			if callable(self.default):
-				return self.default()
-			return self.default
-		# If the field doesn't have a default, then we punt to models.Field.
+			default = self.default
+			if callable(default):
+				default = default()
+			if default is None:
+				return None
+			return default.value
 		return super(EnumField, self).get_default()
 	
 	def to_python(self, value):
@@ -53,6 +40,14 @@ class EnumField(models.IntegerField):
 		except ValueError:
 			raise exceptions.ValidationError(self.error_messages['invalid'] % value)
 	
+	def value_to_string(self, obj):
+		field_value = self._get_val_from_obj(obj)
+		
+		if field_value is not None:
+			field_value = field_value.value
+		
+		return smart_unicode(field_value)
+	
 	def validate(self, value, model_instance):
 		return value in self.enum
 	
@@ -64,12 +59,30 @@ class EnumField(models.IntegerField):
 	
 	def formfield(self, **kwargs):
 		defaults = {
-			'min_value' : self.enum.min_value,
-			'max_value' : self.enum.max_value
+			'required': not self.blank,
+			'label': self.verbose_name,
+			'help_text': self.help_text,
+			'choices': self.get_choices(include_blank = self.blank),
+			'coerce': self.to_python,
+			'empty_value': None,
 		}
-		defaults.update(kwargs)
-		return super(EnumField, self).formfield(**defaults)
 		
+		if self.has_default():
+			if callable(self.default):
+				defaults['initial'] = self.default
+				defaults['show_hidden_initial'] = True
+			else:
+				defaults['initial'] = self.get_default()
+		
+		defaults.update(kwargs)
+		
+		return EnumFormField(**defaults)
+
+class EnumFormField(TypedChoiceField):
+	def prepare_value(self, value):
+		if isinstance(value, EnumValue):
+			return smart_unicode(value.value)
+		return value
 
 def enum_converter(value):
 	if issubclass(value, Enum):
@@ -80,9 +93,11 @@ def enum_converter(value):
 def default_converter(value):
 	if isinstance(value, NOT_PROVIDED) or value is NOT_PROVIDED:
 		return None
-	
-	elif isinstance(value, EnumItem):
-		return 'getattr(Migration().gf("{}.{}"), "{}")'.format(value._enum_type_.__module__, value._enum_type_.__name__, value._enum_name_)
+	elif isinstance(value, EnumValue):
+		#return 'getattr(Migration().gf("{}.{}"), "{}")'.format(value._enum_type_.__module__, value._enum_type_.__name__, value._enum_name_)
+		return repr(value.value)
+	elif value is None:
+		return repr(None)
 	
 	raise ValueError(repr(value))
 
