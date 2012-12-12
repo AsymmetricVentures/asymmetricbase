@@ -94,6 +94,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			logger.debug('BEGIN REQUEST *********** {}'.format(request.path))
 			if not self._login_requirement_ok(request):
 				logger.debug('Login requirement is not ok, redirecting')
+				self.error(request, 'You were not logged in properly. Please try again')
 				return redirect(reverse(getattr(settings, 'ASYM_FAILED_LOGIN_URL')))
 			
 			permissions_required = self._merge_attr('permissions_required')
