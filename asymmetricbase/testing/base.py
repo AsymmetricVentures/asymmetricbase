@@ -49,4 +49,4 @@ class BaseTestCase(TestCase, MergeAttrMixin):
 		if count is not None:
 			self.assertEqual(real_count, count, msg_prefix + "Found %d instances of '%s' in content (expected %d)" % (real_count, text, count))
 		else:
-			self.assertTrue(real_count != 0, msg_prefix + "Couldn't find '%s' in content" % text)
+			self.assertTrue(real_count != 0, msg_prefix + "Couldn't find '{}' in content '{}'".format(text, content))

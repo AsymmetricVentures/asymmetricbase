@@ -1,16 +1,31 @@
 from django.test.client import RequestFactory
 
 from asymmetricbase.testing.base_with_models import BaseTestCaseWithModels
-from asymmetricbase.tests.models import TestEnum, TestEnumModel, TestEnumModelWithDefault
+from asymmetricbase.tests.models import TestEnum, TestEnumModel, TestEnumModelWithDefault, TestEnumModel1
 from asymmetricbase import forms
+from asymmetricbase.fields.enumfield import EnumField
+from django.forms.formsets import formset_factory
 
 class TestForm(forms.Form):
-	pass
+	field1 = EnumField(TestEnum).formfield(required = True)
+	field2 = EnumField(TestEnum, default = TestEnum.VALUE2).formfield()
 
 class TestModelForm(forms.ModelForm):
 	class Meta(object):
 		model = TestEnumModel
 		fields = ('field1',)
+
+class TestModelWithDefaultForm(forms.ModelForm):
+	class Meta(object):
+		model = TestEnumModelWithDefault
+		fields = ('field1',)
+
+#class TestOldEnumForm(forms.ModelForm):
+#	class Meta(object):
+#		model = TestOldEnumModelWithDefault
+
+TestModelFormSet = forms.make_modelformset_factory(TestEnumModel1)
+TestFormSet = formset_factory(TestForm)
 
 class EnumFieldTests(BaseTestCaseWithModels):
 	
@@ -72,8 +87,31 @@ class EnumFieldTests(BaseTestCaseWithModels):
 		substring_html = '<option value="{}" selected="selected">{}</option>'.format(int(TestEnum.VALUE2), str(TestEnum.VALUE2))
 		
 		self.assertHTMLContains(form, substring_html)
-		
 	
+	def test_widget_with_initial(self):
+		form = TestModelWithDefaultForm()
+		
+		substring_html = '<option value="{}" selected="selected">{}</option>'.format(int(TestEnum.VALUE1), str(TestEnum.VALUE1))
+		
+		self.assertHTMLContains(unicode(form), substring_html)
+		
 	def test_get_default(self):
 		model = TestEnumModelWithDefault()
 		model.save()
+		
+		self.assertEqual(model.field1, TestEnum.VALUE1)
+		
+	def test_with_formset1(self):
+		request = self.factory.post('/', {
+			'form-TOTAL_FORMS' : '1',
+			'form-INITIAL_FORMS' : '0',
+			'form-MAX_NUM_FORMS' : '0',
+			'form-0-field1' : '',
+			'form-0-field2' : '2',
+		})
+		
+		formset = TestFormSet(request.POST)
+		
+		self.assertFalse(formset[0].has_changed())
+		self.assertFalse(formset.has_changed())
+		self.assertTrue(formset.is_valid())

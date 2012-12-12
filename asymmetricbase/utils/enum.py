@@ -36,19 +36,15 @@ class EnumMeta(type):
 		Choices = OrderedDict()
 		new_attributes = {
 			'reverse' : OrderedDict(),
-			'__iter__' : lambda self: self.reverse.values(),
-			'max_value' :-1,
-			'min_value' : 0,
-			'__repr__' : name,
+			'__repr__' : lambda self: name,
 		}
-		enum_values = {}
 		items = {}
 		
 		meta = attributes.pop('Meta', {})
-		tuple_properties = getattr(meta, 'properties', ('value', 'label'))
+		properties = getattr(meta, 'properties', ('value', 'label'))
 		
-		if 'value' not in tuple_properties:
-			tuple_properties = ('value',) + tuple_properties
+		if 'value' not in properties:
+			properties = ('value',) + properties
 		
 		item_attrs = {
 			'__repr__' : lambda self: '{}.{}'.format(name, self._enum_name_)
@@ -66,25 +62,31 @@ class EnumMeta(type):
 				
 			item_type_attrs = {
 				'label' : k.replace('_', ' ').title(),
+				'display_order' : None,
 				'_enum_name_' : k,
 				'_enum_type_' : None
 			}
 			
-			if isinstance(v, tuple):
-				if len(v) > len(tuple_properties):
-					raise ValueError('Too many items for the properties')
-				
-				item_type_attrs.update(dict(izip_longest(tuple_properties, v)))
-				
-				if item_type_attrs['value'] is None:
-					raise ValueError('Enum values cannot be None')
-				
-			elif isinstance(v, (int, basestring)):
-				enum_values[k] = v
-				item_type_attrs['value'] = v
+			if not isinstance(v, tuple):
+				v = (v,)
+			
+			if len(v) > len(properties):
+				raise ValueError('Too many items for the properties')
+			
+			attr_updates = dict(izip_longest(properties, v))
+			if attr_updates.get('label', -1) is None:
+				attr_updates.pop('label')
+			
+			item_type_attrs.update(attr_updates)
+			
+			if item_type_attrs['value'] is None:
+				raise ValueError('Enum values cannot be None')
 			
 			if not isinstance(item_type_attrs['value'], (int, long)):
 				raise TypeError('Enum ordinals must be integers')
+			
+			if item_type_attrs['display_order'] is None:
+				item_type_attrs['display_order'] = item_type_attrs['value']
 			
 			items[k] = item_type_attrs
 		
@@ -93,15 +95,12 @@ class EnumMeta(type):
 		for k, v in items.items():
 			new_attributes[k] = ItemType(**v)
 		
-		sorted_items = sorted(items.values(), key = lambda x: x['value'])
+		sorted_items = sorted(items.values(), key = lambda x: x['display_order'])
 		
 		if len(items):
-			item_values = map(lambda x: long(x['value']), sorted_items)
-			
-			new_attributes['min_value'] = item_values[0]
-			new_attributes['max_value'] = item_values[-1]
 		
-			for item in sorted_items:
+			for index, item in enumerate(sorted_items):
+				new_attributes[item['_enum_name_']].display_order = item['display_order'] = index + 1
 				Choices[item['value']] = item['label']
 				new_attributes['reverse'][item['value']] = new_attributes[item['_enum_name_']]
 			
@@ -153,6 +152,8 @@ if __name__ == '__main__':
 	assert isinstance(a1, EnumItem)
 	assert not isinstance(a1, type(a2))
 	assert isinstance(a1, type(a2).__bases__[0])
+	
+	assert MyEnum.A.display_order == 1
 	
 	class MyEnum3(Enum):
 		class Meta(object):
@@ -224,3 +225,14 @@ if __name__ == '__main__':
 		assert False, 'Enum ordinals must be integers'
 	except TypeError:
 		pass
+	
+	class MyEnum6(Enum):
+		A = 1, 2
+		B = 2, 3
+		C = 3, 1
+		
+		class Meta(object):
+			properties = ('value', 'display_order')
+	
+	assert MyEnum6.A.display_order == 2
+	assert tuple(MyEnum6) == (MyEnum6.C, MyEnum6.A, MyEnum6.B)
