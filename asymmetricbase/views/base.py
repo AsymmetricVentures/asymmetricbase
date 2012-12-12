@@ -22,7 +22,6 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 	""" Base class for all views """
 	login_required = True
 	permission_name = ''
-	permission_protected = True
 	
 	form_info = OrderedDict()
 	
@@ -110,7 +109,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			
 			logger.debug('The required permissions are {}'.format(permissions_required))
 			
-			if self.permission_protected:
+			if self.login_required:
 				view_perm = Permission.objects.get(
 					name = self.permission_name,
 					content_type = default_content_type(),
