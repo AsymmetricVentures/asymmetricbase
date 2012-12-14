@@ -37,8 +37,6 @@ class Command(BaseCommand):
 		
 		# insert permissions into DB
 		Permission.objects.bulk_create(self.objs)
-		
-		print args, options
 	
 	def traverse(self, patterns):
 		for entry in patterns:
