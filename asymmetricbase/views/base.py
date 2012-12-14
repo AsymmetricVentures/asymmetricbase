@@ -9,17 +9,21 @@ from django.contrib import messages
 from django.db import transaction
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.contrib.auth.models import Permission
 
 from asymmetricbase.views.mixins.multi_format_response import MultiFormatResponseMixin
 from asymmetricbase.utils.exceptions import DeveloperTODO, ForceRollback
 
 from asymmetricbase.logging import logger #@UnusedImport
 from asymmetricbase.jinja import jinja_env
+from asymmetricbase.utils.permissions import default_content_type, create_codename
 
 class AsymBaseView(MultiFormatResponseMixin, View):
 	""" Base class for all views """
 	login_required = True
-	permissions_required = []
+	permission_name = ''
+	permission_protected = True
+	
 	form_info = OrderedDict()
 	
 	def __init__(self, *args, **kwargs):
@@ -106,11 +110,16 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			
 			logger.debug('The required permissions are {}'.format(permissions_required))
 			
-			for perm in permissions_required:
-				if not request.user.has_perm(perm):
-					messages.error(request, 'You do not have permission to view that page')
-					logger.debug('Failed permission check {}'.format(perm))
-					return redirect(reverse(getattr(settings, 'ASYM_FAILED_LOGIN_URL')))
+			if self.permission_protected:
+				view_perm = Permission.objects.get(
+					name = self.permission_name,
+					content_type = default_content_type(),
+					codename = create_codename(self.__class__.__module__, self.__class__.__name__),
+				)
+				if not request.user.has_perm(view_perm):
+						messages.error(request, 'You do not have permission to view that page')
+						logger.debug('Failed permission check {}'.format(view_perm))
+						return redirect(reverse(getattr(settings, 'ASYM_FAILED_LOGIN_URL')))
 			
 			logger.debug('AsymBaseView: Getting form data')
 			self.get_form_data()
