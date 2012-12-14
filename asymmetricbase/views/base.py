@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse, resolve
 from django.contrib import messages
 from django.db import transaction
 from django.conf import settings
+from django.contrib.auth import REDIRECT_FIELD_NAME
 
 from asymmetricbase.views.mixins.multi_format_response import MultiFormatResponseMixin
 from asymmetricbase.utils.exceptions import DeveloperTODO, ForceRollback
@@ -95,7 +96,11 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			if not self._login_requirement_ok(request):
 				logger.debug('Login requirement is not ok, redirecting')
 				self.error('You were not logged in properly. Please try again')
-				return redirect(reverse(getattr(settings, 'ASYM_FAILED_LOGIN_URL')))
+				return redirect('{}?{}={}'.format(
+					reverse(getattr(settings, 'ASYM_FAILED_LOGIN_URL')),
+					REDIRECT_FIELD_NAME,
+					request.path,
+				))
 			
 			permissions_required = self._merge_attr('permissions_required')
 			
