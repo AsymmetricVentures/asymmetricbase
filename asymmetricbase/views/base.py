@@ -9,7 +9,6 @@ from django.contrib import messages
 from django.db import transaction
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.contrib.auth.models import Permission
 
 from asymmetricbase.views.mixins.multi_format_response import MultiFormatResponseMixin
 from asymmetricbase.utils.exceptions import DeveloperTODO, ForceRollback
@@ -111,7 +110,11 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			logger.debug('The required permissions are {}'.format(permissions_required))
 			
 			if self.login_required:
-				view_perm = '{}.{}'.format(default_content_type_appname(), create_codename(self.__class__.__module__, self.__class__.__name__))
+				suffix = ''
+				if hasattr(self, 'permission_name'):
+					suffix = AsymBaseView.get_view_name_and_suffix(self.permission_name)[1]
+				
+				view_perm = '{}.{}'.format(default_content_type_appname(), create_codename(self.__class__.__module__, self.__class__.__name__, suffix))
 				if not request.user.has_perm(view_perm):
 						messages.error(request, 'You do not have permission to view that page')
 						logger.debug('Failed permission check {}'.format(view_perm))
@@ -213,6 +216,22 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			return ''
 		
 		return template_block(**context)
+	
+	@staticmethod
+	def get_view_name_and_suffix(permission_name, **kwargs):
+		suffix = ''
+		name = ''
+		
+		if isinstance(permission_name, dict):
+			for kwarg_key, kwarg_values in permission_name.items():
+				kwarg_value = kwargs.get(kwarg_key, None)
+				if kwarg_value in kwarg_values:
+					data = kwarg_values[kwarg_value]
+					name = data['name']
+					suffix = data['codename']
+					break
+		
+		return (name, suffix)
 	
 	@staticmethod
 	def forbidden():
