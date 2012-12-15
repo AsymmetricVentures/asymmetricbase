@@ -105,6 +105,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 					request.path,
 				))
 			
+			logger.debug(u'User is: {}'.format(request.user))
 			permissions_required = self._merge_attr('permissions_required')
 			
 			logger.debug('The required permissions are {}'.format(permissions_required))
@@ -119,6 +120,8 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 						messages.error(request, 'You do not have permission to view that page')
 						logger.debug('Failed permission check {}'.format(view_perm))
 						return redirect(reverse(getattr(settings, 'ASYM_FAILED_LOGIN_URL')))
+				
+				logger.debug('Has view permission: {}'.format(view_perm))
 			
 			logger.debug('AsymBaseView: Getting form data')
 			self.get_form_data()
