@@ -113,7 +113,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			if self.login_required:
 				suffix = ''
 				if hasattr(self, 'permission_name'):
-					suffix = AsymBaseView.get_view_name_and_suffix(self.permission_name)[1]
+					suffix = AsymBaseView.get_view_name_and_suffix(self.permission_name, **kwargs)[1]
 				
 				view_perm = '{}.{}'.format(default_content_type_appname(), create_codename(self.__class__.__module__, self.__class__.__name__, suffix))
 				if not request.user.has_perm(view_perm):
