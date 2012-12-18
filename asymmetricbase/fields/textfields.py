@@ -38,7 +38,7 @@ class LongNameField(models.CharField):
 class CommentField(models.CharField):
 	def __init__(self, *args, **kwargs):
 		kwargs.setdefault('max_length', COMMENT_LENGTH)
-		super(ShortMessageField, self).__init__(*args, **kwargs)
+		super(CommentField, self).__init__(*args, **kwargs)
 
 add_introspection_rules([], [
 	'^asymmetricbase\.fields\.textfields\.ShortMessageField',
