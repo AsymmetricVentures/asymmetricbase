@@ -43,7 +43,7 @@ class CommentField(models.CharField):
 add_introspection_rules([], [
 	'^asymmetricbase\.fields\.textfields\.ShortMessageField',
 	'^asymmetricbase\.fields\.textfields\.LongMessageField',
-	'^asymmetricbase\.fields\.textfields\.ShortMessageField',
-	'^asymmetricbase\.fields\.textfields\.LongMessageField',
+	'^asymmetricbase\.fields\.textfields\.ShortNameField',
+	'^asymmetricbase\.fields\.textfields\.LongNameField',
 	'^asymmetricbase\.fields\.textfields\.CommentField',
 ])
