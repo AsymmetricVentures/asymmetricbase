@@ -11,7 +11,13 @@ from django.forms.models import model_to_dict
 from asymmetricbase.logging import audit_logger
 from asymmetricbase._models.logger_models import LogEntryType, AccessType
 
+
 class AsymBaseModel(models.Model):
+	# The next two lines for for eclipse so that it stops reporting _meta as unknown
+	_meta = models.options.Options
+	del _meta
+	
+	
 	uuid = models.CharField(max_length = 40, blank = True)
 	date_created = models.DateTimeField(auto_now_add = True, default = timezone.now)
 	date_updated = models.DateTimeField(auto_now = True, default = timezone.now)
@@ -60,7 +66,7 @@ def asym_model_base_postinit(sender, instance, **kwargs):
 		return
 	
 	if not instance._object_saved_before():
-		return # this is a constructor call. CanAdd will be checked it in pre_save
+		return  # this is a constructor call. CanAdd will be checked it in pre_save
 	
 	instance._audit_log(access_type = AccessType.READ, success = True)
 
