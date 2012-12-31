@@ -9,10 +9,10 @@ from django.contrib import messages
 from django.db import transaction
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.utils.http import urlencode
 
 from asymmetricbase.views.mixins.multi_format_response import MultiFormatResponseMixin
 from asymmetricbase.utils.exceptions import DeveloperTODO, ForceRollback
-
 from asymmetricbase.logging import logger #@UnusedImport
 from asymmetricbase.jinja import jinja_env
 from asymmetricbase.utils.permissions import create_codename, \
@@ -255,6 +255,10 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 	@staticmethod
 	def resolve(*args, **kwargs):
 		return resolve(*args, **kwargs)
+	
+	@staticmethod
+	def urlencode(*args, **kwargs):
+		return urlencode(*args, **kwargs)
 	
 	@staticmethod
 	def commit_on_success():
