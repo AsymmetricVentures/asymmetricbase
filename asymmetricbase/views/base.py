@@ -42,6 +42,13 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 		except AttributeError:
 			pass
 	
+	def predispatch(self, request, *args, **kwargs):
+		""" Called after all preprocessing and form processing is done, but before get and post are called """
+		try:
+			super(AsymBaseView, self).predispatch(request, *args , **kwargs)
+		except AttributeError:
+			pass
+	
 	def load_forms(self, request):
 		
 		for form_name, form_data in self.forms.items():
@@ -135,6 +142,9 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			logger.debug('AsymBaseView: LoadForms')
 			self.load_forms(request)
 			
+			logger.debug("AsymBaseView: Predispatch")
+			self.predispatch(request, *args, **kwargs)
+			
 			try:
 				logger.debug('AsymBaseView: dispatch')
 				response = super(AsymBaseView, self).dispatch(request, *args, **kwargs)
@@ -174,6 +184,9 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 	def success(self, msg):
 		messages.success(self.request, msg)
 	
+	def info(self, msg):
+		messages.info(self.request, msg)
+	
 	def add_errors(self, error_list):
 		error_messages = None
 		if isinstance(error_list, dict):
@@ -191,10 +204,9 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 	
 	def enum(self, enum_class):
 		""" Shortcut for adding enums to the context 
-			>>> class MyEnum(object):
+			>>> class MyEnum(Enum):
 			...     P1 = 1
 			...     P2 = 2
-			...     Choices = ((P1, 'P1'), (P2, 'P2))
 			...
 			>>> # Shortcut for this:
 			>>> self.context['MyEnum'] = MyEnum
