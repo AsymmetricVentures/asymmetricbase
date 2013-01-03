@@ -212,7 +212,7 @@ class AsymBaseModelFormSet(BaseModelFormSet):
 		
 		return False
 
-def make_modelformset_factory(model, form = ModelForm, *args, **kwargs):
+def _define_wrapper_class(form, args, kwargs):
 	formargs = kwargs.pop('formargs', {})
 	exclude = kwargs.pop('exclude', ())
 	kwargs.setdefault('formset', AsymBaseModelFormSet)
@@ -226,22 +226,13 @@ def make_modelformset_factory(model, form = ModelForm, *args, **kwargs):
 				del self.fields[fname]
 	
 	kwargs.update(dict(form = WrapperClass))
+
+def make_modelformset_factory(model, form = ModelForm, *args, **kwargs):
+	_define_wrapper_class(form, args, kwargs)
 	return modelformset_factory(model, *args, **kwargs)
 
 def make_inlineformset_factory(parent_model, model, form = ModelForm, *args, **kwargs):
-	formargs = kwargs.pop('formargs', {})
-	exclude = kwargs.pop('exclude', ())
-	kwargs.setdefault('formset', AsymBaseModelFormSet)
-	
-	class WrapperClass(form):
-		def __init__(self, *args, **kwargs):
-			kwargs.update(formargs)
-			super(WrapperClass, self).__init__(*args, **kwargs)
-			
-			for fname in exclude:
-				del self.fields[fname]
-	
-	kwargs.update(dict(form = WrapperClass))
+	_define_wrapper_class(form, args, kwargs)
 	return inlineformset_factory(parent_model, model, *args, **kwargs)
 	
 monkey_patch_django()
