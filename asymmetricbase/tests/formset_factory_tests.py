@@ -26,6 +26,11 @@ class TestNestedInlineFormSet(BaseInlineFormSet):
 	on the form.
 	stackoverflow.com/questions/7648368/django-inline-formset-setup
 	"""
+	
+	def __init__(self, *args, **kwargs):
+		self.request = kwargs.pop('request')
+		super(TestNestedInlineFormSet, self).__init__(*args, **kwargs)
+	
 	def add_fields(self, form, index):
 		# allow the superclass to add fields as usual
 		super(TestNestedInlineFormSet, self).add_fields(form, index)
@@ -45,13 +50,21 @@ class TestNestedInlineFormSet(BaseInlineFormSet):
 			instance = instance,
 			prefix = 'FKFK_FORMSET_%s' % pk_value,
 		)
-		# store the formset on the form
-		class dummy_request(object):
-			GET = {}
-			POST = {}
+#		# store the formset on the form
+#		class dummy_request(object):
+#			GET = {}
+#			POST = {}
 		
-		form.nested = [FKFKTestFormset(dummy_request())]
-		
+		form.nested = [FKFKTestFormset(self.request)]
+	
+	@classmethod
+	def print_all(cls, form_instance):
+		print form_instance.management_form
+		for form in form_instance.forms:
+			print form
+			if hasattr(form, 'nested'):
+				for f in form.nested:
+					cls.print_all(f)
 
 class FormsetFactoryFactoryTests(BaseTestCaseWithModels):
 	
@@ -203,7 +216,8 @@ class FormsetFactoryFactoryTests(BaseTestCaseWithModels):
 			FKTestModel,
 			formset = TestNestedInlineFormSet,
 			instance = test_model,
-			extra = 0
+			extra = 0,
+			request = request,
 		)(request)
 		
-		self.assertTrue(form_instance.is_valid())
+		TestNestedInlineFormSet.print_all(form_instance)
