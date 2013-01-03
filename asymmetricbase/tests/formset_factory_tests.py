@@ -46,7 +46,7 @@ class TestNestedInlineFormSet(BaseInlineFormSet):
 		FKFKTestFormset = InlineFormSetFactoryFactory(
 			FKTestModel,
 			FKFKTestModel,
-			extra = 0,
+			extra = 1,
 			max_num = None,
 			instance = instance,
 			prefix = 'FKFK_FORMSET_%s' % pk_value,
@@ -202,15 +202,6 @@ class FormsetFactoryFactoryTests(BaseTestCaseWithModels):
 			field1 = True,
 			field2 = 1,
 		)
-#		request = self.factory.post('/', {
-#			'form-TOTAL_FORMS' : '2',
-#			'form-INITIAL_FORMS' : '0',
-#			'form-MAX_NUM_FORMS' : '',
-#			'form-0-field1' : '1',
-#			'form-0-field2' : 'Hello',
-#			'form-1-field1' : '4',
-#			'form-1-field2' : 'World',
-#		})
 		request = self.factory.get('/')
 		factory = InlineFormSetFactoryFactory(
 			TestModel,
@@ -228,58 +219,48 @@ class FormsetFactoryFactoryTests(BaseTestCaseWithModels):
 	def test_post_nested_inlineformset(self):
 		# create top level TestModel
 		test_model = TestModel.objects.create(field1 = True, field2 = 1)
-		# create two FKTestModel instances with ForeignKey to test_model
+		# create a FKTestModel instance with ForeignKey to test_model
 		fk_test_model1 = FKTestModel.objects.create(
 			test_model = test_model,
 			field1 = True,
 			field2 = 1,
 		)
-		fk_test_model2 = FKTestModel.objects.create(
-			test_model = test_model,
-			field1 = True,
-			field2 = 1,
-		)
-		# for each of these, create two FKFKTestModel instances
-		fk_fk_test_model1 = FKFKTestModel.objects.create(
-			fk_test_model = fk_test_model1,
-			field1 = True,
-			field2 = 1,
-		)
-		fk_fk_test_model2 = FKFKTestModel.objects.create(
-			fk_test_model = fk_test_model1,
-			field1 = True,
-			field2 = 1,
-		)
-		fk_fk_test_model3 = FKFKTestModel.objects.create(
-			fk_test_model = fk_test_model2,
-			field1 = True,
-			field2 = 1,
-		)
-		fk_fk_test_model4 = FKFKTestModel.objects.create(
-			fk_test_model = fk_test_model2,
-			field1 = True,
-			field2 = 1,
-		)
-#		request = self.factory.post('/', {
-#			'form-TOTAL_FORMS' : '2',
-#			'form-INITIAL_FORMS' : '0',
-#			'form-MAX_NUM_FORMS' : '',
-#			'form-0-field1' : '1',
-#			'form-0-field2' : 'Hello',
-#			'form-1-field1' : '4',
-#			'form-1-field2' : 'World',
-#		})
-		request = self.factory.get('/')
+		request = self.factory.post('/', {
+			'fktestmodel_set-TOTAL_FORMS' : '1',
+			'fktestmodel_set-INITIAL_FORMS' : '1',
+			'fktestmodel_set-MAX_NUM_FORMS' : '',
+			'fktestmodel_set-0-test_model' : test_model.id,
+			'fktestmodel_set-0-field1' : 1,
+			'fktestmodel_set-0-field2' : 1,
+			'fktestmodel_set-0-id' : test_model.id,
+			'FKFK_FORMSET_1-TOTAL_FORMS' : '1',
+			'FKFK_FORMSET_1-INITIAL_FORMS' : '0',
+			'FKFK_FORMSET_1-0-fk_test_model' : fk_test_model1.id,
+			'FKFK_FORMSET_1-0-field1' : 1,
+			'FKFK_FORMSET_1-0-field2' : 1,
+		})
+#		request = self.factory.get('/')
 		factory = InlineFormSetFactoryFactory(
 			TestModel,
 			FKTestModel,
 			formset = TestNestedInlineFormSet,
 			instance = test_model,
-			extra = 4,
+			extra = 0,
 			max_num = None,
 			request = request,
 		)
 		
 		form_instance = factory(request)
 		
-		TestNestedInlineFormSet.print_all(form_instance)
+#		TestNestedInlineFormSet.print_all(form_instance)
+		
+		self.assertTrue(form_instance.is_valid())
+		
+		form1 = form_instance[0]
+		
+		self.assertEqual(form1.cleaned_data['test_model'], test_model)
+		self.assertEqual(form1.cleaned_data['field1'], 1)
+		self.assertEqual(form1.cleaned_data['field2'], '1')
+		
+		for form in form1.nested:
+			self.assertTrue(form.is_valid())
