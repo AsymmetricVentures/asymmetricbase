@@ -27,6 +27,15 @@ class TestModel(models.AsymBaseModel):
 
 class FKTestModel(models.AsymBaseModel):
 	test_model = models.ForeignKey(TestModel)
+	field1 = models.IntegerField()
+	field2 = models.CharField(max_length = 255)
+	
+	class Meta(object):
+		app_label = 'tests'
+
+class FKFKTestModel(models.AsymBaseModel):
+	fk_test_model = models.ForeignKey(FKTestModel)
+	field1 = models.IntegerField()
 	field2 = models.CharField(max_length = 255)
 	
 	class Meta(object):
