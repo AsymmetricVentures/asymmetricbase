@@ -1,6 +1,7 @@
 from django.forms import * # @UnusedWildImport pylint: disable-msg=W0401
 from django import forms # @Reimport
-from django.forms.models import modelformset_factory, BaseModelFormSet
+from django.forms.models import modelformset_factory, BaseModelFormSet,\
+	inlineformset_factory
 from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
 from django.conf import settings
@@ -227,5 +228,20 @@ def make_modelformset_factory(model, form = ModelForm, *args, **kwargs):
 	kwargs.update(dict(form = WrapperClass))
 	return modelformset_factory(model, *args, **kwargs)
 
-
+def make_inlineformset_factory(parent_model, model, form = ModelForm, *args, **kwargs):
+	formargs = kwargs.pop('formargs', {})
+	exclude = kwargs.pop('exclude', ())
+	kwargs.setdefault('formset', AsymBaseModelFormSet)
+	
+	class WrapperClass(form):
+		def __init__(self, *args, **kwargs):
+			kwargs.update(formargs)
+			super(WrapperClass, self).__init__(*args, **kwargs)
+			
+			for fname in exclude:
+				del self.fields[fname]
+	
+	kwargs.update(dict(form = WrapperClass))
+	return inlineformset_factory(parent_model, model, *args, **kwargs)
+	
 monkey_patch_django()
