@@ -2,9 +2,9 @@ from django.test.client import RequestFactory
 
 from asymmetricbase.testing.base_with_models import BaseTestCaseWithModels
 from asymmetricbase.forms.formset_factoryfactory import FormSetFactoryFactory, \
-	ModelFormSetFactoryFactory
+	ModelFormSetFactoryFactory, InlineFormSetFactoryFactory
 from asymmetricbase import forms
-from asymmetricbase.tests.models import TestModel
+from asymmetricbase.tests.models import TestModel, FKTestModel
 
 class TestForm(forms.Form):
 	field1 = forms.BooleanField(required = False)
@@ -13,6 +13,10 @@ class TestForm(forms.Form):
 class TestModelForm(forms.ModelForm):
 	class Meta(object):
 		model = TestModel
+
+class TestInlineForm(forms.ModelForm):
+	class Meta(object):
+		model = FKTestModel
 
 class FormsetFactoryFactoryTests(BaseTestCaseWithModels):
 	
@@ -64,3 +68,20 @@ class FormsetFactoryFactoryTests(BaseTestCaseWithModels):
 		
 		self.assertEqual(form2.cleaned_data['field1'], 4)
 		self.assertEqual(form2.cleaned_data['field2'], 'World')
+	
+	def test_create_inlineformset1(self):
+		test_model = TestModel.objects.create(field1 = True, field2 = 1)
+		fk_test_model1 = FKTestModel.objects.create(test_model = test_model)
+		fk_test_model2 = FKTestModel.objects.create(test_model = test_model)
+		
+#		request = self.factory.post('/', {
+#			'form-TOTAL_FORMS' : '2',
+#			'form-INITIAL_FORMS' : '0',
+#			'form-MAX_NUM_FORMS' : '',
+#			'form-0-field1' : '1',
+#			'form-0-field2' : 'Hello',
+#			'form-1-field1' : '4',
+#			'form-1-field2' : 'World',
+#		})
+		request = self.factory.get('/')
+		form_instance = InlineFormSetFactoryFactory(TestModel, FKTestModel, instance = test_model, extra = 0)(request)
