@@ -40,6 +40,7 @@ class TestNestedInlineFormSet(BaseInlineFormSet):
 			pk_value = instance.pk
 		except IndexError:
 			instance = None
+			# TODO: not sure about the uniqueness of this. hash(form) might be better
 			pk_value = hash(form.prefix)
 		
 		# define a formset
@@ -51,10 +52,6 @@ class TestNestedInlineFormSet(BaseInlineFormSet):
 			instance = instance,
 			prefix = 'FKFK_FORMSET_%s' % pk_value,
 		)
-#		# store the formset on the form
-#		class dummy_request(object):
-#			GET = {}
-#			POST = {}
 		
 		form.nested = [FKFKTestFormset(self.request)]
 	
@@ -182,22 +179,22 @@ class FormsetFactoryFactoryTests(BaseTestCaseWithModels):
 			field2 = 1,
 		)
 		# for each of these, create two FKFKTestModel instances
-		fk_fk_test_model1 = FKFKTestModel.objects.create(
+		fk_fk_test_model1 = FKFKTestModel.objects.create( #@UnusedVariable
 			fk_test_model = fk_test_model1,
 			field1 = True,
 			field2 = 1,
 		)
-		fk_fk_test_model2 = FKFKTestModel.objects.create(
+		fk_fk_test_model2 = FKFKTestModel.objects.create( #@UnusedVariable
 			fk_test_model = fk_test_model1,
 			field1 = True,
 			field2 = 1,
 		)
-		fk_fk_test_model3 = FKFKTestModel.objects.create(
+		fk_fk_test_model3 = FKFKTestModel.objects.create( #@UnusedVariable
 			fk_test_model = fk_test_model2,
 			field1 = True,
 			field2 = 1,
 		)
-		fk_fk_test_model4 = FKFKTestModel.objects.create(
+		fk_fk_test_model4 = FKFKTestModel.objects.create( #@UnusedVariable
 			fk_test_model = fk_test_model2,
 			field1 = True,
 			field2 = 1,
@@ -212,7 +209,7 @@ class FormsetFactoryFactoryTests(BaseTestCaseWithModels):
 			max_num = None,
 			request = request,
 		)
-		form_instance = factory(request)
+		form_instance = factory(request) #@UnusedVariable
 		
 #		TestNestedInlineFormSet.print_all(form_instance)
 	
@@ -239,7 +236,6 @@ class FormsetFactoryFactoryTests(BaseTestCaseWithModels):
 			'FKFK_FORMSET_1-0-field1' : 1,
 			'FKFK_FORMSET_1-0-field2' : 1,
 		})
-#		request = self.factory.get('/')
 		factory = InlineFormSetFactoryFactory(
 			TestModel,
 			FKTestModel,

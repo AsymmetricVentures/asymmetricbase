@@ -1,7 +1,7 @@
 from django.forms.formsets import formset_factory, BaseFormSet
 
 from asymmetricbase.logging import logger  # @UnusedImport
-from asymmetricbase.forms.form_factory import FormFactory, form_callback
+from asymmetricbase.forms.form_factory import FormFactory
 from asymmetricbase.forms import ModelForm, make_modelformset_factory,\
 	make_inlineformset_factory
 from copy import deepcopy
@@ -55,19 +55,6 @@ class FormSetFactoryFactory(FormFactory):
 	def __deepcopy__(self, memo):
 		# FormFactory deepcopy returns a FormFactory object, so deepcopy
 		# needs to be overridden to return this class
-#		form = deepcopy(self.form, memo)
-#		args = deepcopy(self.args, memo)
-#		callbacks = deepcopy(self.callbacks, memo)
-#		kwargs = deepcopy(self.kwargs, memo)
-#		kwargs['children'] = deepcopy(self.children, memo)
-#		kwargs['parents'] = deepcopy(self.parents, memo)
-#		kwargs['use_GET'] = self.use_GET
-#		
-#		kwargs['extra'] = self.extra
-#		kwargs['max_num'] = self.max_num
-#		kwargs['can_order'] = self.can_order
-#		kwargs['can_delete'] = self.can_delete
-#		kwargs['formset'] = self.formset
 		copier = AsymFormFactoryFactoryDeepcopier()
 		copier.do_deepcopy(self, memo)
 		
@@ -96,23 +83,7 @@ class ModelFormSetFactoryFactory(FormSetFactoryFactory):
 	def __deepcopy__(self, memo):
 		# FormFactory deepcopy returns a FormFactory object, so deepcopy
 		# needs to be overridden to return this class
-		# TODO It would be nice to refactor this so that all the kwargs copying
-		# isn't repeated here and in FormSetFactoryFactory, but the extra model
-		# argument makes it difficult
 		model = deepcopy(self.model, memo)
-#		form = deepcopy(self.form, memo)
-#		args = deepcopy(self.args, memo)
-#		callbacks = deepcopy(self.callbacks, memo)
-#		kwargs = deepcopy(self.kwargs, memo)
-#		kwargs['children'] = deepcopy(self.children, memo)
-#		kwargs['parents'] = deepcopy(self.parents, memo)
-#		kwargs['use_GET'] = self.use_GET
-#		
-#		kwargs['extra'] = self.extra
-#		kwargs['max_num'] = self.max_num
-#		kwargs['can_order'] = self.can_order
-#		kwargs['can_delete'] = self.can_delete
-#		kwargs['formset'] = self.formset
 		copier = AsymFormFactoryFactoryDeepcopier()
 		copier.do_deepcopy(self, memo)
 		
@@ -148,23 +119,7 @@ class InlineFormSetFactoryFactory(FormSetFactoryFactory):
 	def __deepcopy__(self, memo):
 		# FormFactory deepcopy returns a FormFactory object, so deepcopy
 		# needs to be overridden to return this class
-		# TODO It would be nice to refactor this so that all the kwargs copying
-		# isn't repeated here and in FormSetFactoryFactory, but the extra model
-		# argument makes it difficult
 		model = deepcopy(self.model, memo)
-#		form = deepcopy(self.form, memo)
-#		args = deepcopy(self.args, memo)
-#		callbacks = deepcopy(self.callbacks, memo)
-#		kwargs = deepcopy(self.kwargs, memo)
-#		kwargs['children'] = deepcopy(self.children, memo)
-#		kwargs['parents'] = deepcopy(self.parents, memo)
-#		kwargs['use_GET'] = self.use_GET
-#		
-#		kwargs['extra'] = self.extra
-#		kwargs['max_num'] = self.max_num
-#		kwargs['can_order'] = self.can_order
-#		kwargs['can_delete'] = self.can_delete
-#		kwargs['formset'] = self.formset
 		copier = AsymFormFactoryFactoryDeepcopier()
 		copier.do_deepcopy(self, memo)
 		
