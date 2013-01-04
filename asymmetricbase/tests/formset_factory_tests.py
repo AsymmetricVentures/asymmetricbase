@@ -1,11 +1,13 @@
 from django.test.client import RequestFactory
+from django.forms.models import BaseInlineFormSet
 
 from asymmetricbase.testing.base_with_models import BaseTestCaseWithModels
 from asymmetricbase.forms.formset_factoryfactory import FormSetFactoryFactory, \
 	ModelFormSetFactoryFactory, InlineFormSetFactoryFactory
+from asymmetricbase.forms.nested_formset import BaseNestedFormSet
 from asymmetricbase import forms
 from asymmetricbase.tests.models import TestModel, FKTestModel, FKFKTestModel
-from django.forms.models import BaseInlineFormSet
+
 
 class TestForm(forms.Form):
 	field1 = forms.BooleanField(required = False)
@@ -19,7 +21,7 @@ class TestInlineForm(forms.ModelForm):
 	class Meta(object):
 		model = FKTestModel
 
-class TestNestedInlineFormSet(BaseInlineFormSet):
+class TestNestedInlineFormSet(BaseInlineFormSet, BaseNestedFormSet):
 	"""
 	InlineFormSets can be nested by overriding the
 	add_fields method and saving subforms as an attribute
@@ -27,24 +29,8 @@ class TestNestedInlineFormSet(BaseInlineFormSet):
 	stackoverflow.com/questions/7648368/django-inline-formset-setup
 	"""
 	
-	def __init__(self, *args, **kwargs):
-		self.request = kwargs.pop('request')
-		super(TestNestedInlineFormSet, self).__init__(*args, **kwargs)
-	
-	def add_fields(self, form, index):
-		# allow the superclass to add fields as usual
-		super(TestNestedInlineFormSet, self).add_fields(form, index)
-		
-		try:
-			instance = self.get_queryset()[index]
-			pk_value = instance.pk
-		except IndexError:
-			instance = None
-			# TODO: not sure about the uniqueness of this. hash(form) might be better
-			pk_value = hash(form.prefix)
-		
-		# define a formset
-		FKFKTestFormset = InlineFormSetFactoryFactory(
+	def _generate_formset(self, instance, pk_value):
+		return InlineFormSetFactoryFactory(
 			FKTestModel,
 			FKFKTestModel,
 			extra = 1,
@@ -52,17 +38,6 @@ class TestNestedInlineFormSet(BaseInlineFormSet):
 			instance = instance,
 			prefix = 'FKFK_FORMSET_%s' % pk_value,
 		)
-		
-		form.nested = [FKFKTestFormset(self.request)]
-	
-	@classmethod
-	def print_all(cls, form_instance):
-		print form_instance.management_form
-		for form in form_instance.forms:
-			print form
-			if hasattr(form, 'nested'):
-				for f in form.nested:
-					cls.print_all(f)
 
 class FormsetFactoryFactoryTests(BaseTestCaseWithModels):
 	
