@@ -3,8 +3,9 @@ from django.forms.models import BaseModelFormSet
 class BaseNestedFormSet(BaseModelFormSet):
 	
 	def __init__(self, *args, **kwargs):
-		self.request = kwargs.pop('request')
-		assert(self.request is not None)
+		self.request = kwargs.pop('request', None)
+		if self.request is None:
+			raise Exception('request object must be passed to formset via argument to FactoryFactory')
 		super(BaseNestedFormSet, self).__init__(*args, **kwargs)
 	
 	def add_fields(self, form, index):
@@ -20,11 +21,11 @@ class BaseNestedFormSet(BaseModelFormSet):
 			pk_value = hash(form.prefix)
 		
 		# define a formset
-		nested_formset_factory_factory = self._generate_formset(instance, pk_value)
+		nested_formset_factory_factory = self._generate_formset(self.request, instance, pk_value)
 		
 		form.nested = [nested_formset_factory_factory(self.request)]
 	
-	def _generate_formset(self, instance, pk_value):
+	def _generate_formset(self, request, instance, pk_value):
 		"""
 		Returns an instance of FormSetFactoryFactory
 		(or ModelFormSetFactoryFactory, or InlineFormSetFactoryFactory)

@@ -29,7 +29,7 @@ class TestNestedInlineFormSet(BaseInlineFormSet, BaseNestedFormSet):
 	stackoverflow.com/questions/7648368/django-inline-formset-setup
 	"""
 	
-	def _generate_formset(self, instance, pk_value):
+	def _generate_formset(self, request, instance, pk_value):
 		return InlineFormSetFactoryFactory(
 			FKTestModel,
 			FKFKTestModel,
