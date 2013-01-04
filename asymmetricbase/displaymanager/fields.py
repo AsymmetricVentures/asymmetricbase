@@ -80,3 +80,15 @@ class GridLayoutField(TemplateField):
 		self.rowspan = kwargs.pop('rowspan', 1)
 		self.colspan = kwargs.pop('colspan', 1)
 		super(GridLayoutField, self).__init__(*args, **kwargs)
+
+class NestedTemplateField(TemplateField):
+	
+	def __init__(self, header_name = '', macro_name = '', child_name = None, root = False, *args, **kwargs):
+		self.child_name = child_name
+		self.child = None
+		self.root = root
+		
+		super(NestedTemplateField, self).__init__(header_name, macro_name, *args, **kwargs)
+	
+	def __call__(self, instance):
+		return self.template_macro(instance, self.child, *self.args, **self.kwargs)
