@@ -13,7 +13,7 @@ from django.utils import timezone
 from django.conf import settings
 
 import jinja2
-from jinja2.ext import WithExtension
+from jinja2.ext import WithExtension, LoopControlExtension
 
 from asymmetricbase.jinja.tags.csrf_token import CSRFTokenExtension
 from asymmetricbase.jinja.tags.vtable import VTableExtension
@@ -66,7 +66,8 @@ jinja_env = jinja2.Environment(
 		CSRFTokenExtension,
 		VTableExtension,
 		HamlishTagExtension,
-		WithExtension
+		WithExtension,
+		LoopControlExtension
 	]
 )
 

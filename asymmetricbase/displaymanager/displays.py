@@ -61,3 +61,24 @@ class GridLayoutDisplay(Display):
 	@property
 	def item(self):
 		return self.obj
+
+class NestedDisplay(Display):
+	
+	root_field = None
+	
+	def __init__(self, *args, **kwargs):
+		super(NestedDisplay, self).__init__(*args, **kwargs)
+		
+		# populate children on all fields
+		# while we're at it, make sure only one root is defined
+		for field in self._meta.fields:
+			if getattr(field, 'root', False) and not self.root_field:
+				self.root_field = field
+			elif getattr(field, 'root', False):
+				raise Exception('Only one field should be defined as the root.')
+				
+			if hasattr(field, 'child') and field.child is None:
+				field.child = [attr for attr in self._meta.fields if attr.attrname == field.child_name][0]
+	
+	class Meta(object):
+		template_name = ('asymmetricbase/displaymanager/fields.djhtml', 'asymmetricbase/displaymanager/nested_display.djhtml',)

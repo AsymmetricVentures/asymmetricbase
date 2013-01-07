@@ -1,0 +1,6 @@
+
+{% macro display(obj) %}
+	<div class="nested-display">
+		{{ obj.root_field(obj.obj) }}
+	</div>
+{% endmacro %}
