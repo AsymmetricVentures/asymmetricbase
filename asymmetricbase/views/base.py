@@ -9,17 +9,20 @@ from django.contrib import messages
 from django.db import transaction
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.utils.http import urlencode
 
 from asymmetricbase.views.mixins.multi_format_response import MultiFormatResponseMixin
 from asymmetricbase.utils.exceptions import DeveloperTODO, ForceRollback
-
 from asymmetricbase.logging import logger #@UnusedImport
 from asymmetricbase.jinja import jinja_env
+from asymmetricbase.utils.permissions import create_codename, \
+	default_content_type_appname
 
 class AsymBaseView(MultiFormatResponseMixin, View):
 	""" Base class for all views """
 	login_required = True
-	permissions_required = []
+	permission_name = ''
+	
 	form_info = OrderedDict()
 	
 	def __init__(self, *args, **kwargs):
@@ -36,6 +39,13 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			pass
 		try:
 			super(AsymBaseView, self).mixin_preprocess(request, *args, **kwargs)
+		except AttributeError:
+			pass
+	
+	def predispatch(self, request, *args, **kwargs):
+		""" Called after all preprocessing and form processing is done, but before get and post are called """
+		try:
+			super(AsymBaseView, self).predispatch(request, *args , **kwargs)
 		except AttributeError:
 			pass
 	
@@ -102,15 +112,23 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 					request.path,
 				))
 			
+			logger.debug(u'User is: {}'.format(request.user))
 			permissions_required = self._merge_attr('permissions_required')
 			
 			logger.debug('The required permissions are {}'.format(permissions_required))
 			
-			for perm in permissions_required:
-				if not request.user.has_perm(perm):
-					messages.error(request, 'You do not have permission to view that page')
-					logger.debug('Failed permission check {}'.format(perm))
-					return redirect(reverse(getattr(settings, 'ASYM_FAILED_LOGIN_URL')))
+			if self.login_required:
+				suffix = ''
+				if hasattr(self, 'permission_name'):
+					suffix = AsymBaseView.get_view_name_and_suffix(self.permission_name, **kwargs)[1]
+				
+				view_perm = '{}.{}'.format(default_content_type_appname(), create_codename(self.__class__.__module__, self.__class__.__name__, suffix))
+				if not request.user.has_perm(view_perm):
+						messages.error(request, 'You do not have permission to view that page')
+						logger.debug('Failed permission check {}'.format(view_perm))
+						return redirect(reverse(getattr(settings, 'ASYM_FAILED_LOGIN_URL')))
+				
+				logger.debug('Has view permission: {}'.format(view_perm))
 			
 			logger.debug('AsymBaseView: Getting form data')
 			self.get_form_data()
@@ -123,6 +141,9 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			# Create the form instances, and place into context
 			logger.debug('AsymBaseView: LoadForms')
 			self.load_forms(request)
+			
+			logger.debug("AsymBaseView: Predispatch")
+			self.predispatch(request, *args, **kwargs)
 			
 			try:
 				logger.debug('AsymBaseView: dispatch')
@@ -163,6 +184,9 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 	def success(self, msg):
 		messages.success(self.request, msg)
 	
+	def info(self, msg):
+		messages.info(self.request, msg)
+	
 	def add_errors(self, error_list):
 		error_messages = None
 		if isinstance(error_list, dict):
@@ -180,10 +204,9 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 	
 	def enum(self, enum_class):
 		""" Shortcut for adding enums to the context 
-			>>> class MyEnum(object):
+			>>> class MyEnum(Enum):
 			...     P1 = 1
 			...     P2 = 2
-			...     Choices = ((P1, 'P1'), (P2, 'P2))
 			...
 			>>> # Shortcut for this:
 			>>> self.context['MyEnum'] = MyEnum
@@ -210,6 +233,22 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 		return template_block(**context)
 	
 	@staticmethod
+	def get_view_name_and_suffix(permission_name, **kwargs):
+		suffix = ''
+		name = ''
+		
+		if isinstance(permission_name, dict):
+			for kwarg_key, kwarg_values in permission_name.items():
+				kwarg_value = kwargs.get(kwarg_key, None)
+				if kwarg_value in kwarg_values:
+					data = kwarg_values[kwarg_value]
+					name = data['name']
+					suffix = data['codename']
+					break
+		
+		return (name, suffix)
+	
+	@staticmethod
 	def forbidden():
 		return HttpResponseForbidden()
 	
@@ -228,6 +267,10 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 	@staticmethod
 	def resolve(*args, **kwargs):
 		return resolve(*args, **kwargs)
+	
+	@staticmethod
+	def urlencode(*args, **kwargs):
+		return urlencode(*args, **kwargs)
 	
 	@staticmethod
 	def commit_on_success():

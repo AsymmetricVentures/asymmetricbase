@@ -53,6 +53,8 @@ class EnumField(models.IntegerField):
 				default = self.default()
 			if default is None:
 				return None
+			if isinstance(default, (int, long)):
+				return default
 			return default.value
 		# If the field doesn't have a default, then we punt to models.Field.
 		return super(EnumField, self).get_default()
