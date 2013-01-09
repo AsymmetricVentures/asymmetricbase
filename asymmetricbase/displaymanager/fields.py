@@ -34,7 +34,11 @@ class AttrGetField(DisplayField):
 		self.attr = attr 
 	
 	def __call__(self, instance):
-		return getattr(instance, self.field_name)
+		return self.template_macro(instance, attr = self.field_name)
+	
+	@cached_property
+	def template_macro(self):
+		return self.model.get_macro('attr_field')
 	
 	@property
 	def field_name(self):
