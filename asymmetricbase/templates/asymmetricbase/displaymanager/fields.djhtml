@@ -5,3 +5,9 @@
 {% macro intfield(obj) %}
 	{{obj}}
 {% endmacro %}
+
+{% macro attr_field(obj) %}
+	{% if kwargs %}
+		{{ getattr(obj, kwargs['attr']) }}
+	{% endif %}
+{% endmacro %}
