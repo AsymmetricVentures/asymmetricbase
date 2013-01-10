@@ -29,15 +29,24 @@ class DisplayField(object):
 		return self.creation_counter < other.creation_counter
 
 class AttrGetField(DisplayField):
+	''' Can be used in 1 of two ways
+	    First, in a display of the form:
+	      attr_name = dm.AttrGetField()
+	    will display `obj.attr_name`
+	    
+	    Second, in a display of the form:
+	      name = dm.AttrGetField(attr='nested.attribute')
+	    will display `obj.nested.attribute`
+	'''
 	def __init__(self, header_name = '', attr = None):
 		super(AttrGetField, self).__init__(header_name)
 		self.attr = attr 
 	
 	def __call__(self, instance):
-		return self.template_macro(instance, attr = self.field_name)
+		return self.attr_field_macro(instance, attr = self.field_name)
 	
 	@cached_property
-	def template_macro(self):
+	def attr_field_macro(self):
 		return self.model.get_macro('attr_field')
 	
 	@property
@@ -72,7 +81,21 @@ class AutoTemplateField(TemplateField, AttrGetField):
 	
 	def __call__(self, instance):
 		return TemplateField.__call__(self, AttrGetField.__call__(self, instance))
+
+class LinkField(AutoTemplateField):
+	'''
+	'''
+	def __init__(self, header_name = '', url_name = '', *args, **kwargs):
+		macro_name = kwargs.pop('macro_name', None)
+		self.url_name = url_name
+		super(LinkField, self).__init__(*args, **kwargs)
+		
+		if macro_name is not None:
+			self.macro_name = macro_name
 	
+	def __call__(self, instance):
+		return self.template_macro(AttrGetField.__call__(self, instance), self.url_name, *self.args, **self.kwargs)
+
 class IntField(AutoTemplateField): pass
 class CharField(AutoTemplateField): pass
 

@@ -6,8 +6,29 @@
 	{{obj}}
 {% endmacro %}
 
-{% macro attr_field(obj) %}
-	{% if kwargs %}
+{% macro attr_field(obj) -%}
+	{%- if kwargs -%}
 		{{ getattr(obj, kwargs['attr']) }}
-	{% endif %}
-{% endmacro %}
+	{%- endif -%}
+{%- endmacro %}
+
+{% macro linkfield(obj, url_name) -%}
+	{%- if 'url_args' not in kwargs -%}
+		{%- set url_args = [obj|int()] -%}
+	{%- else -%}
+		{%- set url_args = kwargs['url_args'] -%}
+	{%- endif -%}
+	
+	{%- if 'url_kwargs' not in kwargs -%}
+		{%- set url_kwargs = {} -%}
+	{%- else -%}
+		{%- set url_kwargs = kwargs['url_kwargs'] -%}
+	{%- endif -%}
+	
+	{%- if url_text not in kwargs -%}
+		{%- set url_text = obj -%}
+	{%- else-%}
+		{%- set url_text = kwargs['url_text'] -%}
+	{%- endif -%}
+	<a href="{{ url(url_name, *url_args, **url_kwargs) }}">{{url_text}}</a>
+{%- endmacro %}
