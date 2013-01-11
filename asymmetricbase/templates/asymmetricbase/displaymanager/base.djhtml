@@ -22,3 +22,9 @@
 		{{ print_or_call(layout) }}
 	</div>
 {% endmacro %}
+
+{% macro display(layout) %}
+	<div class="display-container">
+		{{ print_or_call(layout) }}
+	</div>
+{% endmacro %}

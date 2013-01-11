@@ -108,6 +108,9 @@ def jinja_vtable(table, header = '', tail = ''):
 def jinja_gridlayout(layout):
 	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml').module.gridlayout(layout)
 
+def jinja_display(layout):
+	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml').module.display(layout)
+
 jinja_env.globals.update({
 	'url' : jinja_url,
 	'getdatetime' : jinja_getdate,
@@ -117,6 +120,7 @@ jinja_env.globals.update({
 	
 	'vtable' : jinja_vtable,
 	'gridlayout' : jinja_gridlayout,
+	'display' : jinja_display,
 })
 
 jinja_env.filters.update({
