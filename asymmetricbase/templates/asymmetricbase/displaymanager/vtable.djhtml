@@ -21,6 +21,10 @@
 					<td>{{ h(item) }}</td>
 				{% endfor %}
 			</tr>
+		{% else %}
+			<tr>
+				<td class="empty"></td>
+			</tr>
 		{% endfor %}
 	</table>
 {% endmacro %}
