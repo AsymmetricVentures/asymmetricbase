@@ -5,7 +5,7 @@ from django.utils.functional import cached_property
 class DisplayField(object):
 	creation_counter = 0
 	
-	def __init__(self, header_name = ''):
+	def __init__(self, header_name = None):
 		self.header_name = header_name
 		self.attrname = ''
 		self.model = None
@@ -16,6 +16,10 @@ class DisplayField(object):
 	def contribute_to_class(self, cls, name):
 		self.attrname = name
 		self.model = cls
+		
+		if self.header_name is None:
+			self.header_name = name.replace('_', ' ').title()
+		
 		if hasattr(cls, '_meta'):
 			cls._meta.add_field(self)
 	
@@ -38,7 +42,7 @@ class AttrGetField(DisplayField):
 	      name = dm.AttrGetField(attr='nested.attribute')
 	    will display `obj.nested.attribute`
 	'''
-	def __init__(self, header_name = '', attr = None):
+	def __init__(self, header_name = None, attr = None):
 		super(AttrGetField, self).__init__(header_name)
 		self.attr = attr 
 	
@@ -60,7 +64,7 @@ class TemplateField(DisplayField):
 	Can be given additional positional or keyword arguments, which will be passed
 	to the macro if the macro supports varargs or kwargs (see jinja2 docs).
 	"""
-	def __init__(self, header_name = '', macro_name = '', *args, **kwargs):
+	def __init__(self, header_name = None, macro_name = '', *args, **kwargs):
 		self.macro_name = macro_name
 		self.args = args
 		self.kwargs = kwargs
@@ -85,7 +89,7 @@ class AutoTemplateField(TemplateField, AttrGetField):
 class LinkField(AutoTemplateField):
 	'''
 	'''
-	def __init__(self, header_name = '', url_name = '', *args, **kwargs):
+	def __init__(self, header_name = None, url_name = '', *args, **kwargs):
 		macro_name = kwargs.pop('macro_name', None)
 		self.url_name = url_name
 		super(LinkField, self).__init__(*args, **kwargs)
@@ -110,7 +114,7 @@ class GridLayoutField(TemplateField):
 
 class NestedTemplateField(TemplateField):
 	
-	def __init__(self, header_name = '', macro_name = '', child_name = None, root = False, *args, **kwargs):
+	def __init__(self, header_name = None, macro_name = '', child_name = None, root = False, *args, **kwargs):
 		self.child_name = child_name
 		self.child = None
 		self.root = root
