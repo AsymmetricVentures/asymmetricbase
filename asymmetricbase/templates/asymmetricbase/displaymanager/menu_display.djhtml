@@ -1,0 +1,23 @@
+{% macro display(obj) %}
+	<div class='menu'>
+		{% for item in obj.obj %}
+			<li>
+				{% if item.args and item.kwargs and item.url_args %}
+					<a href='{{ url(item.url, *batch_context_getattr(*item.args), **batch_context_getattr(**item.kwargs)) }}?{{ item.url_args }}'>item.label</a>
+				{% elif item.args and item.url_args %}
+					<a href='{{ url(item.url, *batch_context_getattr(*item.args)) }}?{{ item.url_args }}'>item.label</a>
+				{% elif item.kwargs and item.url_args %}
+					<a href='{{ url(item.url, **batch_context_getattr(**item.kwargs)) }}?{{ item.url_args }}'>item.label</a>
+				{% elif item.args and item.kwargs %}
+					<a href='{{ url(item.url, *batch_context_getattr(*item.args), **batch_context_getattr(**item.kwargs)) }}'>item.label</a>
+				{% elif item.args %}
+					<a href='{{ url(item.url, *batch_context_getattr(*item.args)) }}'>item.label</a>
+				{% elif item.kwargs %}
+					<a href='{{ url(item.url, **batch_context_getattr(**item.kwargs)) }}'>item.label</a>
+				{% else %}
+					<a href='{{ url(item.url) }}'>item.label</a>
+				{% endif %}
+			</li>
+		{% endfor %}
+	</div>
+{% endmacro %}

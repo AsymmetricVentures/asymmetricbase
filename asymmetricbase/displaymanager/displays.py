@@ -82,3 +82,7 @@ class NestedDisplay(Display):
 	
 	class Meta(object):
 		template_name = ('asymmetricbase/displaymanager/fields.djhtml', 'asymmetricbase/displaymanager/nested_display.djhtml',)
+
+class MenuDisplay(Display):
+	class Meta(object):
+		template_name = ('asymmetricbase/displaymanager/fields.djhtml', 'asymmetricbase/displaymanager/menu_display.djhtml',)
