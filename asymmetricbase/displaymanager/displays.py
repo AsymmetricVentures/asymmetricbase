@@ -88,7 +88,7 @@ class MenuDisplay(Display):
 	"""
 	A Display for rendering a menu using a list of items.
 	
-	The item_processors attribute should be called on each menu item, and is expecting a MenuItem object as an argument.
+	The item_processor attribute should be called on each menu item, and is expecting a MenuItem object as an argument.
 	"""
 	
 	field = MenuItemField()
@@ -99,6 +99,7 @@ class MenuDisplay(Display):
 	@property
 	def item_processor(self):
 		# returns 'field' defined above
+		# for some reason self.field doesn't exist
 		return self._meta.fields[0]
 	
 	class Meta(object):

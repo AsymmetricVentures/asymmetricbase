@@ -3,6 +3,7 @@
 		<ul class='menu'>
 		{% for item in obj.obj %}
 			<li>
+				{# expects a MenuItem as the item #}
 				{{ obj.item_processor(item) }}
 			</li>
 		{% endfor %}

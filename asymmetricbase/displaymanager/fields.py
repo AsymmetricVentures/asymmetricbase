@@ -153,7 +153,8 @@ class MenuItem(object):
 	
 	def process_arguments(self):
 		"""
-		Check if any argument is callable (IE lambda functions) and call any that are
+		Check if any argument in self.args or self.kwargs is callable
+		(IE lambda functions) and call any that are.
 		"""
 		
 		new_args = []
