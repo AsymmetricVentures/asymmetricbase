@@ -14,6 +14,8 @@
 					<a href='{{ url(item.url, *item.args) }}'>{{ item.label }}</a>
 				{% elif item.kwargs %}
 					<a href='{{ url(item.url, **item.kwargs) }}'>{{ item.label }}</a>
+				{% elif item.url_args %}
+					<a href='{{ url(item.url) }}?{{ item.url_args }}'>{{ item.label }}</a>
 				{% else %}
 					<a href='{{ url(item.url) }}'>{{ item.label }}</a>
 				{% endif %}
