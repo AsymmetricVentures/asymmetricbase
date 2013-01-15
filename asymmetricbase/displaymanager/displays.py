@@ -1,6 +1,7 @@
 from base import Display
 import operator
 from collections import OrderedDict
+from asymmetricbase.displaymanager.fields import MenuItemField
 
 class SimpleTableDisplay(Display):
 	class Meta(object):
@@ -84,5 +85,21 @@ class NestedDisplay(Display):
 		template_name = ('asymmetricbase/displaymanager/fields.djhtml', 'asymmetricbase/displaymanager/nested_display.djhtml',)
 
 class MenuDisplay(Display):
+	"""
+	A Display for rendering a menu using a list of items.
+	
+	The item_processors attribute should be called on each menu item, and is expecting a MenuItem object as an argument.
+	"""
+	
+	field = MenuItemField()
+	
+	def __init__(self, *args, **kwargs):
+		super(MenuDisplay, self).__init__(*args, **kwargs)
+	
+	@property
+	def item_processor(self):
+		# returns 'field' defined above
+		return self._meta.fields[0]
+	
 	class Meta(object):
 		template_name = ('asymmetricbase/displaymanager/fields.djhtml', 'asymmetricbase/displaymanager/menu_display.djhtml',)
