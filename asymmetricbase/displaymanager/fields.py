@@ -123,3 +123,58 @@ class NestedTemplateField(TemplateField):
 	
 	def __call__(self, instance):
 		return self.template_macro(instance, self.child, *self.args, **self.kwargs)
+
+class MenuItemField(TemplateField):
+	
+	def __init__(self, header_name = '', macro_name = 'linkfield', *args, **kwargs):
+		super(MenuItemField, self).__init__(header_name, macro_name, *args, **kwargs)
+	
+	def __call__(self, instance):
+		if not isinstance(instance, MenuItem):
+			raise TypeError('MenuItemField must be called on an instance of MenuItem')
+		kwargs = {}
+		kwargs['url_kwargs'] = instance.kwargs
+		kwargs['url_args'] = instance.args
+		kwargs['url_text'] = instance.label
+		kwargs['get_args'] = instance.url_args
+		return self.template_macro(instance, url_name = instance.url, **kwargs)
+
+class MenuItem(object):
+	"""
+	Encapsulates a menu item for use with MenuDisplay.
+	
+	If the args or kwargs cannot be resolved now (IE we need to wait on a form or callback)
+	pass them in wrapped in lambda functions, as they can be resolved using
+	process_arguments() later.
+	"""
+	
+	def __init__(self, url = None, label = '', url_args = None, *args, **kwargs):
+		self.url = url
+		self.label = label
+		self.url_args = url_args
+		self.args = args
+		self.kwargs = kwargs
+	
+	def process_arguments(self):
+		"""
+		Check if any argument in self.args or self.kwargs is callable
+		(IE lambda functions) and call any that are.
+		"""
+		
+		new_args = []
+		for arg in self.args:
+			if callable(arg):
+				new_args.append(arg())
+			else:
+				new_args.append(arg)
+		self.args = tuple(new_args)
+		
+		for k, v in self.kwargs.items():
+			if callable(v):
+				v = v()
+			self.kwargs.update({
+				k : v
+			})
+		
+		if callable(self.url_args):
+			self.url_args = self.url_args()

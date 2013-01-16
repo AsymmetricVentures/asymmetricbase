@@ -19,6 +19,7 @@ from asymmetricbase.jinja.tags.csrf_token import CSRFTokenExtension
 from asymmetricbase.jinja.tags.vtable import VTableExtension
 from asymmetricbase.jinja.tags.haml import HamlishTagExtension
 from asymmetricbase.jinja.tags.fielditerator import checkboxiterator, checkboxiterator_named, radioiterator, radioiterator_named
+from jinja2.utils import contextfunction
 
 class UndefinedVar(jinja2.Undefined):
 	def __int__(self):
@@ -102,11 +103,34 @@ def jinja_getattr(obj, attr_string):
 		obj = jinja_env.getattr(obj, attr)
 	return obj
 
+@contextfunction
+def jinja_context_getattr(context, attr_string):
+	"""
+	Tries to get attribute by name from context
+	"""
+	return jinja_getattr(context, attr_string)
+
+@contextfunction
+def jinja_barch_context_getattr(context, *args, **kwargs):
+	new_args = []
+	new_kwargs = {}
+	if args:
+		for arg in args:
+			new_args.append(jinja_context_getattr(context, arg))
+		return new_args
+	if kwargs:
+		for k, v in kwargs.items():
+			new_kwargs[k] = jinja_context_getattr(context, v)
+		return new_kwargs
+
 def jinja_vtable(table, header = '', tail = ''):
 	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml').module.vtable(table, header, tail)
 
 def jinja_gridlayout(layout):
 	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml').module.gridlayout(layout)
+
+def jinja_display(layout):
+	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml').module.display(layout)
 
 jinja_env.globals.update({
 	'url' : jinja_url,
@@ -114,9 +138,13 @@ jinja_env.globals.update({
 	'type' : type,
 	'dir' : dir,
 	'getattr' : jinja_getattr,
+	'context_getattr' : jinja_context_getattr,
+	'batch_context_getattr' : jinja_barch_context_getattr,
+	
 	
 	'vtable' : jinja_vtable,
 	'gridlayout' : jinja_gridlayout,
+	'display' : jinja_display,
 })
 
 jinja_env.filters.update({
