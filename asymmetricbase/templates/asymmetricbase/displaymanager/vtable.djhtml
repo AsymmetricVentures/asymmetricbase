@@ -23,7 +23,7 @@
 			</tr>
 		{% else %}
 			<tr>
-				<td class="empty"></td>
+				<td class="empty">&nbsp;</td>
 			</tr>
 		{% endfor %}
 	</table>

@@ -33,7 +33,7 @@ class DisplayField(object):
 		return self.creation_counter < other.creation_counter
 
 class AttrGetField(DisplayField):
-	''' Can be used in 1 of two ways
+	""" Can be used in 1 of two ways
 	    First, in a display of the form:
 	      attr_name = dm.AttrGetField()
 	    will display `obj.attr_name`
@@ -41,7 +41,7 @@ class AttrGetField(DisplayField):
 	    Second, in a display of the form:
 	      name = dm.AttrGetField(attr='nested.attribute')
 	    will display `obj.nested.attribute`
-	'''
+	"""
 	def __init__(self, header_name = None, attr = None):
 		super(AttrGetField, self).__init__(header_name)
 		self.attr = attr 
