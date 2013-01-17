@@ -44,7 +44,7 @@ class AttrGetField(DisplayField):
 	"""
 	def __init__(self, header_name = None, attr = None):
 		super(AttrGetField, self).__init__(header_name)
-		self.attr = attr 
+		self.attr = attr
 	
 	def __call__(self, instance):
 		return self.attr_field_macro(instance, attr = self.field_name)
@@ -80,8 +80,11 @@ class TemplateField(DisplayField):
 class AutoTemplateField(TemplateField, AttrGetField):
 	
 	def __init__(self, *args, **kwargs):
-		kwargs['macro_name'] = self.__class__.__name__.lower()
-		super(AutoTemplateField, self).__init__(*args, **kwargs)
+		macro_name = self.__class__.__name__.lower()
+		# We're calling the supers separately because otherwise c3 doesn't 
+		# get to the second super.
+		TemplateField.__init__(self, macro_name = macro_name, *args, **kwargs)
+		AttrGetField.__init__(self, *args, **kwargs)
 	
 	def __call__(self, instance):
 		return TemplateField.__call__(self, AttrGetField.__call__(self, instance))

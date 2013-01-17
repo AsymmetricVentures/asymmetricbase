@@ -32,10 +32,12 @@
 	{%- endif -%}
 	
 	{%- if 'get_args' in kwargs -%}
-		{%- set get_args = kwargs['get_args'] -%}
+		{%- set get_args = kwargs.pop('get_args', None) -%}
+	{%- else -%}
+		{%- set get_args = None -%}
 	{%- endif -%}
 	
-	{%- if get_args is not none -%}
+	{%- if get_args -%}
 		<a href="{{ url(url_name, *url_args, **url_kwargs) }}?{{ get_args }}">{{url_text}}</a>
 	{%- else-%}
 		<a href="{{ url(url_name, *url_args, **url_kwargs) }}">{{url_text}}</a>
