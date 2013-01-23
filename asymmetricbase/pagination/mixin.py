@@ -9,6 +9,8 @@ from asymmetricbase.pagination.form import GetPaginationForm
 from asymmetricbase.views.mixins.base import AsymBaseMixin
 
 class PaginationMixin(AsymBaseMixin):
+	 # Most, if not all, pages that use this mixin also have search
+	js_files = ('search.controller.js',)
 	form_info = OrderedDict(
 		pagination_form = FormFactory(GetPaginationForm, use_GET = True),
 	)
@@ -25,7 +27,7 @@ class PaginationMixin(AsymBaseMixin):
 		self.forms['pagination_form'].callbacks.append(get_pagination_callback)
 		
 		if not hasattr(self, 'results_per_page'):
-			self.results_per_page = getattr(settings, 'ASYM_PAGINATION_DEFAULT_PAGES',  25)
+			self.results_per_page = getattr(settings, 'ASYM_PAGINATION_DEFAULT_PAGES', 25)
 	
 	def _get_pagination_query(self, *args, **kwargs):
 		raise NotImplementedError('Please override this in a baseclass')

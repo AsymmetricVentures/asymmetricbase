@@ -172,8 +172,11 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 		
 		return False
 	
-	def has_permissions(self, perms):
-		return self.request.user.has_perms(perms)
+	def has_permissions(self, perms, obj = None):
+		return self.request.user.has_perms(perms, obj)
+	
+	def has_perm(self, perm, obj = None):
+		return self.request.user.has_perm(perm, obj)
 	
 	def error(self, msg):
 		messages.error(self.request, msg)
