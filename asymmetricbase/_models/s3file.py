@@ -2,6 +2,7 @@ import base64
 import uuid
 import time
 import datetime
+import threading
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from boto import exception as boto_exceptions
@@ -11,6 +12,9 @@ from django.db.utils import DatabaseError
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django_extensions.db.fields.json import JSONField
+
+
+thread_safe_connection_cache = threading.local()
 
 class S3File(models.Model):
 	file_name = models.CharField(max_length = 256)
@@ -27,7 +31,8 @@ class S3File(models.Model):
 	@file_data.setter
 	def file_data(self, value):
 		self._file_data = value
-	
+
+
 	def list_versions(self):
 		"Returns a list of all versions of this file"
 		if not self._s3_key:
@@ -123,15 +128,19 @@ class S3File(models.Model):
 	
 	@classmethod
 	def _get_s3_connection(cls):
-		aws_access_key_id = (settings, "AWS_S3_FILES_ACCESS_KEY_ID", None)
-		aws_secret_access_key = (settings, "AWS_S3_FILES_SECRET_ACCESS_KEY", None)
+		s3_connection = getattr(thread_safe_connection_cache, "s3_connection", None)
+		if s3_connection:
+			return s3_connection
+		aws_access_key_id = getattr(settings, "AWS_S3_FILES_ACCESS_KEY_ID", None)
+		aws_secret_access_key = getattr(settings, "AWS_S3_FILES_SECRET_ACCESS_KEY", None)
 		assert aws_access_key_id and aws_secret_access_key, \
 			"Please assign values for AWS_S3_FILES_ACCESS_KEY_ID and AWS_S3_FILES_SECRET_ACCESS_KEY in settings"
 		try:
-			# TODO: We may want to move to a connection pool
-			return S3Connection(aws_access_key_id, settings.aws_secret_access_key)
+			connection = S3Connection(aws_access_key_id, aws_secret_access_key) # TODO: We may want to move to a connection pool
 		except boto_exceptions.BotoClientError as e:
 			raise DatabaseError("Unable to connect to S3.\nBoto Exception:\n{}".format(e))
+		thread_safe_connection_cache.s3_connection = connection
+		return thread_safe_connection_cache.s3_connection
 	
 	@classmethod
 	def _get_bucket_name(cls):

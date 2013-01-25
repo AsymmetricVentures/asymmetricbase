@@ -62,6 +62,9 @@ class TestEnumModelWithDefault(models.AsymBaseModel):
 	class Meta(object):
 		app_label = 'tests'
 
+class TestS3FileModel(models.S3File):
+	pass
+
 #class TestOldEnumModel(models.AsymBaseModel):
 #	field1 = models.PositiveSmallIntegerField(choices = TestOldEnum.Choices.items())
 #	
