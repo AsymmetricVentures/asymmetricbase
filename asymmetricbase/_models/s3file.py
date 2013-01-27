@@ -12,11 +12,12 @@ from django.db.utils import DatabaseError
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django_extensions.db.fields.json import JSONField
+from base import AsymBaseModel
 
 
 thread_safe_connection_cache = threading.local()
 
-class S3File(models.Model):
+class S3File(AsymBaseModel):
 	file_name = models.CharField(max_length = 256)
 	metadata = JSONField(max_length = 4096)
 	_s3_key = models.CharField(max_length = 256)
