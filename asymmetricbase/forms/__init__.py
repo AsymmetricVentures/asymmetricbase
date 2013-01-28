@@ -1,6 +1,6 @@
 from django.forms import * # @UnusedWildImport pylint: disable-msg=W0401
 from django import forms # @Reimport
-from django.forms.models import modelformset_factory, BaseModelFormSet,\
+from django.forms.models import modelformset_factory, BaseModelFormSet, \
 	inlineformset_factory
 from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
@@ -106,6 +106,10 @@ class Form(BaseFormMixin, forms.Form):
 
 class ModelForm(BaseFormMixin, forms.ModelForm):
 	template_module = jinja_env.get_template('asymmetricbase/forms/form_rows.djhtml').module
+	
+	def __init__(self, *args, **kwargs):
+		self._meta.exclude = ('uuid',) + self._meta.exclude
+		super(ModelForm, self).__init__(*args, **kwargs)
 	
 	def _html_output(self, *args, **kwargs):
 		
