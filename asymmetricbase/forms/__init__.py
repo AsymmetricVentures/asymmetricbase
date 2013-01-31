@@ -108,7 +108,7 @@ class ModelForm(BaseFormMixin, forms.ModelForm):
 	template_module = jinja_env.get_template('asymmetricbase/forms/form_rows.djhtml').module
 	
 	def __init__(self, *args, **kwargs):
-		self._meta.exclude = ('uuid',) + self._meta.exclude
+		self._meta.exclude = ('uuid',) + (self._meta.exclude or ())
 		super(ModelForm, self).__init__(*args, **kwargs)
 	
 	def _html_output(self, *args, **kwargs):
