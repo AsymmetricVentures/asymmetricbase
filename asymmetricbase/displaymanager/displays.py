@@ -4,12 +4,21 @@ from collections import OrderedDict
 from asymmetricbase.displaymanager.fields import MenuItemField
 
 class SimpleTableDisplay(Display):
+	
+	def __init__(self, obj, exclude = (), *args, **kwargs):
+		"""
+		:param exclude: fields that should not be displayed
+		:type exclude: tuble containing field names
+		"""
+		super(SimpleTableDisplay, self).__init__(obj, *args, **kwargs)
+		self.exclude = exclude
+	
 	class Meta(object):
 		template_name = ('asymmetricbase/displaymanager/fields.djhtml', 'asymmetricbase/displaymanager/vtable.djhtml')
 	
 	@property
 	def columns(self):
-		return self._meta.fields
+		return [field for field in self._meta.fields if field.attrname not in self.exclude]
 	
 	@property
 	def items(self):
