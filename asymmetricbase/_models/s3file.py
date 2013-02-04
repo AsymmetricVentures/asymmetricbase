@@ -28,6 +28,8 @@ thread_safe_connection_cache = threading.local()
 
 class S3File(AsymBaseModel):
 	file_name = models.CharField(max_length = 256)
+	# TODO: check if this works in all cases, 
+	#       I had to do some hacky things in our other classes to get JSONField to work
 	metadata = JSONField(max_length = 4096)
 	
 	_s3_key = models.CharField(max_length = 256)
