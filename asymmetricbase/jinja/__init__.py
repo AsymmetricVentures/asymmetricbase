@@ -111,7 +111,7 @@ def jinja_context_getattr(context, attr_string):
 	return jinja_getattr(context, attr_string)
 
 @contextfunction
-def jinja_barch_context_getattr(context, *args, **kwargs):
+def jinja_batch_context_getattr(context, *args, **kwargs):
 	new_args = []
 	new_kwargs = {}
 	if args:
@@ -139,7 +139,7 @@ jinja_env.globals.update({
 	'dir' : dir,
 	'getattr' : jinja_getattr,
 	'context_getattr' : jinja_context_getattr,
-	'batch_context_getattr' : jinja_barch_context_getattr,
+	'batch_context_getattr' : jinja_batch_context_getattr,
 	
 	
 	'vtable' : jinja_vtable,
