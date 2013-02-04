@@ -3,21 +3,24 @@ import base64
 import mimetypes
 import uuid
 import time
-import datetime
 import threading
-from boto.s3.connection import S3Connection
-from boto.s3.key import Key
-from boto import exception as boto_exceptions
-from django.utils.timezone import utc
+
+from django.utils import timezone
 from django.db import models
 from django.db.utils import DatabaseError
 from django.core.exceptions import ValidationError
 from django.conf import settings
+
 from django_extensions.db.fields.json import JSONField
+
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+from boto import exception as boto_exceptions
+
 from base import AsymBaseModel
+
 try:
 	import Image
-
 except ImportError:
 	Image = None	# PIL/Pillow not installed. File Preview is disabled
 
@@ -26,47 +29,49 @@ thread_safe_connection_cache = threading.local()
 class S3File(AsymBaseModel):
 	file_name = models.CharField(max_length = 256)
 	metadata = JSONField(max_length = 4096)
+	
 	_s3_key = models.CharField(max_length = 256)
 	_s3_version_id = models.CharField(max_length = 256)
-
-	class Meta:
+	
+	class Meta(object):
 		abstract = True
-
+	
 	@property
 	def file_data(self):
 		if not getattr(self, '_file_data', None):
 			self._file_data = self._load_from_s3()
+		
 		return self._file_data
 	
 	@file_data.setter
 	def file_data(self, value):
 		self._file_data = value
-
+	
 	@property
 	def content_type(self):
 		if not self.file_name:
 			return None
+		
 		content_type, _ = mimetypes.guess_type(self.file_name)
 		return content_type
-
+	
 	def list_versions(self):
 		"Returns a list of all versions of this file"
 		if not self._s3_key:
 			return [] # we don't have a key yet
+		
 		bucket = self._get_s3_bucket(
 			bucket_name = self._get_bucket_name(),
 			assert_versioning_enabled = True
 		)
 		return bucket.list_versions(prefix = self._s3_key)
 	
-
 	def get_file_prefix(self):
 		# Subclasses can use to append a prefix to file name
 		return 'asymm'
 	
 	def get_file_postfix(self):
-		now = datetime.datetime.utcnow().replace(tzinfo=utc)
-		return now.strftime("-%Y.%m.%d.%H.%M.%S")
+		return timezone.now().strftime("-%Y.%m.%d.%H.%M.%S")
 	
 	def save(self, *args, **kwargs):
 		_file_data = getattr(self, '_file_data', None)
@@ -74,9 +79,11 @@ class S3File(AsymBaseModel):
 			if not _file_data:
 				raise ValidationError("S3File.file_data may not be None")
 			self._s3_key = self._generate_s3_key()
+		
 		if _file_data:
 			bucket_name = self._get_bucket_name()
 			self._put_object_in_s3(bucket_name, self._s3_key, _file_data)
+		
 		super(S3File, self).save(*args, **kwargs)
 	
 	# private
@@ -118,9 +125,12 @@ class S3File(AsymBaseModel):
 			connection = cls._get_s3_connection()
 			if not connection.lookup(bucket_name):
 				connection.create_bucket(bucket_name)
+			
 			bucket = connection.get_bucket(bucket_name)
+			
 			if assert_versioning_enabled:
 				cls._assert_bucket_has_versioning_enabled(bucket)
+				
 			return bucket
 		except boto_exceptions.S3ResponseError as e:
 			raise DatabaseError(
@@ -142,76 +152,83 @@ class S3File(AsymBaseModel):
 	
 	@classmethod
 	def _get_s3_connection(cls):
-		s3_connection = getattr(thread_safe_connection_cache, "s3_connection", None)
+		s3_connection = getattr(thread_safe_connection_cache, 's3_connection', None)
+		
 		if s3_connection:
 			return s3_connection
-		aws_access_key_id = getattr(settings, "AWS_S3_FILES_ACCESS_KEY_ID", None)
-		aws_secret_access_key = getattr(settings, "AWS_S3_FILES_SECRET_ACCESS_KEY", None)
+		
+		aws_access_key_id = getattr(settings, 'AWS_S3_FILES_ACCESS_KEY_ID', None)
+		aws_secret_access_key = getattr(settings, 'AWS_S3_FILES_SECRET_ACCESS_KEY', None)
 		assert aws_access_key_id and aws_secret_access_key, \
 			"Please assign values for AWS_S3_FILES_ACCESS_KEY_ID and AWS_S3_FILES_SECRET_ACCESS_KEY in settings"
+		
 		try:
 			connection = S3Connection(aws_access_key_id, aws_secret_access_key) # TODO: We may want to move to a connection pool
+			setattr(thread_safe_connection_cache, 's3_connection', connection)
 		except boto_exceptions.BotoClientError as e:
 			raise DatabaseError("Unable to connect to S3.\nBoto Exception:\n{}".format(e))
-		thread_safe_connection_cache.s3_connection = connection
+		
 		return thread_safe_connection_cache.s3_connection
 	
 	@classmethod
 	def _get_bucket_name(cls):
-		test_bucket = getattr(settings, "AWS_S3_FILES_BUCKET_TEST", None)
-		real_bucket = getattr(settings, "AWS_S3_FILES_BUCKET", None)
-		assert test_bucket and real_bucket,\
+		test_bucket = getattr(settings, 'AWS_S3_FILES_BUCKET_TEST', None)
+		real_bucket = getattr(settings, 'AWS_S3_FILES_BUCKET', None)
+		assert test_bucket and real_bucket, \
 		"Please assign values for AWS_S3_FILES_BUCKET_TEST and AWS_S3_FILES_BUCKET in settings"
+		
 		try:
 			in_test = settings.IS_IN_TEST == True
 		except AttributeError:
 			in_test = False
-		if in_test:
-			return test_bucket
-		else:
-			return real_bucket
-
+		
+		return real_bucket if not in_test else test_bucket
 
 class S3FileWithPreview(S3File):
-	class Meta:
+	class Meta(object):
 		abstract = True
-
+	
 	class Constants(object):	# Override in subclass
 		PREVIEW_IMAGE_WIDTH = None
 		PREVIEW_IMAGE_HEIGHT = None
-
+	
 	def get_preview_image_data(self):
 		bucket_name = self._get_bucket_name()
 		try:
 			return self._get_object_from_s3(bucket_name, self._generate_preview_key())
 		except IOError:
 			return ""
-
+	
 	def get_preview_type(self):
 		return 'image/jpeg'	# only jpeg previews are currently supported
-
+	
 	def save_preview_image(self):
 		assert Image, "PIL or Pillow is required for image preview"
 		assert self.is_image(), "Cannot save preview image for non-image file"
 		assert self.id and self._s3_key, "Can only save image preview once the image is saved"
 		assert self.Constants.PREVIEW_IMAGE_HEIGHT and self.Constants.PREVIEW_IMAGE_WIDTH, "Set preview image dimensions in the subclass"
+		
 		image_file = StringIO.StringIO(self.file_data)
 		output = StringIO.StringIO()
+		
 		self._generate_thumbnail(image_file, output)
+		
 		preview_image_data = output.getvalue()
 		preview_image_s3_key = self._generate_preview_key()
 		bucket_name = self._get_bucket_name()
+		
 		self._put_object_in_s3(bucket_name, preview_image_s3_key, preview_image_data)
-
+	
 	def _generate_thumbnail(self, image_file, output):
 		try:
 			image = Image.open(image_file)
-			if image.mode != "RGB":
-				image = image.convert("RGB")
+			if image.mode != 'RGB':
+				image = image.convert('RGB')
 			image.thumbnail(
 				[self.Constants.PREVIEW_IMAGE_WIDTH, self.Constants.PREVIEW_IMAGE_HEIGHT],
-				Image.ANTIALIAS)
-			image.save(output, "JPEG")
+				Image.ANTIALIAS
+			)
+			image.save(output, 'JPEG')
 		except IOError:
 			raise self.PreviewImageGenerationFailed
 
@@ -219,7 +236,7 @@ class S3FileWithPreview(S3File):
 		return self.content_type in ['image/png', 'image/jpeg', 'image/gif']
 
 	def _generate_preview_key(self):
-		return self._s3_key + "-preview"
+		return "{}-preview".format(self._s3_key)
 
 	class PreviewImageGenerationFailed(Exception):
 		pass
