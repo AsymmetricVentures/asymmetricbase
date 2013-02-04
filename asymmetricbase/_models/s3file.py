@@ -1,4 +1,6 @@
+import StringIO
 import base64
+import mimetypes
 import uuid
 import time
 import datetime
@@ -13,7 +15,11 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from django_extensions.db.fields.json import JSONField
 from base import AsymBaseModel
+try:
+	import Image
 
+except ImportError:
+	Image = None	# PIL/Pillow not installed. File Preview is disabled
 
 thread_safe_connection_cache = threading.local()
 
@@ -22,7 +28,10 @@ class S3File(AsymBaseModel):
 	metadata = JSONField(max_length = 4096)
 	_s3_key = models.CharField(max_length = 256)
 	_s3_version_id = models.CharField(max_length = 256)
-	
+
+	class Meta:
+		abstract = True
+
 	@property
 	def file_data(self):
 		if not getattr(self, '_file_data', None):
@@ -33,6 +42,12 @@ class S3File(AsymBaseModel):
 	def file_data(self, value):
 		self._file_data = value
 
+	@property
+	def content_type(self):
+		if not self.file_name:
+			return None
+		content_type, _ = mimetypes.guess_type(self.file_name)
+		return content_type
 
 	def list_versions(self):
 		"Returns a list of all versions of this file"
@@ -44,9 +59,7 @@ class S3File(AsymBaseModel):
 		)
 		return bucket.list_versions(prefix = self._s3_key)
 	
-	class Meta:
-		abstract = True
-	
+
 	def get_file_prefix(self):
 		# Subclasses can use to append a prefix to file name
 		return 'asymm'
@@ -157,3 +170,56 @@ class S3File(AsymBaseModel):
 			return test_bucket
 		else:
 			return real_bucket
+
+
+class S3FileWithPreview(S3File):
+	class Meta:
+		abstract = True
+
+	class Constants(object):	# Override in subclass
+		PREVIEW_IMAGE_WIDTH = None
+		PREVIEW_IMAGE_HEIGHT = None
+
+	def get_preview_image_data(self):
+		bucket_name = self._get_bucket_name()
+		try:
+			return self._get_object_from_s3(bucket_name, self._generate_preview_key())
+		except IOError:
+			return ""
+
+	def get_preview_type(self):
+		return 'image/jpeg'	# only jpeg previews are currently supported
+
+	def save_preview_image(self):
+		assert Image, "PIL or Pillow is required for image preview"
+		assert self.is_image(), "Cannot save preview image for non-image file"
+		assert self.id and self._s3_key, "Can only save image preview once the image is saved"
+		assert self.Constants.PREVIEW_IMAGE_HEIGHT and self.Constants.PREVIEW_IMAGE_WIDTH, "Set preview image dimensions in the subclass"
+		image_file = StringIO.StringIO(self.file_data)
+		output = StringIO.StringIO()
+		self._generate_thumbnail(image_file, output)
+		preview_image_data = output.getvalue()
+		preview_image_s3_key = self._generate_preview_key()
+		bucket_name = self._get_bucket_name()
+		self._put_object_in_s3(bucket_name, preview_image_s3_key, preview_image_data)
+
+	def _generate_thumbnail(self, image_file, output):
+		try:
+			image = Image.open(image_file)
+			if image.mode != "RGB":
+				image = image.convert("RGB")
+			image.thumbnail(
+				[self.Constants.PREVIEW_IMAGE_WIDTH, self.Constants.PREVIEW_IMAGE_HEIGHT],
+				Image.ANTIALIAS)
+			image.save(output, "JPEG")
+		except IOError:
+			raise self.PreviewImageGenerationFailed
+
+	def is_image(self):
+		return self.content_type in ['image/png', 'image/jpeg', 'image/gif']
+
+	def _generate_preview_key(self):
+		return self._s3_key + "-preview"
+
+	class PreviewImageGenerationFailed(Exception):
+		pass
