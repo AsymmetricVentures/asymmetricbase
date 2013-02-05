@@ -1,5 +1,6 @@
 import datetime
 import os, warnings
+import locale
 
 from operator import attrgetter
 
@@ -14,12 +15,13 @@ from django.conf import settings
 
 import jinja2
 from jinja2.ext import WithExtension, LoopControlExtension
+from jinja2.utils import contextfunction
 
 from asymmetricbase.jinja.tags.csrf_token import CSRFTokenExtension
 from asymmetricbase.jinja.tags.vtable import VTableExtension
 from asymmetricbase.jinja.tags.haml import HamlishTagExtension
 from asymmetricbase.jinja.tags.fielditerator import checkboxiterator, checkboxiterator_named, radioiterator, radioiterator_named
-from jinja2.utils import contextfunction
+
 
 class UndefinedVar(jinja2.Undefined):
 	def __int__(self):
@@ -132,6 +134,9 @@ def jinja_gridlayout(layout):
 def jinja_display(layout):
 	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml').module.display(layout)
 
+def currency_format(num):
+	return locale.currency(num, grouping = True)
+
 jinja_env.globals.update({
 	'url' : jinja_url,
 	'getdatetime' : jinja_getdate,
@@ -156,5 +161,6 @@ jinja_env.filters.update({
 	'checkboxiterator' : checkboxiterator,
 	'checkboxiterator_named' : checkboxiterator_named,
 	'radioiterator' : radioiterator,
-	'radioiterator_named' : radioiterator_named
+	'radioiterator_named' : radioiterator_named,
+	'currency' : currency_format,
 })
