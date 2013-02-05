@@ -49,7 +49,7 @@ class MultiFormatResponseMixin(MergeAttrMixin):
 		
 		else:
 			encoder_table = {
-				'json' : self._json_ouput,
+				'json' : self._json_output,
 				'jstree' : self._jstree_output,
 				'pdf' : self._pdf_output,
 				'other' : self._default_output,
@@ -64,8 +64,9 @@ class MultiFormatResponseMixin(MergeAttrMixin):
 			
 			response['Content-Length'] = len(response_kwargs['content'])
 			
-			# Add any extra headers to the response
-			callback(response)
+			if callback is not None:
+				# Add any extra headers to the response
+				callback(response)
 		
 		
 		if 'content_disposition' in self.context and self.context['content_disposition']:
