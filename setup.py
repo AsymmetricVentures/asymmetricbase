@@ -49,7 +49,8 @@ setup(
 		'jinja2(==2.6)',
 		'pytz',  # most recent
 		'south(==0.7.5)',
-		'hamlpy',  # most recent
+		'hamlpy',  # most recent,
+		'Pillow'
 	),
 	
 	dependency_links = ['https://github.com/jessemiller/HamlPy/tarball/master#egg=hamlpy=0.82.2'],

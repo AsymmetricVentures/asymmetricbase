@@ -36,7 +36,7 @@ class FormFactory(object):
 		if 'prefix' in self.kwargs:
 			form_data = { k : v for k, v in form_data.items() if k.startswith(self.kwargs['prefix']) }
 		
-		self.args = (form_data or None,) + filter(lambda x: x is not None, self.args)
+		self.args = (form_data or None, request.FILES) + filter(lambda x: x is not None, self.args)
 		
 		if 'initial' in self.kwargs:
 			if isinstance(self.kwargs['initial'], dict):

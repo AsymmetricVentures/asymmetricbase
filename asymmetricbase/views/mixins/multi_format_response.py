@@ -26,6 +26,7 @@ class MultiFormatResponseMixin(MergeAttrMixin):
 	
 	def render_to_response(self, **response_kwargs):
 		""" Returns a response with a template rendered with the given context. """
+		
 		if self.output_type == 'html':
 			css_files = self._merge_attr_signal('css_files', lambda x:  x.replace('scss', 'css'))
 			css_resources = ResourceSet()
@@ -45,32 +46,68 @@ class MultiFormatResponseMixin(MergeAttrMixin):
 				context = self.context,
 				**response_kwargs
 			)
-			
-		elif self.output_type == 'json':
-			json_str = AsymJSONEncoder().encode(self.context)
-			return HttpResponse(json_str, mimetype = 'application/json')
-		
-		elif self.output_type == 'jstree':
-			json_str = AsymJSTreeEncoder().encode(self.context)
-			return HttpResponse(json_str, mimetype = 'application/json')
-		
-		elif self.output_type == 'pdf':
-			assert 'pdf_data' in self.context, 'PDF data not found in context["pdf_data"]'
-			assert 'pdf_name' in self.context, 'PDF name not found in context["pdf_name"]'
-			
-			response = HttpResponse(self.context['pdf_data'], mimetype = 'application/pdf')
-			response['Content-Description'] = 'File Transfers'
-			response['Content-Length'] = len(self.context['pdf_data'])
-			
-			if hasattr(self, 'content_disposition') and self.content_disposition:
-				response['Content-Disposition'] = self.content_disposition
-			else:
-				response['Content-Disposition'] = 'attachment; filename={}'.format(urlquote(self.context['pdf_name']))
-			
-			return response
 		
 		else:
-			raise ImproperlyConfigured("Unknown output_type: {}".format(self.output_type))
+			encoder_table = {
+				'json' : self._json_ouput,
+				'jstree' : self._jstree_output,
+				'pdf' : self._pdf_output,
+				'other' : self._default_output,
+			}
+			
+			encoder = encoder_table.get(self.output_type, 'other')
+			response_kwargs = encoder()
+			
+			callback = response_kwargs.pop('__callback', None)
+			
+			response = HttpResponse(**response_kwargs)
+			
+			response['Content-Length'] = len(response_kwargs['content'])
+			
+			# Add any extra headers to the response
+			callback(response)
+		
+		
+		if 'content_disposition' in self.context and self.context['content_disposition']:
+			response['Content-Disposition'] = self.context['content_disposition']
+		
+		return response
+	
+	def _json_output(self):
+		return {
+			'content' : AsymJSONEncoder().encode(self.context),
+			'content_type' : 'application/json'
+		}
+	
+	def _jstree_output(self):
+		return {
+			'content' : AsymJSTreeEncoder().encode(self.context),
+			'content_type' : 'application/json'
+		}
+	
+	def _pdf_output(self):
+		assert 'content_name' in self.context, "No name found in context['content_name']"
+		
+		ret_kwargs = self._default_output()
+		ret_kwargs['content_type'] = 'application/pdf'
+		
+		return ret_kwargs
+	
+	def _default_output(self):
+		assert 'content_data' in self.context, "Not data found in context['content_data']"
+		
+		ret_kwargs = {
+			'content' : self.context['content_data'],
+			'content_type' : self.context.get('content_type', None)
+		}
+		
+		if 'content_name' in self.context:
+			def callback(response):
+				response['Content-Description'] = 'File Transfers'
+				response['Content-Disposition'] = self.context.get('content_disposition', 'attachment; filename={}'.format(urlquote(self.context['content_name'])))
+			
+			ret_kwargs['__calback'] = callback
+		return ret_kwargs
 	
 	def get_template_names(self):
 		""" Returns a list of template names to be used for the request. Must return
