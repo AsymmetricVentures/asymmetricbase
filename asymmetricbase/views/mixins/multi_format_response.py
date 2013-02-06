@@ -107,7 +107,7 @@ class MultiFormatResponseMixin(MergeAttrMixin):
 				response['Content-Description'] = 'File Transfers'
 				response['Content-Disposition'] = self.context.get('content_disposition', 'attachment; filename={}'.format(urlquote(self.context['content_name'])))
 			
-			ret_kwargs['__calback'] = callback
+			ret_kwargs['__callback'] = callback
 		return ret_kwargs
 	
 	def get_template_names(self):
