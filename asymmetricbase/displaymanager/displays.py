@@ -74,9 +74,8 @@ class GridLayoutDisplay(Display):
 
 class NestedDisplay(Display):
 	
-	root_field = None
-	
 	def __init__(self, *args, **kwargs):
+		self.root_field = None
 		super(NestedDisplay, self).__init__(*args, **kwargs)
 		
 		# populate children on all fields
