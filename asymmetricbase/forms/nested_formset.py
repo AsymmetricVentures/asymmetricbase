@@ -5,6 +5,10 @@ class BaseNestedFormSet(BaseModelFormSet):
 	nested_att_name = 'nested'
 	
 	def __init__(self, *args, **kwargs):
+		"""
+		Request is passed into this formset so it can be passed down into
+		any nested formsets (since these need the request data on initialization).
+		"""
 		self.request = kwargs.pop('request', None)
 		if self.request is None:
 			raise Exception('request object must be passed to formset via argument to FactoryFactory')
