@@ -1,6 +1,7 @@
 import datetime
 import os, warnings
 import locale
+from decimal import Decimal
 
 from operator import attrgetter
 
@@ -135,6 +136,8 @@ def jinja_display(layout):
 	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml').module.display(layout)
 
 def currency_format(num):
+	if not isinstance(num, (int, float, long, Decimal)):
+		num = 0
 	return locale.currency(num, grouping = True)
 
 jinja_env.globals.update({
