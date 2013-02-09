@@ -195,7 +195,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 		# check if error_list is a dict or list of dicts
 		if isinstance(error_list, dict):
 			error_messages = { unicode(err) for error in error_list.values() for err in error }
-		elif isinstance(error_list[0], dict):
+		elif len(error_list) and isinstance(error_list[0], dict):
 			error_messages = { unicode(e) for error in error_list for err in error.values() for e in err}
 		else:
 			error_messages = { unicode(error) for error in error_list }
