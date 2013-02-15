@@ -1,11 +1,32 @@
 import logging
 from logging import CRITICAL, DEBUG, ERROR, FATAL, INFO, WARN
+import re
+from pprint import pformat
+
+from django.utils.encoding import force_unicode
 
 class DBTraceHandler(logging.Handler):
 	def __init__(self):
 		self.rows = []
 		self.django_request = None
 		super(DBTraceHandler, self).__init__()
+	
+	def _get_safe_dict(self, d, *extra_rxs):
+		new_dict = {}
+		sensitive_rxs = ['pass', 'password', 'key'] + list(extra_rxs)
+		rx = r'|'.join(re.escape(r) for r in sensitive_rxs)
+		
+		
+		for k, v in d.items():
+			new_dict[k] = v
+			m = rx.match(k, re.I)
+			if m is not None:
+				new_dict[k] = '**SENSITIVE**'
+	
+		return new_dict
+	
+	def _get_request_dict_string(self, key):
+		d = getattr(self.django_request, key, {})
 	
 	def emit(self, record):
 		if self.django_request is None:
@@ -16,8 +37,24 @@ class DBTraceHandler(logging.Handler):
 		from django.db import connection
 		from django.db.utils import DatabaseError
 		from asymmetricbase.models import TraceEntry
-		entry = TraceEntry(get = getattr(self.django_request, 'path', ''))
-		msg = ''
+		
+		url_path = getattr(self.django_request, 'path', '')
+		request_method = getattr(self.django_request, 'method', 'GET')
+		
+		if url_path.startswith('/static'):
+			# Ignore static files in DEBUG
+			return
+		
+		entry = TraceEntry(get = url_path, method = request_method)
+		msg = u''
+		
+		
+		user = getattr(self.django_request, 'user', None),
+		
+		if user:
+			entry.user = u'{} {}'.format(getattr(user, 'id', '0'), getattr(user, 'username', 'anonymous'))
+		else:
+			entry.user = '0 None'
 		
 		for row in self.rows:
 			msg_row = u'''[{level}] {file_name}:{lineno} {msg}\n'''
@@ -26,6 +63,14 @@ class DBTraceHandler(logging.Handler):
 				entry.exc_info = row['exc_info']
 			
 			msg += msg_row.format(**row)
+		
+		msg += u"\nMeta: {}".format(force_unicode(self._get_safe_dict(getattr(self.django_request, 'META', {}))))
+		if request_method == 'GET':
+			msg += u"\nGET: {}".format(force_unicode(self._get_safe_dict(getattr(self.django_request, 'GET', {}))))
+		elif request_method == 'POST':
+			msg += u"\nPOST: {}".format(force_unicode(self._get_safe_dict(getattr(self.django_request, 'POST', {}))))
+		else:
+			msg += u"\nREQUEST: {}".format(force_unicode(self._get_safe_dict(getattr(self.django_request, 'REQUEST', {}))))
 		
 		if len(msg) > 1:
 			entry.msg = msg

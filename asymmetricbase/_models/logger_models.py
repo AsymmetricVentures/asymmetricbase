@@ -131,6 +131,9 @@ class TraceEntry(models.Model):
 	msg = models.TextField(blank = True)
 	exc_info = models.TextField(blank = True)
 	
+	method = models.CharField(blank = True, default = '', max_length = 10)
+	user = models.CharField(blank = True, default = '', max_length = 100)
+	
 	class Meta(object):
 		app_label = 'asymmetricbase'
 	
