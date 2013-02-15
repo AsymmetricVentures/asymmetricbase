@@ -133,6 +133,8 @@ class TraceEntry(models.Model):
 	
 	method = models.CharField(blank = True, default = '', max_length = 10)
 	user = models.CharField(blank = True, default = '', max_length = 100)
+	request_meta = models.TextField(blank = True, default = '')
+	request_data = models.TextField(blank = True, default = '') # Either POST or GET
 	
 	class Meta(object):
 		app_label = 'asymmetricbase'

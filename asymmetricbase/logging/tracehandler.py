@@ -14,19 +14,33 @@ class DBTraceHandler(logging.Handler):
 	def _get_safe_dict(self, d, *extra_rxs):
 		new_dict = {}
 		sensitive_rxs = ['pass', 'password', 'key'] + list(extra_rxs)
-		rx = r'|'.join(re.escape(r) for r in sensitive_rxs)
-		
+		rx = re.compile(r'|'.join(re.escape(r) for r in sensitive_rxs), re.I)
 		
 		for k, v in d.items():
 			new_dict[k] = v
-			m = rx.match(k, re.I)
+			m = rx.match(k)
 			if m is not None:
 				new_dict[k] = '**SENSITIVE**'
 	
 		return new_dict
 	
-	def _get_request_dict_string(self, key):
+	def _get_request_dict_string(self, key, dict_process = None):
 		d = getattr(self.django_request, key, {})
+		if dict_process is not None:
+			d = dict_process(d)
+		safe_d = self._get_safe_dict(d)
+		return force_unicode(pformat(safe_d))
+	
+	def _trim_meta_dict(self, d):
+		new_dict = {}
+		
+		rx = re.compile(r'^(HTTP|CONTENT|SERVER|REMOTE).*')
+		
+		for k, v in d.items():
+			if rx.match(k) is not None:
+				new_dict[k] = v
+		
+		return new_dict
 	
 	def emit(self, record):
 		if self.django_request is None:
@@ -38,18 +52,20 @@ class DBTraceHandler(logging.Handler):
 		from django.db.utils import DatabaseError
 		from asymmetricbase.models import TraceEntry
 		
+		msg = u''
 		url_path = getattr(self.django_request, 'path', '')
-		request_method = getattr(self.django_request, 'method', 'GET')
+		request_method = getattr(self.django_request, 'method', 'REQUEST')
 		
 		if url_path.startswith('/static'):
 			# Ignore static files in DEBUG
 			return
 		
 		entry = TraceEntry(get = url_path, method = request_method)
-		msg = u''
 		
+		entry.request_meta = self._get_request_dict_string('META', dict_process = self._trim_meta_dict)
+		entry.request_data = self._get_request_dict_string(request_method if request_method in ['POST', 'GET'] else 'REQUEST')
 		
-		user = getattr(self.django_request, 'user', None),
+		user = getattr(self.django_request, 'user', None)
 		
 		if user:
 			entry.user = u'{} {}'.format(getattr(user, 'id', '0'), getattr(user, 'username', 'anonymous'))
@@ -63,14 +79,6 @@ class DBTraceHandler(logging.Handler):
 				entry.exc_info = row['exc_info']
 			
 			msg += msg_row.format(**row)
-		
-		msg += u"\nMeta: {}".format(force_unicode(self._get_safe_dict(getattr(self.django_request, 'META', {}))))
-		if request_method == 'GET':
-			msg += u"\nGET: {}".format(force_unicode(self._get_safe_dict(getattr(self.django_request, 'GET', {}))))
-		elif request_method == 'POST':
-			msg += u"\nPOST: {}".format(force_unicode(self._get_safe_dict(getattr(self.django_request, 'POST', {}))))
-		else:
-			msg += u"\nREQUEST: {}".format(force_unicode(self._get_safe_dict(getattr(self.django_request, 'REQUEST', {}))))
 		
 		if len(msg) > 1:
 			entry.msg = msg
