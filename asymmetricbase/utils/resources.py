@@ -49,6 +49,13 @@ class Resource(object):
 	
 	def __repr__(self):
 		return u"Resource('{}')".format(self.file)
+	
+	@property
+	def absolute_path(self):
+		"""
+		The absolute path of the file.
+		"""
+		return '{}{}'.format(settings.MEDIA_ROOT, self.file)
 
 class ResourceSet(object):
 	def __init__(self):
@@ -63,16 +70,28 @@ class ResourceSet(object):
 			self._included.append(self._all[resource])
 	
 	def __html__(self):
-		
-		closure = set()
-		closure_list = []
-		for resource in self._included:
-			self._resource_closure(closure, closure_list, resource)
-		
+		closure_list = self._get_resource_closure_list()
 		return mark_safe('\n'.join(resource.__html__() for resource in closure_list))
 	
 	def as_html(self):
 		return self.__html__()
+	
+	def as_absolute_path_list(self):
+		"""
+		Return a list of files in the set as absolute paths.
+		"""
+		closure_list = self._get_resource_closure_list()
+		return [resource.absolute_path for resource in closure_list]
+	
+	def _get_resource_closure_list(self):
+		"""
+		Return a list of all files in the set and their dependencies.
+		"""
+		closure = set()
+		closure_list = []
+		for resource in self._included:
+			self._resource_closure(closure, closure_list, resource)
+		return closure_list
 	
 	def _resource_closure(self, out, out_list, resource):
 		if resource in out:
