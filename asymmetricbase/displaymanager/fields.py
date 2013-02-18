@@ -1,5 +1,6 @@
 from functools import total_ordering
 from django.utils.functional import cached_property
+from jinja2.utils import contextfunction
 
 @total_ordering
 class DisplayField(object):
@@ -46,7 +47,8 @@ class AttrGetField(DisplayField):
 		super(AttrGetField, self).__init__(header_name)
 		self.attr = attr
 	
-	def __call__(self, instance):
+	@contextfunction
+	def __call__(self, context, instance):
 		return self.attr_field_macro(instance, attr = self.field_name)
 	
 	@cached_property
@@ -74,7 +76,8 @@ class TemplateField(DisplayField):
 	def template_macro(self):
 		return self.model.get_macro(self.macro_name)
 	
-	def __call__(self, instance):
+	@contextfunction
+	def __call__(self, context, instance):
 		return self.template_macro(instance, *self.args, **self.kwargs)
 
 class AutoTemplateField(TemplateField, AttrGetField):
@@ -86,8 +89,9 @@ class AutoTemplateField(TemplateField, AttrGetField):
 		TemplateField.__init__(self, macro_name = macro_name, *args, **kwargs)
 		AttrGetField.__init__(self, *args, **kwargs)
 	
-	def __call__(self, instance):
-		return TemplateField.__call__(self, AttrGetField.__call__(self, instance))
+	@contextfunction
+	def __call__(self, context, instance):
+		return TemplateField.__call__(self, context, AttrGetField.__call__(self, context, instance))
 
 class LinkField(AutoTemplateField):
 	'''
@@ -100,8 +104,9 @@ class LinkField(AutoTemplateField):
 		if macro_name is not None:
 			self.macro_name = macro_name
 	
-	def __call__(self, instance):
-		return self.template_macro(AttrGetField.__call__(self, instance), self.url_name, *self.args, **self.kwargs)
+	@contextfunction
+	def __call__(self, context, instance):
+		return self.template_macro(AttrGetField.__call__(self, context, instance), self.url_name, *self.args, **self.kwargs)
 
 class IntField(AutoTemplateField): pass
 class CharField(AutoTemplateField): pass

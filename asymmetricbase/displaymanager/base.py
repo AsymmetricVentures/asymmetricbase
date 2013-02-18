@@ -93,6 +93,7 @@ class DisplayMeta(type):
 			if isinstance(template_name, (list, tuple, OrderedSet)):
 				for name in template_name:
 					if name not in template_dict:
+						#TODO: this needs to be lazy
 						template_dict.update({name : jinja_env.get_template(name).module})
 			else:
 				if template_name not in template_dict:
