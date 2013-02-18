@@ -49,11 +49,10 @@ class AttrGetField(DisplayField):
 	
 	@contextfunction
 	def __call__(self, context, instance):
-		return self.attr_field_macro(instance, attr = self.field_name)
+		return self.attr_field_macro(context = context)(instance, attr = self.field_name)
 	
-	@cached_property
-	def attr_field_macro(self):
-		return self.model.get_macro('attr_field')
+	def attr_field_macro(self, context = {}):
+		return self.model.get_macro('attr_field', context = context)
 	
 	@property
 	def field_name(self):
@@ -72,13 +71,12 @@ class TemplateField(DisplayField):
 		self.kwargs = kwargs
 		super(TemplateField, self).__init__(header_name)
 	
-	@cached_property
-	def template_macro(self):
-		return self.model.get_macro(self.macro_name)
+	def template_macro(self, context = {}):
+		return self.model.get_macro(self.macro_name, context = context)
 	
 	@contextfunction
 	def __call__(self, context, instance):
-		return self.template_macro(instance, *self.args, **self.kwargs)
+		return self.template_macro(context)(instance, *self.args, **self.kwargs)
 
 class AutoTemplateField(TemplateField, AttrGetField):
 	

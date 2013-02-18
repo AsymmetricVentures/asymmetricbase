@@ -3,6 +3,9 @@ from collections import OrderedDict
 
 from django.core.exceptions import FieldError
 
+from jinja2.runtime import Macro
+from jinja2.utils import contextfunction
+
 from asymmetricbase.jinja import jinja_env
 from asymmetricbase.utils.orderedset import OrderedSet
 
@@ -138,26 +141,13 @@ class DisplayMeta(type):
 			# new_class._meta.template_name is always going to be an OrderedSet
 			# because DisplayOptions always sets it as one.
 			new_class._meta.template_name.update(parent_meta.template_name)
-# 			if not isinstance(new_class._meta.template_name, OrderedSet):
-# 				s = OrderedSet()
-# 				
-# 				if isinstance(new_class._meta.template_name, (set, tuple, list)):
-# 					s.update(new_class._meta.template_name)
-# 					
-# 				new_class._meta.template_name = OrderedSet()
-# 			# turn template_name into a tuple if it isn't
-# 			new_class._meta.template_name = new_class._meta.template_name if isinstance(new_class._meta.template_name, tuple) else (new_class._meta.template_name,)
-# 			# concatenate with parent template_name
-# 			for name in parent_meta.template_name:
-# 				if name not in new_class._meta.template_name:
-# 					new_class._meta.template_name += (name,)
 			
 			new_class._meta.parents[base] = base
 		
 		# build template dictionary
-		template_dict = DisplayMeta._load_templates(OrderedDict(), getattr(new_class._meta, 'template_name', None))
+		#template_dict = DisplayMeta._load_templates(OrderedDict(), getattr(new_class._meta, 'template_name', None))
 		
-		new_class.template_dict = template_dict
+		new_class.template_dict = OrderedDict()
 		
 		new_class._prepare()
 		
@@ -189,13 +179,44 @@ class Display(object):
 		return self.__html__()
 	
 	def __html__(self):
-		return self.__class__.get_macro('display')(self)
+		return self.__call__()
 	
+	@contextfunction
+	def __call__(self, context = {}):
+		return self.get_macro('display', context = context)(self)
+		
 	@classmethod
-	def get_macro(cls, name):
-		for template_module in cls.template_dict.values():
-			if hasattr(template_module, name):
-				return getattr(template_module, name)
-		raise AttributeError('Cannot get macro \'{}\''.format(name))
+	def get_macro(cls, name, **kwargs):
+		"""Get a macro by name and context
+		"""
+		context = kwargs.pop('context', {})
+		
+		macro_key = (name, id(context))
+		
+		if macro_key not in cls._macro_cache:
+			# Load all macros with this context
+			template_dict = Display._load_templates(cls.template_dict, getattr(cls._meta, 'template_name', None), context)
+			
+			# Now find all the macros
+			for template_module in template_dict.values():
+				for macro_name, macro in template_module.__dict__.items():
+					if isinstance(macro, Macro):
+						cls._macro_cache[(macro_name, id(context))] = macro
+		
+		if macro_key not in cls._macro_cache:
+			raise AttributeError('Cannot get macro \'{}\''.format(name))
+		
+		return cls._macro_cache[macro_key]
 	
-	# get_macro = memoize(_get_macro, _macro_cache, 1)
+	@staticmethod
+	def _load_templates(template_dict, template_name, context):
+		if template_name is not None:
+			if isinstance(template_name, (list, tuple, OrderedSet)):
+				for name in template_name:
+					if name not in template_dict:
+						template_dict.update({name : jinja_env.get_template(name, globals = context).module})
+			else:
+				if template_name not in template_dict:
+					template_dict.update({template_name : jinja_env.get_template(template_name, globals = context).module})
+		
+		return template_dict
