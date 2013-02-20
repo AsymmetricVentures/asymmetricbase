@@ -31,7 +31,6 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 		self.forms = {}
 		super(AsymBaseView, self).__init__(*args, **kwargs)
 		self.successful = True
-		self.forms = {}
 	
 	def preprocess(self, request, *args, **kwargs):
 		"This is called before get or post are called. Used to prepare shared values"
