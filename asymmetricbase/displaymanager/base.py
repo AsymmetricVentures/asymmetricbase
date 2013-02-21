@@ -8,6 +8,7 @@ from jinja2.utils import contextfunction
 
 from asymmetricbase.jinja import jinja_env
 from asymmetricbase.utils.orderedset import OrderedSet
+from asymmetricbase.middleware.request_cache import get_request_cache
 
 DEFAULT_NAMES = ('ordering', 'structural_name',)
 
@@ -170,8 +171,6 @@ class Display(object):
 	''' Per "model" '''
 	__metaclass__ = DisplayMeta
 	
-	_macro_cache = {}
-	
 	def __init__(self, obj, *args, **kwargs):
 		self.obj = obj
 	
@@ -190,10 +189,13 @@ class Display(object):
 		"""Get a macro by name and context
 		"""
 		context = kwargs.pop('context', {})
+		cache = get_request_cache()
 		
-		macro_key = (name, id(context))
+		macro_key = Display.__make_key(id(cls), name, id(context))
 		
-		if macro_key not in cls._macro_cache:
+		macro_ret = cache.get(macro_key)
+		
+		if macro_ret is None:
 			# Load all macros with this context
 			template_dict = Display._load_templates(cls.template_dict, getattr(cls._meta, 'template_name', None), context)
 			
@@ -201,13 +203,18 @@ class Display(object):
 			for template_module in template_dict.values():
 				for macro_name, macro in template_module.__dict__.items():
 					if isinstance(macro, Macro):
-						cls._macro_cache[(macro_name, id(context))] = macro
+						if macro_name == name:
+							macro_ret = macro
+						cache.set(Display.__make_key(id(cls), macro_name, id(context)), macro)
 		
-		if macro_key not in cls._macro_cache:
+		if macro_ret is None:
 			raise AttributeError('Cannot get macro \'{}\''.format(name))
 		
-		return cls._macro_cache[macro_key]
+		return macro_ret
 	
+	@staticmethod
+	def __make_key(*args):
+		return '-'.join(map(str, args))
 	@staticmethod
 	def _load_templates(template_dict, template_name, context):
 		if template_name is not None:
