@@ -1,3 +1,4 @@
+#@PydevCodeAnalysisIgnore
 # -*- coding: utf-8 -*-
 import datetime
 from south.db import db
@@ -10,11 +11,11 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding model 'TraceEntry'
         db.create_table('asymmetricbase_traceentry', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('date_created', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now)),
-            ('get', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('msg', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('exc_info', self.gf('django.db.models.fields.TextField')(blank=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key = True)),
+            ('date_created', self.gf('django.db.models.fields.DateTimeField')(default = datetime.datetime.now)),
+            ('get', self.gf('django.db.models.fields.TextField')(blank = True)),
+            ('msg', self.gf('django.db.models.fields.TextField')(blank = True)),
+            ('exc_info', self.gf('django.db.models.fields.TextField')(blank = True)),
         ))
         db.send_create_signal('asymmetricbase', ['TraceEntry'])
 
