@@ -1,11 +1,46 @@
 import logging
 from logging import CRITICAL, DEBUG, ERROR, FATAL, INFO, WARN
+import re
+from pprint import pformat
+
+from django.utils.encoding import force_unicode
 
 class DBTraceHandler(logging.Handler):
 	def __init__(self):
 		self.rows = []
 		self.django_request = None
 		super(DBTraceHandler, self).__init__()
+	
+	def _get_safe_dict(self, d, *extra_rxs):
+		new_dict = {}
+		sensitive_rxs = ['pass', 'password', 'key'] + list(extra_rxs)
+		rx = re.compile(r'|'.join(re.escape(r) for r in sensitive_rxs), re.I)
+		
+		for k, v in d.items():
+			new_dict[k] = v
+			m = rx.match(k)
+			if m is not None:
+				new_dict[k] = '**SENSITIVE**'
+	
+		return new_dict
+	
+	def _get_request_dict_string(self, key, dict_process = None):
+		d = getattr(self.django_request, key, {})
+		if dict_process is not None:
+			d = dict_process(d)
+		safe_d = self._get_safe_dict(d)
+		return force_unicode(pformat(safe_d))
+	
+	def _trim_meta_dict(self, d):
+		new_dict = {}
+		
+		rx = re.compile(r'^(HTTP|CONTENT|SERVER|REMOTE).*')
+		
+		for k, v in d.items():
+			if rx.match(k) is not None:
+				new_dict[k] = v
+		
+		return new_dict
 	
 	def emit(self, record):
 		if self.django_request is None:
@@ -16,8 +51,26 @@ class DBTraceHandler(logging.Handler):
 		from django.db import connection
 		from django.db.utils import DatabaseError
 		from asymmetricbase.models import TraceEntry
-		entry = TraceEntry(get = getattr(self.django_request, 'path', ''))
-		msg = ''
+		
+		msg = u''
+		url_path = getattr(self.django_request, 'path', '')
+		request_method = getattr(self.django_request, 'method', 'REQUEST')
+		
+		if url_path.startswith('/static'):
+			# Ignore static files in DEBUG
+			return
+		
+		entry = TraceEntry(get = url_path, method = request_method)
+		
+		entry.request_meta = self._get_request_dict_string('META', dict_process = self._trim_meta_dict)
+		entry.request_data = self._get_request_dict_string(request_method if request_method in ['POST', 'GET'] else 'REQUEST')
+		
+		user = getattr(self.django_request, 'user', None)
+		
+		if user:
+			entry.user = u'{} {}'.format(getattr(user, 'id', '0'), getattr(user, 'username', 'anonymous'))
+		else:
+			entry.user = '0 None'
 		
 		for row in self.rows:
 			msg_row = u'''[{level}] {file_name}:{lineno} {msg}\n'''

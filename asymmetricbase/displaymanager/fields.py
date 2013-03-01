@@ -1,5 +1,5 @@
 from functools import total_ordering
-from django.utils.functional import cached_property
+from jinja2.utils import contextfunction
 
 @total_ordering
 class DisplayField(object):
@@ -46,12 +46,12 @@ class AttrGetField(DisplayField):
 		super(AttrGetField, self).__init__(header_name)
 		self.attr = attr
 	
-	def __call__(self, instance):
-		return self.attr_field_macro(instance, attr = self.field_name)
+	@contextfunction
+	def __call__(self, context, instance):
+		return self.attr_field_macro(context = context)(instance, attr = self.field_name)
 	
-	@cached_property
-	def attr_field_macro(self):
-		return self.model.get_macro('attr_field')
+	def attr_field_macro(self, context = {}):
+		return self.model.get_macro('attr_field', context = context)
 	
 	@property
 	def field_name(self):
@@ -70,12 +70,12 @@ class TemplateField(DisplayField):
 		self.kwargs = kwargs
 		super(TemplateField, self).__init__(header_name)
 	
-	@cached_property
-	def template_macro(self):
-		return self.model.get_macro(self.macro_name)
+	def template_macro(self, context = {}):
+		return self.model.get_macro(self.macro_name, context = context)
 	
-	def __call__(self, instance):
-		return self.template_macro(instance, *self.args, **self.kwargs)
+	@contextfunction
+	def __call__(self, context, instance):
+		return self.template_macro(context)(instance, *self.args, **self.kwargs)
 
 class AutoTemplateField(TemplateField, AttrGetField):
 	
@@ -86,8 +86,9 @@ class AutoTemplateField(TemplateField, AttrGetField):
 		TemplateField.__init__(self, macro_name = macro_name, *args, **kwargs)
 		AttrGetField.__init__(self, *args, **kwargs)
 	
-	def __call__(self, instance):
-		return TemplateField.__call__(self, AttrGetField.__call__(self, instance))
+	@contextfunction
+	def __call__(self, context, instance):
+		return TemplateField.__call__(self, context, AttrGetField.__call__(self, context, instance))
 
 class LinkField(AutoTemplateField):
 	'''
@@ -100,8 +101,9 @@ class LinkField(AutoTemplateField):
 		if macro_name is not None:
 			self.macro_name = macro_name
 	
-	def __call__(self, instance):
-		return self.template_macro(AttrGetField.__call__(self, instance), self.url_name, *self.args, **self.kwargs)
+	@contextfunction
+	def __call__(self, context, instance):
+		return self.template_macro(context = context)(AttrGetField.__call__(self, context, instance), self.url_name, *self.args, **self.kwargs)
 
 class IntField(AutoTemplateField): pass
 class CharField(AutoTemplateField): pass
@@ -124,15 +126,17 @@ class NestedTemplateField(TemplateField):
 		
 		super(NestedTemplateField, self).__init__(header_name, macro_name, *args, **kwargs)
 	
-	def __call__(self, instance):
-		return self.template_macro(instance, self.child, *self.args, **self.kwargs)
+	@contextfunction
+	def __call__(self, context, instance):
+		return self.template_macro(context = context)(instance, self.child, *self.args, **self.kwargs)
 
 class MenuItemField(TemplateField):
 	
 	def __init__(self, header_name = '', macro_name = 'linkfield', *args, **kwargs):
 		super(MenuItemField, self).__init__(header_name, macro_name, *args, **kwargs)
 	
-	def __call__(self, instance):
+	@contextfunction
+	def __call__(self, context, instance):
 		if not isinstance(instance, MenuItem):
 			raise TypeError('MenuItemField must be called on an instance of MenuItem')
 		kwargs = {}
@@ -140,7 +144,7 @@ class MenuItemField(TemplateField):
 		kwargs['url_args'] = instance.args
 		kwargs['url_text'] = instance.label
 		kwargs['get_args'] = instance.url_args
-		return self.template_macro(instance, url_name = instance.url, **kwargs)
+		return self.template_macro(context = context)(instance, url_name = instance.url, **kwargs)
 
 class MenuItem(object):
 	"""

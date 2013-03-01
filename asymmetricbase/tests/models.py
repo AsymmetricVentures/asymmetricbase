@@ -69,15 +69,3 @@ class TestS3FileWithPreviewModel(models.S3FileWithPreview):
 	class Constants(object):
 		PREVIEW_IMAGE_WIDTH = 50
 		PREVIEW_IMAGE_HEIGHT = 50
-
-#class TestOldEnumModel(models.AsymBaseModel):
-#	field1 = models.PositiveSmallIntegerField(choices = TestOldEnum.Choices.items())
-#	
-#	class Meta(object):
-#		app_label = 'tests'
-#
-#class TestOldEnumModelWithDefault(models.AsymBaseModel):
-#	field1 = models.PositiveSmallIntegerField(choices = TestOldEnum.Choices.items(), default = TestOldEnum.VALUEC)
-#	
-#	class Meta(object):
-#		app_label = 'tests'

@@ -17,6 +17,8 @@ from django.conf import settings
 import jinja2
 from jinja2.ext import WithExtension, LoopControlExtension
 from jinja2.utils import contextfunction
+from jinja2.runtime import Context
+from jinja2.nodes import _context_function_types
 
 from asymmetricbase.jinja.tags.csrf_token import CSRFTokenExtension
 from asymmetricbase.jinja.tags.vtable import VTableExtension
@@ -60,6 +62,36 @@ class UndefinedVar(jinja2.Undefined):
 			return UndefinedVar()
 		
 		return None
+
+def is_special_function(fn):
+	return hasattr(fn, 'contextfunction') or hasattr(fn, 'evalcontextfunction') or hasattr(fn, 'environmentfunction')
+
+def Context_call(__self, __obj, *args, **kwargs):
+	"""Call the callable with the arguments and keyword arguments
+	provided but inject the active context or environment as first
+	argument if the callable is a :func:`contextfunction` or
+	:func:`environmentfunction`.
+	"""
+	if __debug__:
+		__traceback_hide__ = True
+	
+	if hasattr(__obj, '__call__') and is_special_function(__obj.__call__):
+		__obj = getattr(__obj, '__call__')
+		
+	if isinstance(__obj, _context_function_types):
+		if getattr(__obj, 'contextfunction', 0):
+			args = (__self,) + args
+		elif getattr(__obj, 'evalcontextfunction', 0):
+			args = (__self.eval_ctx,) + args
+		elif getattr(__obj, 'environmentfunction', 0):
+			args = (__self.environment,) + args
+	try:
+		return __obj(*args, **kwargs)
+	except StopIteration:
+		return __self.environment.undefined('value was undefined because '
+											'a callable raised a '
+											'StopIteration exception')
+
 
 template_loader = getattr(settings, 'ASYM_TEMPLATE_LOADER', jinja2.FileSystemLoader(app_template_dirs))
 jinja_env = jinja2.Environment(
@@ -126,14 +158,17 @@ def jinja_batch_context_getattr(context, *args, **kwargs):
 			new_kwargs[k] = jinja_context_getattr(context, v)
 		return new_kwargs
 
-def jinja_vtable(table, header = '', tail = ''):
-	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml').module.vtable(table, header, tail)
+@contextfunction
+def jinja_vtable(ctx, table, header = '', tail = ''):
+	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml', globals = ctx).module.vtable(table, header, tail)
 
-def jinja_gridlayout(layout):
-	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml').module.gridlayout(layout)
+@contextfunction
+def jinja_gridlayout(ctx, layout):
+	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml', globals = ctx).module.gridlayout(layout)
 
-def jinja_display(layout):
-	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml').module.display(layout)
+@contextfunction
+def jinja_display(ctx, layout):
+	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml', globals = ctx).module.display(layout)
 
 def currency_format(num):
 	if not isinstance(num, (int, float, long, Decimal)):
@@ -167,3 +202,8 @@ jinja_env.filters.update({
 	'radioiterator_named' : radioiterator_named,
 	'currency' : currency_format,
 })
+
+#jinja_env.compile_templates('/tmp/jinjatemplates', zip = None)
+
+# Ugly hack to enable calling classes with @contextfunction
+setattr(Context, 'call', Context_call)

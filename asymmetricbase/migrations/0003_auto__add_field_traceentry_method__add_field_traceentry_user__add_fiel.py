@@ -1,4 +1,3 @@
-#@PydevCodeAnalysisIgnore
 # -*- coding: utf-8 -*-
 import datetime
 from south.db import db
@@ -9,20 +8,39 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'TraceEntry'
-        db.create_table('asymmetricbase_traceentry', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key = True)),
-            ('date_created', self.gf('django.db.models.fields.DateTimeField')(default = datetime.datetime.now)),
-            ('get', self.gf('django.db.models.fields.TextField')(blank = True)),
-            ('msg', self.gf('django.db.models.fields.TextField')(blank = True)),
-            ('exc_info', self.gf('django.db.models.fields.TextField')(blank = True)),
-        ))
-        db.send_create_signal('asymmetricbase', ['TraceEntry'])
+        # Adding field 'TraceEntry.method'
+        db.add_column('asymmetricbase_traceentry', 'method',
+                      self.gf('django.db.models.fields.CharField')(default='', max_length=10, blank=True),
+                      keep_default=False)
+
+        # Adding field 'TraceEntry.user'
+        db.add_column('asymmetricbase_traceentry', 'user',
+                      self.gf('django.db.models.fields.CharField')(default='', max_length=100, blank=True),
+                      keep_default=False)
+
+        # Adding field 'TraceEntry.request_meta'
+        db.add_column('asymmetricbase_traceentry', 'request_meta',
+                      self.gf('django.db.models.fields.TextField')(default='', blank=True),
+                      keep_default=False)
+
+        # Adding field 'TraceEntry.request_data'
+        db.add_column('asymmetricbase_traceentry', 'request_data',
+                      self.gf('django.db.models.fields.TextField')(default='', blank=True),
+                      keep_default=False)
 
 
     def backwards(self, orm):
-        # Deleting model 'TraceEntry'
-        db.delete_table('asymmetricbase_traceentry')
+        # Deleting field 'TraceEntry.method'
+        db.delete_column('asymmetricbase_traceentry', 'method')
+
+        # Deleting field 'TraceEntry.user'
+        db.delete_column('asymmetricbase_traceentry', 'user')
+
+        # Deleting field 'TraceEntry.request_meta'
+        db.delete_column('asymmetricbase_traceentry', 'request_meta')
+
+        # Deleting field 'TraceEntry.request_data'
+        db.delete_column('asymmetricbase_traceentry', 'request_data')
 
 
     models = {
@@ -64,7 +82,11 @@ class Migration(SchemaMigration):
             'exc_info': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'get': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'msg': ('django.db.models.fields.TextField', [], {'blank': 'True'})
+            'method': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '10', 'blank': 'True'}),
+            'msg': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'request_data': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+            'request_meta': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+            'user': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '100', 'blank': 'True'})
         }
     }
 

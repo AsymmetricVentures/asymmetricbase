@@ -10,6 +10,7 @@ from django.db import transaction
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.utils.http import urlencode
+from django.template.response import ContentNotRenderedError
 
 from asymmetricbase.views.mixins.multi_format_response import MultiFormatResponseMixin
 from asymmetricbase.utils.exceptions import DeveloperTODO, ForceRollback
@@ -17,6 +18,7 @@ from asymmetricbase.logging import logger #@UnusedImport
 from asymmetricbase.jinja import jinja_env
 from asymmetricbase.utils.permissions import create_codename, \
 	default_content_type_appname
+
 
 class AsymBaseView(MultiFormatResponseMixin, View):
 	""" Base class for all views """
@@ -29,7 +31,6 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 		self.forms = {}
 		super(AsymBaseView, self).__init__(*args, **kwargs)
 		self.successful = True
-		self.forms = {}
 	
 	def preprocess(self, request, *args, **kwargs):
 		"This is called before get or post are called. Used to prepare shared values"
@@ -151,6 +152,10 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			except ForceRollback:
 				# Ignore these because they're not real exceptions
 				response = self.render_to_response()
+			except ContentNotRenderedError as e:
+				logger.exception(u"Content not rendered for template {}.".format(self.template_name))
+				self.template_name = '500.djhtml'
+				return self.render_to_response()
 			
 			logger.debug('END REQUEST*********')
 			return response
