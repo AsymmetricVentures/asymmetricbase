@@ -1,8 +1,26 @@
+# -*- coding: utf-8 -*-
+#    Asymmetric Base Framework - A collection of utilities for django frameworks
+#    Copyright (C) 2013  Asymmetric Ventures Inc.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program; if not, write to the Free Software Foundation, Inc.,
+#    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 from django.core.management.base import BaseCommand
 from django.db.models import get_models
 from django.db import connections, DEFAULT_DB_ALIAS, transaction
 from django.core.management.color import color_style
 from django.db.backends.util import truncate_name
+
 from south.db.generic import DatabaseOperations
 
 class Command(BaseCommand):

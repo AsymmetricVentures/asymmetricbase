@@ -1,8 +1,23 @@
-import datetime
+# -*- coding: utf-8 -*-
+#    Asymmetric Base Framework - A collection of utilities for django frameworks
+#    Copyright (C) 2013  Asymmetric Ventures Inc.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program; if not, write to the Free Software Foundation, Inc.,
+#    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 import os, warnings
 import locale
 from decimal import Decimal
-
 from operator import attrgetter
 
 from django.template.loaders.app_directories import fs_encoding, \
@@ -22,9 +37,7 @@ from jinja2.nodes import _context_function_types
 
 from asymmetricbase.jinja.tags.csrf_token import CSRFTokenExtension
 from asymmetricbase.jinja.tags.vtable import VTableExtension
-from asymmetricbase.jinja.tags.haml import HamlishTagExtension
 from asymmetricbase.jinja.tags.fielditerator import checkboxiterator, checkboxiterator_named, radioiterator, radioiterator_named
-
 
 class UndefinedVar(jinja2.Undefined):
 	def __int__(self):
@@ -101,7 +114,6 @@ jinja_env = jinja2.Environment(
 	extensions = [
 		CSRFTokenExtension,
 		VTableExtension,
-		HamlishTagExtension,
 		WithExtension,
 		LoopControlExtension
 	]

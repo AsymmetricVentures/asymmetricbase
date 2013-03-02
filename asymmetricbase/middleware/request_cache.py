@@ -1,8 +1,10 @@
+# No license given.
+# Modified from:http://stackoverflow.com/questions/3151469/per-request-cache-in-django
+
 from threading import currentThread
 import time
 
 from django.core.cache.backends.locmem import LocMemCache
-# http://stackoverflow.com/questions/3151469/per-request-cache-in-django
 
 _request_cache = {}
 _installed_middleware = False

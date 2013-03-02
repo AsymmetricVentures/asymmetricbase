@@ -1,3 +1,20 @@
+# -*- coding: utf-8 -*-
+#    Asymmetric Base Framework - A collection of utilities for django frameworks
+#    Copyright (C) 2013  Asymmetric Ventures Inc.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program; if not, write to the Free Software Foundation, Inc.,
+#    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 from django.db import models
 from django.utils import timezone
 
@@ -10,21 +27,6 @@ class LogEntryType(Enum):
 	ASSIGN = 4, 'assign'
 	OTHER = 5, 'other'
 
-# class LogEntryType(object):
-# 	MODEL = 'model'
-# 	VIEW = 'view'
-# 	LOGIN = 'login'
-# 	ASSIGN = 'assign'
-# 	OTHER = 'other'
-# 	
-# 	Choices = OrderedDict([
-# 		(MODEL, 'Model'),
-# 		(VIEW, 'View'),
-# 		(LOGIN, 'Login'),
-# 		(ASSIGN, 'Assign'),
-# 		(OTHER, 'OTHER')
-# 	])
-
 class AccessType(Enum):
 	READ = 1, 'read'
 	WRITE = 2, 'write'
@@ -34,28 +36,6 @@ class AccessType(Enum):
 	UNASSIGN = 6, 'unassign'
 	VIEW = 7, 'view'
 	OTHER = 8, 'other'
-
-# class AccessType(object):
-# 	READ = 'read'
-# 	WRITE = 'write'
-# 	ADD = 'add'
-# 	GRANT = 'grant'
-# 	ASSIGN = 'assign'
-# 	UNASSIGN = 'unassign'
-# 	VIEW = 'view'
-# 	OTHER = 'other'
-# 	
-# 	Choices = OrderedDict([
-# 		(READ, 'Read'),
-# 		(WRITE, 'Write'),
-# 		(ADD, 'Add'),
-# 		(GRANT, 'Grant'),
-# 		(ASSIGN, 'assign'),
-# 		(UNASSIGN, 'unassign'),
-# 		(VIEW, 'View'),
-# 		(OTHER, 'OTHER')
-# 	])
-
 
 class ObjectContent(models.Model):
 	time_stamp = models.DateTimeField('action time', auto_now = True, default = timezone.now)
@@ -72,7 +52,6 @@ class ObjectContent(models.Model):
 		obj = list(serializers.deserialize("json", self.content_in_json))[0].object
 		return obj
 	
-
 class AuditEntry(models.Model):
 	log_type = models.CharField(max_length = 10, choices = LogEntryType.Choices.items())
 	access_type = models.CharField(max_length = 10, choices = AccessType.Choices.items())

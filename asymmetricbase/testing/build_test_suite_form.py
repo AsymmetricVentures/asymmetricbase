@@ -1,8 +1,9 @@
-import unittest
+# -*- coding: utf-8 -*-
+# No license given
+# From: http://furrybrains.com/2009/02/25/organizaing-unit-tests-in-django/
 
-'''
-From http://furrybrains.com/2009/02/25/organizaing-unit-tests-in-django/
-'''
+
+import unittest
 
 def build_test_suite_from(test_cases):
 	"""

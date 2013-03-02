@@ -1,3 +1,20 @@
+# -*- coding: utf-8 -*-
+#    Asymmetric Base Framework - A collection of utilities for django frameworks
+#    Copyright (C) 2013  Asymmetric Ventures Inc.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program; if not, write to the Free Software Foundation, Inc.,
+#    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 from django.forms import * # @UnusedWildImport pylint: disable-msg=W0401
 from django import forms # @Reimport
 from django.forms.models import modelformset_factory, BaseModelFormSet, \
@@ -8,8 +25,8 @@ from django.conf import settings
 
 import jinja2
 
-from asymmetricbase.forms.boundfield import BoundField
 from asymmetricbase.jinja import jinja_env
+from asymmetricbase.forms.monkey_patch_django import monkey_patch_django
 
 HTML5 = getattr(settings, 'ASYM_HTML5', False)
 HTML5_WIDGETS = getattr(settings, 'ASYM_HTML5_WIDGETS', {})
@@ -17,24 +34,6 @@ HTML5_WIDGETS = getattr(settings, 'ASYM_HTML5_WIDGETS', {})
 if HTML5:
 	from asymmetricbase.forms.html5_widgets import * # pylint: disable-msg=W0401
 
-# from https://gist.github.com/972162/3230682034aefe517e0c08b4ff38a6c37509a0e9
-def monkey_patch_django():
-	"""
-	Patching some django objects to make them "safe" for jinja's escape() function.
-	Good for us it uses __html__() method.
-	"""
-	# Django's SafeString and SafeUnicode should not be escaped:
-	from django.utils.safestring import SafeData
-	SafeData.__html__ = lambda self: self
-	
-	from django.forms.formsets import BaseFormSet
-	from django.forms.util import ErrorDict, ErrorList
-	
-	# If unicode returns SafeData, then escape will pass it outside unmodified thanks to patch above
-	# If it's just a string it will be escaped
-	for cls in (BaseForm, Media, BoundField, BaseFormSet, ErrorDict, ErrorList):
-		cls.__html__ = lambda self: jinja2.escape(unicode(self))
-	
 class BaseFormMixin(object):
 	
 	required_css_class = 'field_required'
