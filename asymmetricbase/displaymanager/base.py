@@ -110,16 +110,16 @@ class DisplayMeta(type):
 	
 	@staticmethod
 	def _load_templates(template_dict, template_name):
-		if template_name is not None:
-			if isinstance(template_name, (list, tuple, OrderedSet)):
-				for name in template_name:
-					if name not in template_dict:
-						#TODO: this needs to be lazy
-						template_dict.update({name : jinja_env.get_template(name).module})
-			else:
-				if template_name not in template_dict:
-					template_dict.update({template_name : jinja_env.get_template(template_name).module})
-		
+#		if template_name is not None:
+#			if isinstance(template_name, (list, tuple, OrderedSet)):
+#				for name in template_name:
+#					#if name not in template_dict:
+#						#TODO: this needs to be lazy
+#						#template_dict.update({name : jinja_env.get_template(name).module})
+#			else:
+#				if template_name not in template_dict:
+#					template_dict.update({template_name : jinja_env.get_template(template_name).module})
+#		
 		return template_dict
 	
 	def __new__(cls, name, bases, attrs):
@@ -206,15 +206,15 @@ class Display(object):
 		"""Get a macro by name and context
 		"""
 		context = kwargs.pop('context', {})
-		cache = get_request_cache()
+		#cache = get_request_cache()
 		
-		macro_key = Display.__make_key(id(cls), name, id(context))
+		#macro_key = Display.__make_key(id(cls), name, id(context))
 		
-		macro_ret = cache.get(macro_key)
+		macro_ret = None# cache.get(macro_key)
 		
 		if macro_ret is None:
 			# Load all macros with this context
-			template_dict = Display._load_templates(cls.template_dict, getattr(cls._meta, 'template_name', None), context)
+			template_dict = Display._load_templates({}, getattr(cls._meta, 'template_name', None), context)
 			
 			# Now find all the macros
 			for template_module in template_dict.values():
@@ -222,7 +222,7 @@ class Display(object):
 					if isinstance(macro, Macro):
 						if macro_name == name:
 							macro_ret = macro
-						cache.set(Display.__make_key(id(cls), macro_name, id(context)), macro)
+						#cache.set(Display.__make_key(id(cls), macro_name, id(context)), macro)
 		
 		if macro_ret is None:
 			raise AttributeError('Cannot get macro \'{}\''.format(name))
@@ -232,6 +232,7 @@ class Display(object):
 	@staticmethod
 	def __make_key(*args):
 		return '-'.join(map(str, args))
+	
 	@staticmethod
 	def _load_templates(template_dict, template_name, context):
 		if template_name is not None:
