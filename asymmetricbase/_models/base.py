@@ -21,7 +21,6 @@ from django.dispatch.dispatcher import receiver
 from django.db.models import signals
 from django.forms.models import model_to_dict
 from django.contrib.contenttypes.models import ContentType
-from django.utils.functional import cached_property
 
 from asymmetricbase.logging import audit_logger
 from asymmetricbase._models.logger_models import LogEntryType, AccessType
@@ -57,9 +56,9 @@ class AsymBaseModel(models.Model):
 	def __json__(self, encoder):
 		return model_to_dict(self, exclude = ['id'])
 	
-	@cached_property
-	def content_type(self):
-		return ContentType.objects.get_for_model(self)
+	@classmethod
+	def get_content_type(cls):
+		return ContentType.objects.get_for_model(cls)
 
 @receiver(signal = signals.post_save, dispatch_uid = 'write_audit_log')
 def asym_model_base_postsave(sender, instance, created, raw, using, **kwargs):
