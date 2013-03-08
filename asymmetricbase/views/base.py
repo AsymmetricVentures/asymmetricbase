@@ -135,19 +135,6 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			
 			logger.debug('The required permissions are {}'.format(permissions_required))
 			
-			if self.login_required:
-				suffix = ''
-				if hasattr(self, 'permission_name'):
-					suffix = AsymBaseView.get_view_name_and_suffix(self.permission_name, **kwargs)[1]
-				
-				view_perm = '{}.{}'.format(default_content_type_appname(), create_codename(self.__class__.__module__, self.__class__.__name__, suffix))
-				if not request.user.has_perm(view_perm):
-						messages.error(request, 'You do not have permission to view that page')
-						logger.debug('Failed permission check {}'.format(view_perm))
-						return redirect(reverse(getattr(settings, 'ASYM_FAILED_LOGIN_URL')))
-				
-				logger.debug('Has view permission: {}'.format(view_perm))
-			
 			logger.debug('AsymBaseView: Getting form data')
 			self.get_form_data()
 			
@@ -162,6 +149,10 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			
 			logger.debug("AsymBaseView: Predispatch")
 			self.predispatch(request, *args, **kwargs)
+			
+			logger.debug("AsymBaseView: Has Access")
+			if not self._has_access(request, *args, **kwargs):
+				return redirect(reverse(getattr(settings, 'ASYM_FAILED_LOGIN_URL')))
 			
 			try:
 				logger.debug('AsymBaseView: dispatch')
@@ -193,6 +184,24 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			return True
 		
 		return False
+	
+	def _has_access(self, request, *args, **kwargs):
+		if self.login_required:
+			view_perm = self._get_view_perm(*args, **kwargs)
+			if not request.user.has_perm(view_perm):
+				self.error('You do not have permission to view that page')
+				logger.debug('Failed permission check {}'.format(view_perm))
+				return False
+			
+			logger.debug('Has view permission: {}'.format(view_perm))
+		return True
+	
+	def _get_view_perm(self, *args, **kwargs):
+		suffix = ''
+		if hasattr(self, 'permission_name'):
+			suffix = AsymBaseView.get_view_name_and_suffix(self.permission_name, **kwargs)[1]
+		
+		return '{}.{}'.format(default_content_type_appname(), create_codename(self.__class__.__module__, self.__class__.__name__, suffix))
 	
 	def has_permissions(self, perms, obj = None):
 		return self.request.user.has_perms(perms, obj)
