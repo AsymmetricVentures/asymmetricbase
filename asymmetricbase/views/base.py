@@ -189,7 +189,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 		if self.login_required:
 			view_perm = self._get_view_perm(*args, **kwargs)
 			if not request.user.has_perm(view_perm):
-				self.error('You do not have permission to view that page')
+				self.error("You do not have permission to view that page")
 				logger.debug('Failed permission check {}'.format(view_perm))
 				return False
 			
@@ -233,8 +233,8 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 		
 		logger.debug('The following are add_errors()')
 		for error in error_messages:
-			if error.startswith('This field is required'):
-				error = 'Required fields are marked with an asterisk'
+			if error.startswith("This field is required"):
+				error = "Required fields are marked with an asterisk"
 			
 			logger.debug('\t{}'.format(error))
 			self.error(error)
