@@ -152,6 +152,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			
 			logger.debug("AsymBaseView: Has Access")
 			if not self._has_access(request, *args, **kwargs):
+				self.error("You do not have permission to view that page")
 				return redirect(reverse(getattr(settings, 'ASYM_FAILED_LOGIN_URL')))
 			
 			try:
@@ -189,7 +190,6 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 		if self.login_required:
 			view_perm = self._get_view_perm(*args, **kwargs)
 			if not request.user.has_perm(view_perm):
-				self.error("You do not have permission to view that page")
 				logger.debug('Failed permission check {}'.format(view_perm))
 				return False
 			
