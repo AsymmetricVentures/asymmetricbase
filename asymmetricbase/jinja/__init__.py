@@ -76,6 +76,11 @@ class UndefinedVar(jinja2.Undefined):
 		
 		return None
 
+class JinjaEnvironment(jinja2.Environment):
+	
+	def get_template_module(self, template_name, ctx = None):
+		return self.get_template(template_name).make_module(vars = ctx)
+
 def is_special_function(fn):
 	return hasattr(fn, 'contextfunction') or hasattr(fn, 'evalcontextfunction') or hasattr(fn, 'environmentfunction')
 
@@ -107,7 +112,7 @@ def Context_call(__self, __obj, *args, **kwargs):
 
 
 template_loader = getattr(settings, 'ASYM_TEMPLATE_LOADER', jinja2.FileSystemLoader(app_template_dirs))
-jinja_env = jinja2.Environment(
+jinja_env = JinjaEnvironment(
 	loader = template_loader,
 	undefined = UndefinedVar,
 	autoescape = True,
@@ -116,7 +121,7 @@ jinja_env = jinja2.Environment(
 		VTableExtension,
 		WithExtension,
 		LoopControlExtension
-	]
+	],
 )
 
 def jinja_url(view_name, *args, **kwargs):
@@ -172,15 +177,15 @@ def jinja_batch_context_getattr(context, *args, **kwargs):
 
 @contextfunction
 def jinja_vtable(ctx, table, header = '', tail = ''):
-	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml', globals = ctx).module.vtable(table, header, tail)
+	return jinja_env.get_template_module('asymmetricbase/displaymanager/base.djhtml', ctx).vtable(table, header, tail)
 
 @contextfunction
 def jinja_gridlayout(ctx, layout):
-	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml', globals = ctx).module.gridlayout(layout)
+	return jinja_env.get_template_module('asymmetricbase/displaymanager/base.djhtml', ctx).gridlayout(layout)
 
 @contextfunction
 def jinja_display(ctx, layout):
-	return jinja_env.get_template('asymmetricbase/displaymanager/base.djhtml', globals = ctx).module.display(layout)
+	return jinja_env.get_template_module('asymmetricbase/displaymanager/base.djhtml', ctx).display(layout)
 
 def currency_format(num):
 	if not isinstance(num, (int, float, long, Decimal)):
