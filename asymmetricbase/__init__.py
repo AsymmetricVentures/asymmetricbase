@@ -15,33 +15,6 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import django
-from django.utils import html as django_html_utils
+from .utils import monkey_patching
 
-from jinja2._markupsafe import Markup
-
-old_conditional_escape = django_html_utils.conditional_escape
-
-def conditional_escape(html):
-	"""
-	Override django's conditional_escape to look for jinja's MarkupSafe
-	"""
-	if isinstance(html, Markup):
-		return html
-	else:
-		return old_conditional_escape(html)
-	
-setattr(django_html_utils, 'conditional_escape', conditional_escape)
-
-if cmp(django.VERSION[:3], (1, 5, 0)) < 0:
-	# Cached property is broken in django < 1.5
-	
-	from django.utils.functional import cached_property
-	
-	def cached_prop__get__(self, instance, type = None): #@ReservedAssignment
-		if instance is None:
-			return self
-		res = instance.__dict__[self.func.__name__] = self.func(instance)
-		return res
-	
-	setattr(cached_property, '__get__', cached_prop__get__)
+monkey_patching.monkey_patch()
