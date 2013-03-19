@@ -16,6 +16,7 @@
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models.query import QuerySet
 
 class AsymJSONEncoder(DjangoJSONEncoder):
 	
@@ -23,6 +24,8 @@ class AsymJSONEncoder(DjangoJSONEncoder):
 		
 		if hasattr(o, '__json__'):
 			return o.__json__(self.default)
+		if isinstance(o, QuerySet):
+			return self.default(list(o))
 		else:
 			return super(AsymJSONEncoder, self).default(o)
 
