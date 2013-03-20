@@ -36,7 +36,7 @@ class FormFactory(object):
 		self.children = set(kwargs.pop('children', []))
 		self.parents = set(kwargs.pop('parents', []))
 		self.use_GET = kwargs.pop('use_GET', False)
-		
+		self.use_GET_and_POST = kwargs.pop('use_GET_and_POST', False)
 		self.kwargs = kwargs
 		self.instance = None
 		self.initial = {}
@@ -44,8 +44,9 @@ class FormFactory(object):
 	def __call__(self, request):
 		form_data = QueryDict('', mutable = True)
 		form_data.update(self.data)
-		
-		if self.use_GET:
+		if self.use_GET_and_POST:
+			form_data.update(request.GET or request.POST or {})
+		elif self.use_GET:
 			form_data.update(request.GET)
 		else:
 			form_data.update(request.POST)
@@ -91,6 +92,7 @@ class FormFactory(object):
 		kwargs['children'] = deepcopy(self.children, memo)
 		kwargs['parents'] = deepcopy(self.parents, memo)
 		kwargs['use_GET'] = self.use_GET
+		kwargs['use_GET_and_POST'] = self.use_GET_and_POST
 		ret = FormFactory(form, *args, callbacks = callbacks, init_callbacks = init_callbacks, **kwargs)
 		
 		ret.data = deepcopy(self.data, memo)
