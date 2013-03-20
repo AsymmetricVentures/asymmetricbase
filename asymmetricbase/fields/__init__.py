@@ -16,6 +16,7 @@
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dollarfield import DollarField, ZERO_DOLLARS
+from quantityfield import QtyField, ZERO_QTY
 from enumfield import EnumField, EnumFormField
 from extended_modelmultiplechoicefield import ExtendedModelMultipleChoiceField
 from rangefield import IntegerRangeField

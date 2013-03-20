@@ -15,10 +15,23 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-#@PydevCodeAnalysisIgnore
-from django.db.models import * # @UnusedWildImport
-from fields import (QtyField, DollarField, IntegerRangeField, EnumField, ZERO_DOLLARS, ZERO_QTY,
-	COMMENT_LENGTH, LONG_MESSAGE_LENGTH, LONG_NAME_LENGTH, SHORT_MESSAGE_LENGTH, SHORT_NAME_LENGTH,
-	CommentField, LongMessageField, LongNameField, ShortMessageField, ShortNameField, UUIDField)
-from _models import * # @UnusedWildImport
+from decimal import Decimal
 
+from django.db import models
+
+from south.modelsinspector import add_introspection_rules
+
+from asymmetricbase.logging import logger # @UnusedImport
+
+ZERO_QTY = Decimal('0.00')
+
+class QtyField(models.DecimalField):
+	
+	def __init__(self, *args, **kwargs):
+		kwargs.setdefault('default', ZERO_QTY)
+		kwargs.setdefault('max_digits', 15)
+		kwargs.setdefault('decimal_places', 2)
+		
+		super(QtyField, self).__init__(*args, **kwargs)
+
+add_introspection_rules([], ['^asymmetricbase\.fields\.quantityfield\.QtyField'])
