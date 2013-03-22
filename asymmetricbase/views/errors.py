@@ -16,6 +16,7 @@
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from asymmetricbase.views.base import AsymBaseView
+from django.http import HttpResponseRedirect
 
 class ErrorBaseView(AsymBaseView):
 	@classmethod
@@ -24,7 +25,8 @@ class ErrorBaseView(AsymBaseView):
 		
 		def view(request, *args, **kwargs):
 			response = v(request, *args, **kwargs)
-			response.render()
+			if not isinstance(response, HttpResponseRedirect):
+				response.render()
 			return response
 		return view
 
