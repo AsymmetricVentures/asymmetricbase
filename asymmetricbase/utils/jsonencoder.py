@@ -25,7 +25,7 @@ class AsymJSONEncoder(DjangoJSONEncoder):
 		if hasattr(o, '__json__'):
 			return o.__json__(self.default)
 		if isinstance(o, QuerySet):
-			return self.default(list(o))
+			return list(o)
 		else:
 			return super(AsymJSONEncoder, self).default(o)
 
