@@ -24,25 +24,8 @@ from asymmetricbase import forms
 
 class FormFactory(object):
 	"""
-	FormFactory expects that initial data for the forms are passed in 
-	via FormFactory.initial. If initial data is set elsewhere, 
-	eg:
-	def Form.__init__(self, *args, **kwargs):
-		''' DO NOT DO THIS '''
-		super(Form, self).__init__(*args, **kwargs)
-		self.fields['field_name'].initial = "Some Value"
-		
-	Then the form will return is_valid==False in the case of an empty submission
-	because FormFactory will pass None as form_data and therefore the form will
-	be unbound and not use the initial data. The correct way to pass initial
-	data to a form is (in the view):
-	eg:
-	def preprocess(self, *args, **kwargs):
-		super(View, self).preprocess(*args, **kwargs)
-		
-		self.forms['myform'].initial.update({
-			'field1' : "Some Value",
-		})
+	If you need a form to return is_valid() == True even when request.{POST,GET}
+	is an empty QueryDict(), then set always_bound = True
 	
 	"""
 	
