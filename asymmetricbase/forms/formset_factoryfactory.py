@@ -19,7 +19,7 @@ from django.forms.formsets import formset_factory, BaseFormSet
 
 from asymmetricbase.logging import logger  # @UnusedImport
 from asymmetricbase.forms.form_factory import FormFactory
-from asymmetricbase.forms import ModelForm, make_modelformset_factory,\
+from asymmetricbase.forms import ModelForm, make_modelformset_factory, \
 	make_inlineformset_factory
 from copy import deepcopy
 from django.forms.models import BaseModelFormSet, BaseInlineFormSet
@@ -38,6 +38,7 @@ class AsymFormFactoryFactoryDeepcopier(object):
 		self.kwargs['children'] = deepcopy(instance.children, memo)
 		self.kwargs['parents'] = deepcopy(instance.parents, memo)
 		self.kwargs['use_GET'] = instance.use_GET
+		self.kwargs['always_bound'] = instance.always_bound
 		
 		self.kwargs['extra'] = instance.extra
 		self.kwargs['max_num'] = instance.max_num

@@ -50,6 +50,8 @@ class FormFactory(object):
 		self.form = form
 		self.args = args
 		self.data = {}
+		# TODO: see if always_bound can be replaced with use_GET
+		self.always_bound = kwargs.pop('always_bound', False)
 		
 		self.callbacks = kwargs.pop('callbacks', [])
 		self.init_callbacks = kwargs.pop('init_callbacks', [])
@@ -75,8 +77,11 @@ class FormFactory(object):
 		if 'prefix' in self.kwargs:
 			form_data = { k : v for k, v in form_data.items() if k.startswith(self.kwargs['prefix']) }
 		
-		# if form_data or request.FILES are empty, pass in None otherwise form is instantiated as bound form
-		self.args = (form_data or None, request.FILES or None) + filter(lambda x: x is not None, self.args)
+		if not self.always_bound:
+			# if form_data or request.FILES are empty, pass in None otherwise form is instantiated as bound form
+			self.args = (form_data or None, request.FILES or None) + filter(lambda x: x is not None, self.args)
+		else:
+			self.args = (form_data, request.FILES or None) + filter(lambda x: x is not None, self.args)
 		
 		if 'initial' in self.kwargs:
 			if isinstance(self.kwargs['initial'], dict):
@@ -113,6 +118,7 @@ class FormFactory(object):
 		kwargs['children'] = deepcopy(self.children, memo)
 		kwargs['parents'] = deepcopy(self.parents, memo)
 		kwargs['use_GET'] = self.use_GET
+		kwargs['always_bound'] = self.always_bound
 		ret = FormFactory(form, *args, callbacks = callbacks, init_callbacks = init_callbacks, **kwargs)
 		
 		ret.data = deepcopy(self.data, memo)
