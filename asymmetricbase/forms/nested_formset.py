@@ -65,4 +65,4 @@ class BaseNestedFormSet(BaseModelFormSet):
 		for form in formset_instance.forms:
 			print form
 			if hasattr(form, 'nested_attr_name'):
-					cls.print_all(getattr(form, form.nested_attr_name))
+				cls.print_all(getattr(form, form.nested_attr_name))

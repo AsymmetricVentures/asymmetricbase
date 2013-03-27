@@ -188,6 +188,8 @@ class Display(object):
 	''' Per "model" '''
 	__metaclass__ = DisplayMeta
 	
+	USE_CACHE = False
+	
 	def __init__(self, obj, *args, **kwargs):
 		self.obj = obj
 	
@@ -206,23 +208,35 @@ class Display(object):
 		"""Get a macro by name and context
 		"""
 		context = kwargs.pop('context', {})
-		#cache = get_request_cache()
 		
-		#macro_key = Display.__make_key(id(cls), name, id(context))
-		
-		macro_ret = None# cache.get(macro_key)
+		if Display.USE_CACHE:
+			if id(context) == id({}):
+				tmp = {}
+				tmp = context
+				context = {}
+				context = tmp
+			
+			
+			cache = get_request_cache()
+			
+			macro_key = Display.__make_key(id(cls), name, id(context))
+			
+			macro_ret = cache.get(macro_key)
+		else:
+			macro_ret = None
 		
 		if macro_ret is None:
 			# Load all macros with this context
-			template_dict = Display._load_templates({}, getattr(cls._meta, 'template_name', None), context)
+			template_dict = Display._load_templates(OrderedDict(), getattr(cls._meta, 'template_name', None), context)
 			
 			# Now find all the macros
-			for template_module in template_dict.values():
+			for template_module in reversed(template_dict.values()):
 				for macro_name, macro in template_module.__dict__.items():
 					if isinstance(macro, Macro):
 						if macro_name == name:
 							macro_ret = macro
-						#cache.set(Display.__make_key(id(cls), macro_name, id(context)), macro)
+						if Display.USE_CACHE:
+							cache.set(Display.__make_key(id(cls), macro_name, id(context)), macro)
 		
 		if macro_ret is None:
 			raise AttributeError('Cannot get macro \'{}\''.format(name))
