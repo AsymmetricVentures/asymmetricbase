@@ -253,9 +253,9 @@ class Display(object):
 			if isinstance(template_name, (list, tuple, OrderedSet)):
 				for name in template_name:
 					if name not in template_dict:
-						template_dict.update({name : jinja_env.get_template(name, globals = context).module})
+						template_dict.update({name : jinja_env.get_template_module(name, context)})
 			else:
 				if template_name not in template_dict:
-					template_dict.update({template_name : jinja_env.get_template(template_name, globals = context).module})
+					template_dict.update({template_name : jinja_env.get_template_module(template_name, context)})
 		
 		return template_dict
