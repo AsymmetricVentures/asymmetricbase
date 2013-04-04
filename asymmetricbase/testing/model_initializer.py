@@ -14,6 +14,7 @@
 #    You should have received a copy of the GNU General Public License along
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from django.db import transaction
 
 class ModelInitializer(object):
 	"""
@@ -51,10 +52,11 @@ def install_initializers(initializer_classes):
 	
 	initialized_instances = []
 	
-	# Map[initializer_class, InitializerClassState
+	# Map[initializer_class, InitializerClassState]
 	state = defaultdict(lambda: InitializerClassState.NOT_INSTALLED)
 	
-	_install_initializers_aux(state, initialized_instances, initializer_classes)
+	with transaction.commit_on_success():
+		_install_initializers_aux(state, initialized_instances, initializer_classes)
 	
 	return initialized_instances
 
