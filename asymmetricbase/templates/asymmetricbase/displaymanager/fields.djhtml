@@ -48,11 +48,11 @@
 	{%- if 'url_text' not in kwargs -%}
 		{%- set url_text = obj -%}
 	{%- else-%}
-		{%- set url_text = kwargs['url_text'] -%}
+		{%- set url_text = resolve_recursive(kwargs['url_text']) -%}
 	{%- endif -%}
 	
 	{%- if 'get_args' in kwargs -%}
-		{%- set get_args = kwargs.pop('get_args', None) -%}
+		{%- set get_args = resolve_recursive(kwargs.pop('get_args', None)) -%}
 	{%- else -%}
 		{%- set get_args = None -%}
 	{%- endif -%}
