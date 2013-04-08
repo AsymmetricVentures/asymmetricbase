@@ -59,7 +59,7 @@ class AttrGetField(DisplayField):
 	      name = dm.AttrGetField(attr='nested.attribute')
 	    will display `obj.nested.attribute`
 	"""
-	def __init__(self, header_name = None, attr = None):
+	def __init__(self, header_name = None, attr = None, *args, **kwargs):
 		super(AttrGetField, self).__init__(header_name)
 		self.attr = attr
 	
@@ -110,9 +110,10 @@ class AutoTemplateField(TemplateField, AttrGetField):
 class LinkField(AutoTemplateField):
 	'''
 	'''
-	def __init__(self, header_name = None, url_name = '', *args, **kwargs):
+	def __init__(self, header_name = None, url_name = '', use_instance = False, *args, **kwargs):
 		macro_name = kwargs.pop('macro_name', None)
 		self.url_name = url_name
+		self.use_instance = use_instance
 		super(LinkField, self).__init__(*args, **kwargs)
 		
 		if macro_name is not None:
@@ -120,10 +121,16 @@ class LinkField(AutoTemplateField):
 	
 	@contextfunction
 	def __call__(self, context, instance):
-		return self.template_macro(context = context)(AttrGetField.__call__(self, context, instance), self.url_name, *self.args, **self.kwargs)
+		macro = self.template_macro(context = context)
+		if self.use_instance:
+			return macro(instance, self.url_name, *self.args, **self.kwargs)
+		else:
+			return macro(AttrGetField.__call__(self, context, instance), self.url_name, *self.args, **self.kwargs)
 
 class IntField(AutoTemplateField): pass
 class CharField(AutoTemplateField): pass
+
+class ContextField(): pass
 
 class GridLayoutField(TemplateField):
 	

@@ -36,13 +36,13 @@
 	{%- if 'url_args' not in kwargs -%}
 		{%- set url_args = [obj|int()] -%}
 	{%- else -%}
-		{%- set url_args = kwargs['url_args'] -%}
+		{%- set url_args = resolve_recursive(kwargs['url_args']) -%}
 	{%- endif -%}
 	
 	{%- if 'url_kwargs' not in kwargs -%}
 		{%- set url_kwargs = {} -%}
 	{%- else -%}
-		{%- set url_kwargs = kwargs['url_kwargs'] -%}
+		{%- set url_kwargs = resolve_recursive(kwargs['url_kwargs']) -%}
 	{%- endif -%}
 	
 	{%- if 'url_text' not in kwargs -%}

@@ -19,6 +19,7 @@ import os, warnings
 import locale
 from decimal import Decimal
 from operator import attrgetter
+from collections import OrderedDict
 
 from django.template.loaders.app_directories import fs_encoding, \
 	app_template_dirs
@@ -38,6 +39,7 @@ from jinja2.nodes import _context_function_types
 from asymmetricbase.jinja.tags.csrf_token import CSRFTokenExtension
 from asymmetricbase.jinja.tags.vtable import VTableExtension
 from asymmetricbase.jinja.tags.fielditerator import checkboxiterator, checkboxiterator_named, radioiterator, radioiterator_named
+import asymmetricbase
 
 class UndefinedVar(jinja2.Undefined):
 	def __int__(self):
@@ -176,6 +178,24 @@ def jinja_batch_context_getattr(context, *args, **kwargs):
 		return new_kwargs
 
 @contextfunction
+def jinja_recursive_resolve_display(context, obj):
+	from asymmetricbase.displaymanager import ContextAttribute
+	
+	if isinstance(obj, ContextAttribute):
+		return jinja_context_getattr(context, obj.attr_name)
+	
+	elif isinstance(obj, (list, tuple)):
+		return (jinja_recursive_resolve_display(context, item) for item in obj)
+	
+	elif isinstance(obj, (set, frozenset)):
+		return {jinja_recursive_resolve_display(context, item) for item in obj}
+	
+	elif isinstance(obj, (dict, OrderedDict)):
+		return { k : jinja_recursive_resolve_display(context, item) for k, item in obj.items()}
+	
+	return obj
+
+@contextfunction
 def jinja_vtable(ctx, table, header = '', tail = ''):
 	return jinja_env.get_template_module('asymmetricbase/displaymanager/base.djhtml', ctx).vtable(table, header, tail)
 
@@ -201,6 +221,7 @@ jinja_env.globals.update({
 	'context_getattr' : jinja_context_getattr,
 	'batch_context_getattr' : jinja_batch_context_getattr,
 	
+	'resolve_recursive' : jinja_recursive_resolve_display,
 	
 	'vtable' : jinja_vtable,
 	'gridlayout' : jinja_gridlayout,

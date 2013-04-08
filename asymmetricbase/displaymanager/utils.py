@@ -14,22 +14,9 @@
 #    You should have received a copy of the GNU General Public License along
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from jinja2.utils import contextfunction
 
-
-all: clean build sync
+class ContextAttribute(object):
 	
-	
-clean:
-	rm -rf build dist *.deb MANIFEST
-	- sudo rm -rf asymmetricbase.egg-info
-
-build: clean
-	python setup.py bdist_rpm
-	sudo alien -dc dist/*.noarch.rpm
-
-sync: build
-	rsync -avh *.deb jayson:
-	rsync -avh *.deb westpoint:
-
-clean_compiled_templates:
-	find . -name "*_compiled.py" -print |xargs rm
+	def __init__(self, attr_name):
+		self.attr_name = attr_name
