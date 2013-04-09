@@ -32,6 +32,12 @@
 	{%- endif -%}
 {%- endmacro %}
 
+{%- macro attr_call_field(obj) -%}
+	{%- if kwargs -%}
+		{{ getattr(obj, kwargs['attr'])() }}
+	{%- endif -%}
+{%- endmacro -%}
+
 {% macro linkfield(obj, url_name) -%}
 	{%- if 'url_args' not in kwargs -%}
 		{%- set url_args = [obj|int()] -%}

@@ -74,6 +74,13 @@ class AttrGetField(DisplayField):
 	def field_name(self):
 		return self.attr if self.attr is not None else self.attrname
 
+class AttrCallField(AttrGetField):
+	"""
+	Same as AttrGetField except that it calls the field.
+	"""
+	def attr_field_macro(self, context = {}):
+		return self.model.get_macro('attr_call_field', context = context)
+
 class TemplateField(DisplayField):
 	"""
 	Renders using the macro defined in macro_name.
