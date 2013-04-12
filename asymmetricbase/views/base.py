@@ -36,7 +36,6 @@ from asymmetricbase.jinja import jinja_env
 from asymmetricbase.utils.permissions import create_codename, \
 	default_content_type_appname
 
-
 class AsymBaseView(MultiFormatResponseMixin, View):
 	""" Base class for all views """
 	login_required = True
@@ -74,7 +73,16 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			form_instance = form_data(request)
 			
 			setattr(self, form_name, form_instance)
-			self.context[form_name] = form_instance
+			
+			if self.output_type in ('json', 'jsontree'):
+				# Forms aren't json serializable, so we just want pertinent
+				# values for the form. 
+				self.context[form_name] = {
+					'is_valid' : form_instance.is_valid(),
+					'errors' : self._get_error_list(form_instance.errors)
+				}
+			else:
+				self.context[form_name] = form_instance
 			
 			form_data.process_callbacks()
 	
@@ -172,7 +180,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			logger.error('{}'.format(e))
 			self.template_name = 'todo_error.djhtml'
 			return self.render_to_response()
-		
+	
 	def get(self, request, *args, **kwargs):
 		self.context['params'] = kwargs
 		return self.render_to_response()
@@ -221,7 +229,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 	def info(self, msg):
 		messages.info(self.request, msg)
 	
-	def add_errors(self, error_list):
+	def _get_error_list(self, error_list):
 		error_messages = None
 		# check if error_list is a dict or list of dicts
 		if isinstance(error_list, dict):
@@ -231,8 +239,12 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 		else:
 			error_messages = { unicode(error) for error in error_list }
 		
+		return error_messages
+		
+	def add_errors(self, error_list):
+		
 		logger.debug('The following are add_errors()')
-		for error in error_messages:
+		for error in self._get_error_list(error_list):
 			if error.startswith("This field is required"):
 				error = "Required fields are marked with an asterisk"
 			
