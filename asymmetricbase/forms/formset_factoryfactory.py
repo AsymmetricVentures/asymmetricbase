@@ -38,6 +38,7 @@ class AsymFormFactoryFactoryDeepcopier(object):
 		self.kwargs['children'] = deepcopy(instance.children, memo)
 		self.kwargs['parents'] = deepcopy(instance.parents, memo)
 		self.kwargs['use_GET'] = instance.use_GET
+		self.kwargs['use_REQUEST'] = instance.use_REQUEST
 		self.kwargs['always_bound'] = instance.always_bound
 		
 		self.kwargs['extra'] = instance.extra

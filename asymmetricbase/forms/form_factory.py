@@ -27,6 +27,7 @@ class FormFactory(object):
 	If you need a form to return is_valid() == True even when request.{POST,GET}
 	is an empty QueryDict(), then set always_bound = True
 	
+	If you need to merge POST and GET, call with use_REQUEST = True
 	"""
 	
 	def __init__(self, form, *args, **kwargs):
@@ -43,6 +44,7 @@ class FormFactory(object):
 		self.children = set(kwargs.pop('children', []))
 		self.parents = set(kwargs.pop('parents', []))
 		self.use_GET = kwargs.pop('use_GET', False)
+		self.use_REQUEST = kwargs.pop('use_REQUEST', False)
 		
 		self.kwargs = kwargs
 		self.instance = None
@@ -54,6 +56,8 @@ class FormFactory(object):
 		
 		if self.use_GET:
 			form_data.update(request.GET)
+		elif self.use_REQUEST:
+			form_data.update(request.REQUEST)
 		else:
 			form_data.update(request.POST)
 		
@@ -101,6 +105,7 @@ class FormFactory(object):
 		kwargs['children'] = deepcopy(self.children, memo)
 		kwargs['parents'] = deepcopy(self.parents, memo)
 		kwargs['use_GET'] = self.use_GET
+		kwargs['use_REQUEST'] = self.use_REQUEST
 		kwargs['always_bound'] = self.always_bound
 		ret = FormFactory(form, *args, callbacks = callbacks, init_callbacks = init_callbacks, **kwargs)
 		
