@@ -31,3 +31,4 @@ _$*
 .pydevproject
 .settings
 build
+asymmetricbase.egg-info

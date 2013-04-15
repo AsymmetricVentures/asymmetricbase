@@ -34,6 +34,7 @@ Topic :: Software Development :: Libraries :: Application Frameworks
 setup(
 	name = 'asymmetricbase',
 	version = datetime.now().strftime('%Y%m%d%H%M'),
+	url = 'https://github.com/AsymmetricVentures/jinja2',
 	
 	author = 'Richard Eames',
 	author_email = 'reames@asymmetricventures.com',
@@ -70,11 +71,6 @@ setup(
 		'hamlpy',  # most recent,
 		'Pillow'
 	),
-	
-	dependency_links = [
-		'https://github.com/jessemiller/HamlPy/tarball/master#egg=hamlpy=0.82.2',
-		'https://github.com/AsymmetricVentures/jinja2/tarball/master#egg=Jinja2=2.6',
-	],
 	
 	package_dir = {'asymmetricbase' : 'asymmetricbase'},
 	package_data = {

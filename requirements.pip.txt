@@ -1,0 +1,2 @@
+-e git://github.com/jessemiller/HamlPy.git#egg=hamlpy
+-e git://github.com/AsymmetricVentures/jinja2.git#egg=Jinja2
