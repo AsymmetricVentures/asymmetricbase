@@ -140,6 +140,11 @@ def jinja_date_filter(d, fmt = "%d/%b/%y %I:%M%p"):
 def jinja_fmt(fmt, *args, **kwargs):
 	return fmt.format(*args, **kwargs)
 
+def jinja_filter_empty(seq):
+	if hasattr(seq, '__iter__'):
+		return filter(None, seq)
+	return seq
+
 def jinja_getattr(obj, attr_string):
 	"""
 	Resolve attributes using jinja's getattr() rather than the default python method.
@@ -182,7 +187,7 @@ def jinja_recursive_resolve_display(context, obj):
 	from asymmetricbase.displaymanager import ContextAttribute
 	
 	if isinstance(obj, ContextAttribute):
-		return jinja_context_getattr(context, obj.attr_name)
+		return obj(context, jinja_context_getattr(context, obj.attr_name))
 	
 	elif isinstance(obj, (list, tuple)):
 		return (jinja_recursive_resolve_display(context, item) for item in obj)
@@ -239,6 +244,7 @@ jinja_env.filters.update({
 	'radioiterator' : radioiterator,
 	'radioiterator_named' : radioiterator_named,
 	'currency' : currency_format,
+	'filter' : jinja_filter_empty
 })
 
 #jinja_env.compile_templates('/tmp/jinjatemplates', zip = None)

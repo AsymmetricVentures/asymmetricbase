@@ -17,5 +17,12 @@
 
 class ContextAttribute(object):
 	
-	def __init__(self, attr_name):
+	def __init__(self, attr_name, on_undefined = lambda x:x):
+		self.on_undefined = on_undefined
 		self.attr_name = attr_name
+	
+	def __call__(self, context, attr):
+		if not attr:
+			return self.on_undefined(attr)
+		return attr
+		

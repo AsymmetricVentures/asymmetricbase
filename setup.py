@@ -63,15 +63,18 @@ setup(
 	classifiers = filter(None, classifiers.split('\n')),
 	
 	requires = (
-		'django(==1.4)',
+		'django(==1.4.5)',
 		'jinja2(==2.6)',
 		'pytz',  # most recent
-		'south(==0.7.5)',
+		'south(==0.7.6)',
 		'hamlpy',  # most recent,
 		'Pillow'
 	),
 	
-	dependency_links = ['https://github.com/jessemiller/HamlPy/tarball/master#egg=hamlpy=0.82.2'],
+	dependency_links = [
+		'https://github.com/jessemiller/HamlPy/tarball/master#egg=hamlpy=0.82.2',
+		'https://github.com/AsymmetricVentures/jinja2/tarball/master#egg=Jinja2=2.6',
+	],
 	
 	package_dir = {'asymmetricbase' : 'asymmetricbase'},
 	package_data = {
