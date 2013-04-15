@@ -40,7 +40,6 @@ from asymmetricbase.jinja.tags.csrf_token import CSRFTokenExtension
 from asymmetricbase.jinja.tags.vtable import VTableExtension
 from asymmetricbase.jinja.tags.fielditerator import checkboxiterator, checkboxiterator_named, radioiterator, radioiterator_named
 import asymmetricbase
-from copy import copy
 
 class UndefinedVar(jinja2.Undefined):
 	def __int__(self):
@@ -184,14 +183,7 @@ def jinja_batch_context_getattr(context, *args, **kwargs):
 		return new_kwargs
 
 @contextfunction
-def jinja_recursive_resolve_display(context, obj, extra_context = None):
-	# pass in extra_context dict if recursive lookup should be done with
-	# additional context (like the calling arguments of a macro, which are not
-	# in context passed in by the decoration
-	if extra_context is not None:
-		context = dict(context)
-		context.update(**extra_context)
-	
+def jinja_recursive_resolve_display(context, obj):
 	from asymmetricbase.displaymanager import ContextAttribute
 	
 	if isinstance(obj, ContextAttribute):

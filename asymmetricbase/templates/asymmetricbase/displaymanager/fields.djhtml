@@ -39,27 +39,26 @@
 {%- endmacro -%}
 
 {% macro linkfield(obj, url_name) -%}
-	{%- set macro_args = {'obj' : obj} -%}
 	{%- if 'url_args' not in kwargs -%}
 		{%- set url_args = [obj|int()] -%}
 	{%- else -%}
-		{%- set url_args = resolve_recursive(kwargs['url_args'], macro_args) -%}
+		{%- set url_args = resolve_recursive(kwargs['url_args']) -%}
 	{%- endif -%}
 	
 	{%- if 'url_kwargs' not in kwargs -%}
 		{%- set url_kwargs = {} -%}
 	{%- else -%}
-		{%- set url_kwargs = resolve_recursive(kwargs['url_kwargs'], macro_args) -%}
+		{%- set url_kwargs = resolve_recursive(kwargs['url_kwargs']) -%}
 	{%- endif -%}
 	
 	{%- if 'url_text' not in kwargs -%}
 		{%- set url_text = obj -%}
 	{%- else-%}
-		{%- set url_text = resolve_recursive(kwargs['url_text'], macro_args) -%}
+		{%- set url_text = resolve_recursive(kwargs['url_text']) -%}
 	{%- endif -%}
 	
 	{%- if 'get_args' in kwargs -%}
-		{%- set get_args = resolve_recursive(kwargs.pop('get_args', None), macro_args) -%}
+		{%- set get_args = resolve_recursive(kwargs.pop('get_args', None)) -%}
 	{%- else -%}
 		{%- set get_args = None -%}
 	{%- endif -%}
