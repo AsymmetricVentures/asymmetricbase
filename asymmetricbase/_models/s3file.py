@@ -163,7 +163,7 @@ class S3File(AsymBaseModel):
 	@classmethod
 	def _assert_bucket_has_versioning_enabled(cls, bucket):
 		d = bucket.get_versioning_status()
-		if d.has_key('Versioning') and d['Versioning'] == 'Enabled':
+		if 'Versioning' in d and d['Versioning'] == 'Enabled':
 			# already has versioning enabled
 			return
 		bucket.configure_versioning(versioning = True)

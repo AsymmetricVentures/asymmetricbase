@@ -32,9 +32,9 @@ except ImportError:
 
 class TestS3File(BaseTestCaseWithModels):
 	def test_simple_load_save(self):
-		f1 = TestS3FileModel(file_data = "SOME FILE CONTENT")
-		f2 = TestS3FileModel(file_data = "SOME OTHER FILE CONTENT")
-		f3 = TestS3FileModel(file_data = "AND YET ANOTHER FILE CONTENT")
+		f1 = TestS3FileModel(file_data = b"SOME FILE CONTENT")
+		f2 = TestS3FileModel(file_data = b"SOME OTHER FILE CONTENT")
+		f3 = TestS3FileModel(file_data = b"AND YET ANOTHER FILE CONTENT")
 		f1.metadata = {'some_field': 'some value', 'another_field': 12345}
 		f1.save()
 		f2.save()
@@ -42,9 +42,9 @@ class TestS3File(BaseTestCaseWithModels):
 		f1_loaded = TestS3FileModel.objects.get(id = f1.id)
 		f2_loaded = TestS3FileModel.objects.get(id = f2.id)
 		f3_loaded = TestS3FileModel.objects.get(id = f3.id)
-		self.assertEquals(f1_loaded.file_data, "SOME FILE CONTENT")
-		self.assertEquals(f2_loaded.file_data, "SOME OTHER FILE CONTENT")
-		self.assertEquals(f3_loaded.file_data, "AND YET ANOTHER FILE CONTENT")
+		self.assertEquals(f1_loaded.file_data, b"SOME FILE CONTENT")
+		self.assertEquals(f2_loaded.file_data, b"SOME OTHER FILE CONTENT")
+		self.assertEquals(f3_loaded.file_data, b"AND YET ANOTHER FILE CONTENT")
 		self.assertEquals(f1_loaded.metadata, {'some_field': 'some value', 'another_field': 12345})
 	
 	def test_save_load_large_random_sized_blocks(self):
@@ -66,15 +66,17 @@ class TestS3File(BaseTestCaseWithModels):
 	
 	def _generate_random_block(self):
 		block_length = random.randrange(1000, 2000)
-		return "".join(chr(random.randrange(0, 256)) for _i in xrange(block_length))
+		return b"".join(chr(random.randrange(0, 256)) for _i in xrange(block_length))
 
 @unittest.skipUnless(Image, "Image Preview is only enabled if PIL or Pillow is installed")
 class TestS3FileWithPreview(BaseTestCaseWithModels):
 	def test_simple_load_save(self):
 		test_image_file = os.path.join(os.path.dirname(__file__), "tiger.jpg")
-		f = TestS3FileWithPreviewModel(
-			file_data = open(test_image_file).read(),
-			file_name = "tiger.jpg")
+		with open(test_image_file) as fp:
+			f = TestS3FileWithPreviewModel(
+				file_data = fp.read(),
+				file_name = "tiger.jpg"
+			)
 		f.save()
 		f.save_preview_image()
 		f_loaded = TestS3FileWithPreviewModel.objects.get(id = f.id)
