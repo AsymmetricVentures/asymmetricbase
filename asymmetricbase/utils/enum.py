@@ -43,6 +43,9 @@ class EnumItem(object):
 			return self.value == other.value
 		return False
 	
+	def __hash__(self):
+		return hash((type(self), self.label, self.value))
+	
 	def __lt__(self, other):
 		if isinstance(other, type(self)):
 			return self.value < other.value
@@ -257,3 +260,8 @@ if __name__ == '__main__':
 	
 	assert MyEnum6.A.display_order == 2
 	assert tuple(MyEnum6) == (MyEnum6.C, MyEnum6.A, MyEnum6.B)
+	
+	# Enums should be hashable
+	hash(MyEnum6.A)
+	d = {MyEnum6.A : 'a'}
+	assert d[MyEnum6.A] == 'a'
