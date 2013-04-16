@@ -93,7 +93,7 @@ class Command(BaseCommand):
 							
 							# check for name conflicts
 							if name in self.names and codename != self.names[name] and self.verbose:
-								print 'Duplicate: Permission at {} with name \'{}\' already defined at {}.'.format(codename, name, self.names[name])
+								print('Duplicate: Permission at {} with name \'{}\' already defined at {}.'.format(codename, name, self.names[name]))
 							# check that permission is not already defined for this class
 							if (codename,) not in self.db_perms:
 								if codename not in self.codenames:
@@ -106,19 +106,19 @@ class Command(BaseCommand):
 										)
 									)
 								if self.verbose:
-									print '{} Permission: {} at {}.'.format(msg, name, codename)
+									print('{} Permission: {} at {}.'.format(msg, name, codename))
 							else:
 								perm = Permission.objects.get(content_type = self.ctype, codename = codename)
 								perm.name = name
 								perm.save()
 								if self.verbose:
-									print 'Update: Permission \'{}\' updated at {}.'.format(name, codename)
+									print('Update: Permission \'{}\' updated at {}.'.format(name, codename))
 							
 							self.names[name] = codename
 						elif getattr(cls, 'login_required', True) is False and self.verbose:
-							print 'Skip: Login not required for {}.{} so permission not added.'.format(k.__module__, cls.__name__)
+							print('Skip: Login not required for {}.{} so permission not added.'.format(k.__module__, cls.__name__))
 						elif self.verbose:
-							print 'Warning: permission_name not defined on {}.{}.'.format(k.__module__, cls.__name__)
+							print('Warning: permission_name not defined on {}.{}.'.format(k.__module__, cls.__name__))
 						
 			if hasattr(entry, 'url_patterns'):
 				self.traverse(entry.url_patterns)

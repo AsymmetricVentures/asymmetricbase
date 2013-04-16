@@ -17,8 +17,8 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from base import *
-from fields import *
-from field_position import *
-from displays import *
-from utils import *
+from .base import *
+from .fields import *
+from .field_position import *
+from .displays import *
+from .utils import *

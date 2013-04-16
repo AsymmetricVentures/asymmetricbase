@@ -28,7 +28,7 @@ def cached_function(func):
 	
 	
 	>>> def myfunc():
-	...   print "HELLO"
+	...   print("HELLO")
 	...   return 42
 	>>> f = cached_function(myfunc)
 	>>> myfunc()
