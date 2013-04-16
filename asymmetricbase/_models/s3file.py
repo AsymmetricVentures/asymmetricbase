@@ -36,7 +36,7 @@ from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from boto import exception as boto_exceptions
 
-from base import AsymBaseModel
+from .base import AsymBaseModel
 
 try:
 	import Image

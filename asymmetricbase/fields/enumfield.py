@@ -21,7 +21,6 @@ from django.db import models
 from django.core import exceptions
 from django.db.models.fields import NOT_PROVIDED
 from django.db.models.fields.subclassing import SubfieldBase
-from django.utils.text import capfirst
 from django.utils.encoding import smart_unicode
 
 from south.modelsinspector import add_introspection_rules

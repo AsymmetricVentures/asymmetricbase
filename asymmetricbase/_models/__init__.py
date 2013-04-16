@@ -17,6 +17,6 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from logger_models import *
-from base import *
-from s3file import *
+from .logger_models import *
+from .base import *
+from .s3file import *

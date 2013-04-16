@@ -18,7 +18,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import django
-from . import monkey_patch_perm_model
+from . import monkey_patch_django_auth_models
 
 def patch_cached_property():
 	if cmp(django.VERSION[:3], (1, 5, 0)) < 0:
@@ -38,5 +38,5 @@ def monkey_patch():
 	patch_cached_property()
 	
 	# We want longer names in the permission model
-	monkey_patch_perm_model.monkey_patch()
+	monkey_patch_django_auth_models.monkey_patch()
 	

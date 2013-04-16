@@ -17,10 +17,12 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from base import Display
+
 import operator
 from collections import OrderedDict
+
 from asymmetricbase.displaymanager.fields import MenuItemField
+from asymmetricbase.displaymanager.base import Display
 
 class SimpleTableDisplay(Display):
 	

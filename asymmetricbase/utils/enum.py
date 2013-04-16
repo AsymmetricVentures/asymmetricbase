@@ -109,7 +109,7 @@ class EnumMeta(type):
 			
 			items[k] = item_type_attrs
 		
-		ItemType = type('{}Item'.format(name), (EnumItem,), item_attrs)
+		ItemType = type(str('{}Item').format(name), (EnumItem,), item_attrs)
 		
 		for k, v in items.items():
 			new_attributes[k] = ItemType(**v)
@@ -134,8 +134,10 @@ class EnumMeta(type):
 	
 	def __iter__(self):
 		return iter(self.reverse.values())
-	
-class Enum(object):
+
+EnumBase = EnumMeta(str('EnumBase'), (), {'__doc__' : ''})
+
+class Enum(EnumBase):
 	'''Baseclass for Enums. 
 	   ** DO NOT define methods in here'''
 	__metaclass__ = EnumMeta

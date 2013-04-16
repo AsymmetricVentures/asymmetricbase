@@ -18,6 +18,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from functools import total_ordering
+
 from jinja2.utils import contextfunction
 
 @total_ordering
