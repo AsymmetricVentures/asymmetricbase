@@ -38,11 +38,11 @@ MAX_USERNAME_LENGTH = getattr(settings, 'MAX_USERNAME_LENGTH', 255)
 
 def patch_model_field_length(model, field_name, max_length):
 	field = model._meta.get_field(field_name)
-	field.max_length = MAX_PERMISSION_NAME_LENGTH
+	field.max_length = max_length
 	
 	for v in field.validators:
 		if isinstance(v, MaxLengthValidator):
-			v.limit_value = MAX_PERMISSION_NAME_LENGTH
+			v.limit_value = max_length
 
 def patch_permission_model_signal(sender, *args, **kwargs):
 	if sender.__module__ == 'django.contrib.auth.models':
