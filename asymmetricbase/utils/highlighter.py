@@ -16,6 +16,7 @@
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import re
+
 from jinja2._markupsafe import Markup, escape
 
 from asymmetricbase.logging import logger #@UnusedImport

@@ -29,6 +29,10 @@ from . import filters, global_functions, environment
 from .monkey_patching import monkey_patch_jinja
 
 template_loader = getattr(settings, 'ASYM_TEMPLATE_LOADER', jinja2.FileSystemLoader(app_template_dirs))
+
+if hasattr(template_loader, '__call__'):
+	template_loader = template_loader()
+
 jinja_env = environment.JinjaEnvironment(
 	loader = template_loader,
 	undefined = environment.UndefinedVar,

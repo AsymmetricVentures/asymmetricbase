@@ -16,12 +16,13 @@
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import sys
+
 from django.utils import timezone
 
 class MonthIter(object):
 	def __init__(self, start_date, end_date = None, months = 1):
 		self.start_date = start_date.replace(day = 1)
-		self.end_date = timezone.today().replace(day = 1) if end_date is None else end_date.replace(day = 1)
+		self.end_date = timezone.now().replace(day = 1) if end_date is None else end_date.replace(day = 1)
 		self.months = months
 		self.current = self.start_date
 		

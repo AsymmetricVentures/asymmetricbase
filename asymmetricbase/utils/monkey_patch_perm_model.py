@@ -34,9 +34,10 @@ from django.core.validators import MaxLengthValidator
 
 # Patch up Permission.name
 MAX_PERMISSION_NAME_LENGTH = getattr(settings, 'MAX_PERMISSION_NAME_LENGTH', 128)
+MAX_USERNAME_LENGTH = getattr(settings, 'MAX_USERNAME_LENGTH', 255)
 
-def patch_permission_model(model):
-	field = model._meta.get_field('name')
+def patch_model_field_length(model, field_name, max_length):
+	field = model._meta.get_field(field_name)
 	field.max_length = MAX_PERMISSION_NAME_LENGTH
 	
 	for v in field.validators:
@@ -44,13 +45,26 @@ def patch_permission_model(model):
 			v.limit_value = MAX_PERMISSION_NAME_LENGTH
 
 def patch_permission_model_signal(sender, *args, **kwargs):
-	if sender.__name__ == 'User' and sender.__module__ == 'django.contrib.auth.models':
-		patch_permission_model(sender)
+	if sender.__module__ == 'django.contrib.auth.models':
+		
+		if sender.__name__ == 'Permission':
+			patch_model_field_length(sender, 'name', MAX_PERMISSION_NAME_LENGTH)
+		
+		elif sender.__name__ == 'User':
+			patch_model_field_length(sender, 'username', MAX_USERNAME_LENGTH)
 
 class_prepared.connect(patch_permission_model_signal)
 
 def monkey_patch():
-	from django.contrib.auth.models import Permission
-	if Permission._meta.get_field('name').max_length != MAX_PERMISSION_NAME_LENGTH: #@UndefinedVariable
-		patch_permission_model(Permission)
+	from django.contrib.auth.models import Permission, User
+	
+	is_permission_patched = Permission._meta.get_field('name').max_length == MAX_PERMISSION_NAME_LENGTH #@UndefinedVariable
+	is_user_patched = User._meta.get_field('username').max_length == MAX_USERNAME_LENGTH #@UndefinedVariable
+	
+	if not is_permission_patched:
+		patch_permission_model_signal(Permission)
+	
+	if not is_user_patched:
+		patch_permission_model_signal(User)
+		
 

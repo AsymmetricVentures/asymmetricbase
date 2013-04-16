@@ -16,6 +16,7 @@
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from django.contrib.contenttypes.models import ContentType
+
 from asymmetricbase.utils.cached_function import cached_function
 
 @cached_function
