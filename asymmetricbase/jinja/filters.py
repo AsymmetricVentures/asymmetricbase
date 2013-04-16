@@ -32,6 +32,11 @@ def jinja_date_filter(d, fmt = "%d/%b/%y %I:%M%p"):
 def jinja_fmt(fmt, *args, **kwargs):
 	return fmt.format(*args, **kwargs)
 
+def jinja_filter_empty(seq):
+	if hasattr(seq, '__iter__'):
+		return filter(None, seq)
+	return seq
+
 def currency_format(num):
 	if not isinstance(num, (int, float, long, Decimal)):
 		num = 0
@@ -58,4 +63,5 @@ def get_filters():
 		
 		# Locale dependant
 		'currency' : currency_format,
+		'filter' : jinja_filter_empty,
 	}

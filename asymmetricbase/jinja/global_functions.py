@@ -17,6 +17,8 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from collections import OrderedDict
+
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 
@@ -72,6 +74,24 @@ def jinja_batch_context_getattr(context, *args, **kwargs):
 		return new_kwargs
 
 @contextfunction
+def jinja_recursive_resolve_display(context, obj):
+	from asymmetricbase.displaymanager import ContextAttribute
+	
+	if isinstance(obj, ContextAttribute):
+		return obj(context, jinja_context_getattr(context, obj.attr_name))
+	
+	elif isinstance(obj, (list, tuple)):
+		return (jinja_recursive_resolve_display(context, item) for item in obj)
+	
+	elif isinstance(obj, (set, frozenset)):
+		return {jinja_recursive_resolve_display(context, item) for item in obj}
+	
+	elif isinstance(obj, (dict, OrderedDict)):
+		return { k : jinja_recursive_resolve_display(context, item) for k, item in obj.items()}
+	
+	return obj
+
+@contextfunction
 def jinja_vtable(ctx, table, header = '', tail = ''):
 	return ctx.environment.get_template_module('asymmetricbase/displaymanager/base.djhtml', ctx).vtable(table, header, tail)
 
@@ -93,6 +113,7 @@ def get_functions():
 		'context_getattr' : jinja_context_getattr,
 		'batch_context_getattr' : jinja_batch_context_getattr,
 		
+		'resolve_recursive' : jinja_recursive_resolve_display,
 		
 		'vtable' : jinja_vtable,
 		'gridlayout' : jinja_gridlayout,
