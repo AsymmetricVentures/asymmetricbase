@@ -46,6 +46,9 @@ class DisplayField(object):
 	def __str__(self):
 		return str(getattr(self.model, self.name))
 	
+	def __hash__(self):
+		return hash((type(self), self.model, self.attrname, self.creation_counter))
+	
 	def __eq__(self, other):
 		return self.creation_counter == other.creation_counter
 	

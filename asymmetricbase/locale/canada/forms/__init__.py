@@ -63,7 +63,7 @@ class CAPostalCodeField(Field):
 	
 	def widget_attrs(self, widget):
 		w = ''
-		if widget.attrs.has_key('class'):
+		if 'class' in widget.attrs:
 			w = ' ' + widget.attrs['class']
 		return { 'class' : w }
 
@@ -88,6 +88,6 @@ class CAPhoneNumberField(Field):
 	
 	def widget_attrs(self, widget):
 		w = ''
-		if widget.attrs.has_key('class'):
+		if 'class' in widget.attrs:
 			w = ' ' + widget.attrs['class']
 		return { 'class' : w }
