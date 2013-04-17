@@ -34,7 +34,7 @@ Topic :: Software Development :: Libraries :: Application Frameworks
 setup(
 	name = 'asymmetricbase',
 	version = datetime.now().strftime('%Y%m%d%H%M'),
-	url = 'https://github.com/AsymmetricVentures/jinja2',
+	url = 'https://github.com/AsymmetricVentures/asymmetricbase',
 	
 	author = 'Richard Eames',
 	author_email = 'reames@asymmetricventures.com',
