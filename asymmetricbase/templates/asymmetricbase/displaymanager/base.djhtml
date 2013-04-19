@@ -28,8 +28,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 	{%- endif -%}
 {% endmacro %}
 
-{% macro vtable(table, header = '', tail = '') %}
+{% macro vtable(table, header = '', tail = '', title = '') %}
 	<div class="vtable-container">
+		{%-if title != '' -%}
+			<h3 class="vtable-title">
+				{{ title }}
+			</h3>
+		{%- endif -%}
 		{{ print_or_call(header) }}
 		<div class="vtable-rounded-container">
 			{{ print_or_call(table) }}

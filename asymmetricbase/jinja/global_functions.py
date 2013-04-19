@@ -92,8 +92,8 @@ def jinja_recursive_resolve_display(context, obj):
 	return obj
 
 @contextfunction
-def jinja_vtable(ctx, table, header = '', tail = ''):
-	return ctx.environment.get_template_module('asymmetricbase/displaymanager/base.djhtml', ctx).vtable(table, header, tail)
+def jinja_vtable(ctx, table, header = '', tail = '', title = ''):
+	return ctx.environment.get_template_module('asymmetricbase/displaymanager/base.djhtml', ctx).vtable(table, header, tail, title)
 
 @contextfunction
 def jinja_gridlayout(ctx, layout):
