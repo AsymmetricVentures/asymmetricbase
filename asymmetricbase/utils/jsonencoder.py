@@ -17,8 +17,12 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import types
+
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.query import QuerySet
+
+from asymmetricbase.logging import logger
 
 class AsymJSONEncoder(DjangoJSONEncoder):
 	
@@ -26,12 +30,15 @@ class AsymJSONEncoder(DjangoJSONEncoder):
 		
 		if hasattr(o, '__json__'):
 			return o.__json__(self.default)
-		if isinstance(o, QuerySet):
+		if isinstance(o, (QuerySet, set)):
 			return list(o)
+		elif isinstance(o, (types.FunctionType, types.LambdaType)):
+			logger.debug("Tried to jsonify a function or lambda")
+			return str(o)
 		else:
 			return super(AsymJSONEncoder, self).default(o)
 
-class AsymJSTreeEncoder(DjangoJSONEncoder):
+class AsymJSTreeEncoder(AsymJSONEncoder):
 	
 	def default(self, o):
 		
