@@ -17,38 +17,6 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from jinja2.nodes import _context_function_types
-
-
-def is_special_function(fn):
-	return hasattr(fn, 'contextfunction') or hasattr(fn, 'evalcontextfunction') or hasattr(fn, 'environmentfunction')
-
-def Context_call(__self, __obj, *args, **kwargs):
-	"""Call the callable with the arguments and keyword arguments
-	provided but inject the active context or environment as first
-	argument if the callable is a :func:`contextfunction` or
-	:func:`environmentfunction`.
-	"""
-	if __debug__:
-		__traceback_hide__ = True
-	
-	if hasattr(__obj, '__call__') and is_special_function(__obj.__call__):
-		__obj = getattr(__obj, '__call__')
-		
-	if isinstance(__obj, _context_function_types):
-		if getattr(__obj, 'contextfunction', 0):
-			args = (__self,) + args
-		elif getattr(__obj, 'evalcontextfunction', 0):
-			args = (__self.eval_ctx,) + args
-		elif getattr(__obj, 'environmentfunction', 0):
-			args = (__self.environment,) + args
-	try:
-		return __obj(*args, **kwargs)
-	except StopIteration:
-		return __self.environment.undefined('value was undefined because '
-											'a callable raised a '
-											'StopIteration exception')
-
 def patch_conditional_escape():
 	from django.utils import html as django_html_utils
 	
@@ -67,8 +35,5 @@ def patch_conditional_escape():
 	setattr(django_html_utils, 'conditional_escape', conditional_escape)
 
 def monkey_patch_jinja():
-	from jinja2.runtime import Context
-	# Ugly hack to enable calling classes with @contextfunction
-	setattr(Context, 'call', Context_call)
 	
 	patch_conditional_escape()
