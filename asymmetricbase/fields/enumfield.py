@@ -30,11 +30,30 @@ from asymmetricbase.utils.enum import Enum, EnumItem
 from asymmetricbase import forms
 
 class EnumFormField(forms.TypedChoiceField):
+	
+	def __init__(self, enum, *args, **kwargs):
+		self.enum = enum
+		if 'choices' not in kwargs:
+			kwargs['choices'] = enum.Choices.items()
+		super(EnumFormField, self).__init__(*args, **kwargs)
+	
 	def prepare_value(self, data):
 		if isinstance(data, EnumItem):
 			return smart_unicode(data.value)
 		
 		return data
+	
+	def to_python(self, value):
+		if value is None:
+			return None
+		
+		elif value in self.enum:
+			return value
+		
+		try:
+			return self.enum(int(value))
+		except ValueError:
+			raise exceptions.ValidationError(self.error_messages['invalid'] % value)
 
 class EnumField(models.IntegerField):
 	__metaclass__ = SubfieldBase
@@ -98,6 +117,7 @@ class EnumField(models.IntegerField):
 	def formfield(self, **kwargs):
 		include_blank = (self.blank or not (self.has_default() or 'initial' in kwargs))
 		defaults = {
+			'enum' : self.enum,
 			'required' : not self.blank,
 			'label' : self.verbose_name,
 			'help_text' : self.help_text,

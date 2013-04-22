@@ -69,7 +69,7 @@ setup(
 		'pytz',  # most recent
 		'south(==0.7.6)',
 		'hamlpy',  # most recent,
-		'Pillow'
+		'Pillow',
 	),
 	
 	package_dir = {'asymmetricbase' : 'asymmetricbase'},
