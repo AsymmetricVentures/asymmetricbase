@@ -27,7 +27,7 @@ from asymmetricbase.jinja.tags.fielditerator import checkboxiterator, checkboxit
 def jinja_date_filter(d, fmt = "%d/%b/%y %I:%M%p"):
 	if not d:
 		return ''
-	return timezone.localtime(d).strftime(fmt)
+	return timezone.template_localtime(d).strftime(fmt)
 
 def jinja_fmt(fmt, *args, **kwargs):
 	return fmt.format(*args, **kwargs)
