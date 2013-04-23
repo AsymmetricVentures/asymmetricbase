@@ -17,12 +17,16 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import StringIO
 import base64
 import mimetypes
 import uuid
 import time
 import threading
+
+try:
+	from io import BytesIO as ImageBufferIO
+except ImportError:
+	import StringIO.StringIO as ImageBufferIO
 
 from django.utils import timezone
 from django.db import models
@@ -39,13 +43,19 @@ from boto import exception as boto_exceptions
 from .base import AsymBaseModel
 
 try:
-	import Image
+	import Image # Try to import PIL
 except ImportError:
-	Image = None	# PIL/Pillow not installed. File Preview is disabled
+	try:
+		from PIL import Image # try to import Pillow
+	except ImportError:
+		Image = None	# PIL/Pillow not installed. File Preview is disabled
 
 thread_safe_connection_cache = threading.local()
 
 class S3File(AsymBaseModel):
+	"""
+	This class should always deal with binary data
+	"""
 	file_name = models.CharField(max_length = 256)
 	# TODO: check if this works in all cases, 
 	#       I had to do some hacky things in our other classes to get JSONField to work
@@ -121,11 +131,11 @@ class S3File(AsymBaseModel):
 	def _get_object_from_s3(self, bucket_name, object_name):
 		key = self._get_s3_key(bucket_name, object_name)
 		encoded_value = key.get_contents_as_string()
-		return  base64.b64decode(encoded_value)
+		return bytes(base64.b64decode(encoded_value))
 	
 	def _put_object_in_s3(self, bucket_name, object_name, value):
 		key = self._get_s3_key(bucket_name, object_name, assert_versioning_enabled = True)
-		encoded_value = base64.b64encode(value)
+		encoded_value = base64.b64encode(bytes(value))
 		key.set_contents_from_string(encoded_value, encrypt_key = True)
 		self._s3_version_id = key.version_id
 	
@@ -218,7 +228,7 @@ class S3FileWithPreview(S3File):
 		try:
 			return self._get_object_from_s3(bucket_name, self._generate_preview_key())
 		except IOError:
-			return ""
+			return b""
 	
 	def get_preview_type(self):
 		return 'image/jpeg'	# only jpeg previews are currently supported
@@ -229,8 +239,8 @@ class S3FileWithPreview(S3File):
 		assert self.id and self._s3_key, "Can only save image preview once the image is saved"
 		assert self.Constants.PREVIEW_IMAGE_HEIGHT and self.Constants.PREVIEW_IMAGE_WIDTH, "Set preview image dimensions in the subclass"
 		
-		image_file = StringIO.StringIO(self.file_data)
-		output = StringIO.StringIO()
+		image_file = ImageBufferIO(self.file_data)
+		output = ImageBufferIO()
 		
 		self._generate_thumbnail(image_file, output)
 		
