@@ -1,6 +1,6 @@
 -e git://github.com/jessemiller/HamlPy.git#egg=hamlpy
 -e git://github.com/AsymmetricVentures/jinja2.git#egg=Jinja2
-django==1.4.5
+django==1.5
 pytz  # most recent
 south==0.7.6
 Pillow
