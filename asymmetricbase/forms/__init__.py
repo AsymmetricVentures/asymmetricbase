@@ -74,11 +74,11 @@ class BaseFormMixin(object):
 				if field.min_value is not None:
 					newattrs.update({'min' : field.min_value})
 				
-			if validate.has_key(name):
+			if name in validate:
 				validate_string = validate[name]
 				newattrs.update({'data-validate' : validate_string})
 			
-			if field_info.has_key(name):
+			if name in field_info:
 				info = field_info[name]
 				
 				field_data = info.pop('data', {})
