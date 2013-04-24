@@ -4,3 +4,4 @@ django==1.5
 pytz  # most recent
 south==0.7.6
 Pillow
+django-localflavor-ca

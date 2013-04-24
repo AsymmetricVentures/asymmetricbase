@@ -58,8 +58,8 @@ class_prepared.connect(patch_permission_model_signal)
 def monkey_patch():
 	from django.contrib.auth.models import Permission, User
 	
-	is_permission_patched = Permission._meta.get_field('name').max_length == MAX_PERMISSION_NAME_LENGTH #@UndefinedVariable
-	is_user_patched = User._meta.get_field('username').max_length == MAX_USERNAME_LENGTH #@UndefinedVariable
+	is_permission_patched = Permission._meta.get_field('name').max_length >= MAX_PERMISSION_NAME_LENGTH #@UndefinedVariable
+	is_user_patched = User._meta.get_field('username').max_length >= MAX_USERNAME_LENGTH #@UndefinedVariable
 	
 	if not is_permission_patched:
 		patch_permission_model_signal(Permission)
