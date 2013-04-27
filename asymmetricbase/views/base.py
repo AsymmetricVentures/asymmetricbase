@@ -135,7 +135,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 				logger.debug('Login requirement is not ok, redirecting')
 				self.error('You were not logged in properly. Please try again')
 				return redirect('{}?{}={}'.format(
-					reverse(getattr(settings, 'ASYM_FAILED_LOGIN_URL')),
+					reverse(getattr(settings, 'ASYM_FAILED_LOGIN_URL', settings.LOGIN_REDIRECT_URL)),
 					REDIRECT_FIELD_NAME,
 					request.path,
 				))

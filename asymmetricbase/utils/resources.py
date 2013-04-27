@@ -23,7 +23,7 @@ import re
 from django.conf import settings
 from django.utils.safestring import mark_safe
 
-static_dir = settings.STATIC_DOC_ROOT
+static_dir = settings.STATIC_ROOT
 
 class ResourceType(object):
 	def __init__(self, folder, extension, html):
