@@ -21,6 +21,7 @@ from asymmetricbase.views.base import AsymBaseView
 from django.http import HttpResponseRedirect
 
 class ErrorBaseView(AsymBaseView):
+	login_required = False
 	@classmethod
 	def as_view(cls, **initkwargs):
 		v = super(AsymBaseView, cls).as_view(**initkwargs)

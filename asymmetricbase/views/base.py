@@ -140,7 +140,10 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 					request.path,
 				))
 			
-			logger.debug(u'User is: {}'.format(request.user))
+			if hasattr(request, 'user'):
+				logger.debug(u'User is: {}'.format(request.user))
+			else:
+				logger.debug('No user in request')
 			permissions_required = self._merge_attr('permissions_required')
 			
 			logger.debug('The required permissions are {}'.format(permissions_required))
@@ -191,7 +194,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 		"Returns false if login is required and current user is not logged in"
 		if not self.login_required:
 			return True
-		if request.user.is_authenticated():
+		if hasattr(request, 'user') and request.user.is_authenticated():
 			return True
 		
 		return False
