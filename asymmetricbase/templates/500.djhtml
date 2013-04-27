@@ -1,0 +1,11 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Internal Server Error</title>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8">
+	</head>
+	<body>
+		HTTP 500: Internal Server Error. <br />
+		<p>An error occured while trying to serve the page you requested. Please come back later.</p>
+	</body>
+</html>
