@@ -25,7 +25,6 @@ import jinja2
 from jinja2.ext import WithExtension, LoopControlExtension
 
 from asymmetricbase.jinja.tags.csrf_token import CSRFTokenExtension
-from asymmetricbase.jinja.tags.vtable import VTableExtension
 
 from . import filters, global_functions, environment
 from .monkey_patching import monkey_patch_jinja
@@ -41,7 +40,6 @@ jinja_env = environment.JinjaEnvironment(
 	autoescape = True,
 	extensions = [
 		CSRFTokenExtension,
-		VTableExtension,
 		WithExtension,
 		LoopControlExtension
 	],
