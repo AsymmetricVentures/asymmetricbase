@@ -47,7 +47,7 @@ class Resource(object):
 		self.type = resource_type
 		self.dependencies = dependencies
 		self.url = '{}{}'.format(
-			settings.MEDIA_URL, self.file
+			settings.STATIC_URL, self.file
 		)
 	
 	def __html__(self):
