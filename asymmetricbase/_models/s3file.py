@@ -24,6 +24,11 @@ import time
 import threading
 
 try:
+	from urllib.parse import quote as url_quote
+except ImportError:
+	from urllib import quote as url_quote
+
+try:
 	from io import BytesIO as ImageBufferIO
 except ImportError:
 	import StringIO.StringIO as ImageBufferIO
@@ -39,6 +44,8 @@ from django_extensions.db.fields.json import JSONField
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from boto import exception as boto_exceptions
+
+from asymmetricbase.logging import logger
 
 from .base import AsymBaseModel
 
@@ -250,24 +257,59 @@ class S3FileWithPreview(S3File):
 		
 		self._put_object_in_s3(bucket_name, preview_image_s3_key, preview_image_data)
 	
-	def _generate_thumbnail(self, image_file, output):
+	def _generate_thumbnail(self, image_file, output, size = [Constants.PREVIEW_IMAGE_WIDTH, Constants.PREVIEW_IMAGE_HEIGHT]):
 		try:
-			image = Image.open(image_file)
+			if Image.isImageType(image_file):
+				image = image_file
+			else:
+				image = Image.open(image_file)
 			if image.mode != 'RGB':
 				image = image.convert('RGB')
 			image.thumbnail(
-				[self.Constants.PREVIEW_IMAGE_WIDTH, self.Constants.PREVIEW_IMAGE_HEIGHT],
+				size,
 				Image.ANTIALIAS
 			)
 			image.save(output, 'JPEG')
 		except IOError:
-			raise self.PreviewImageGenerationFailed
+			logger.exception('Could not generate thumbnail')
+			raise PreviewImageGenerationFailed()
 
 	def is_image(self):
 		return self.content_type in ['image/png', 'image/jpeg', 'image/gif']
 
 	def _generate_preview_key(self):
 		return "{}-preview".format(self._s3_key)
+	
+	def get_data_url(self, max_width = None):
+		data_url = b'data:{};base64,{}'
+		
+		if self.is_image():
+			image_file = ImageBufferIO(self.file_data)
+			output = ImageBufferIO()
+			
+			try:
+				image = Image.open(image_file)
+				
+				s = image.size
+				
+				if max_width and s[0] > max_width:
+					ratio = max_width / s[0]
+					width = s[0] * ratio
+					height = s[1] * ratio
+					self._generate_thumbnail(image, output, (width, height))
+					
+					file_data = output.getvalue()
+				else:
+					file_data = image_file.getvalue()
+			except IOError:
+				file_data = self.file_data
+				logger.exception('Error when trying to resize image for data: url')
+		else:
+			file_data = self.file_data
+			
+		data = bytes(url_quote(file_data.encode('base64')))
+		
+		return data_url.format(self.content_type, data)
 
-	class PreviewImageGenerationFailed(Exception):
-		pass
+class PreviewImageGenerationFailed(Exception):
+	pass

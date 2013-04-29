@@ -70,7 +70,7 @@ class Resource(object):
 		"""
 		The absolute path of the file.
 		"""
-		return '{}{}'.format(settings.MEDIA_ROOT, self.file)
+		return '{}{}'.format(settings.STATIC_ROOT, self.file)
 
 class ResourceSet(object):
 	def __init__(self):

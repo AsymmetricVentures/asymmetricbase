@@ -53,7 +53,7 @@ class FormSetFactoryFactory(FormFactory):
 	
 	def __init__(self, form, *args, **kwargs):
 		self.extra = kwargs.pop('extra', 0)
-		self.max_num = kwargs.pop('max_num', 0)
+		self.max_num = kwargs.pop('max_num', 1000)
 		self.can_order = kwargs.pop('can_order', False)
 		self.can_delete = kwargs.pop('can_delete', False)
 		self.formset = kwargs.pop('formset', BaseFormSet)
