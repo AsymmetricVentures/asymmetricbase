@@ -26,6 +26,8 @@ from django.utils.safestring import mark_safe
 static_dir = settings.STATIC_ROOT
 
 class ResourceType(object):
+	resource_types = {}
+	
 	def __init__(self, folder, extension, html):
 		self.folder = folder
 		self.extension = extension
@@ -33,16 +35,10 @@ class ResourceType(object):
 	
 	def __repr__(self):
 		return self.extension
-
-ResourceType.JS = ResourceType(
-	folder = 'js', extension = 'js',
-	html = u'<script src="{url}?h={hash}" type="text/javascript"></script>',
-)
-
-ResourceType.CSS = ResourceType(
-	folder = 'stylesheets', extension = 'css',
-	html = u'<link href="{url}?h={hash}" rel="stylesheet" type="text/css"/>',
-)
+	
+	@classmethod
+	def add_resource_type(cls, name, folder, extension, html):
+		cls.resource_types[name] = ResourceType(folder = folder, extension = extension, html = html)
 
 class Resource(object):
 	def __init__(self, resource_type, file_path, dependencies):
@@ -67,7 +63,7 @@ class Resource(object):
 		return hash(self.file)
 	
 	def __repr__(self):
-		return u"Resource('{}')".format(self.file)
+		return "Resource('{}')".format(self.file)
 	
 	@property
 	def absolute_path(self):
@@ -132,11 +128,7 @@ def _get_resources():
 	
 	resources = {}
 	
-	resource_types = [
-		ResourceType.JS, ResourceType.CSS
-	]
-	
-	for resource_type in resource_types:
+	for resource_type in ResourceType.resource_types.values():
 		rootdir = os.path.join(static_dir, resource_type.folder)
 		for file_path in _list_files_of_type(rootdir, resource_type.extension):
 			deps = _get_file_dependencies(file_path)
