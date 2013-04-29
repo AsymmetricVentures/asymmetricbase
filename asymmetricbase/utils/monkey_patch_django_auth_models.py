@@ -35,6 +35,7 @@ from django.core.validators import MaxLengthValidator
 # Patch up Permission.name
 MAX_PERMISSION_NAME_LENGTH = getattr(settings, 'MAX_PERMISSION_NAME_LENGTH', 128)
 MAX_USERNAME_LENGTH = getattr(settings, 'MAX_USERNAME_LENGTH', 255)
+MAX_EMAIL_LENGTH = getattr(settings, 'MAX_EMAIL_LENGTH', 255)
 
 def patch_model_field_length(model, field_name, max_length):
 	field = model._meta.get_field(field_name)
@@ -52,6 +53,7 @@ def patch_permission_model_signal(sender, *args, **kwargs):
 		
 		elif sender.__name__ == 'User':
 			patch_model_field_length(sender, 'username', MAX_USERNAME_LENGTH)
+			patch_model_field_length(sender, 'email', MAX_EMAIL_LENGTH)
 
 class_prepared.connect(patch_permission_model_signal)
 
@@ -60,6 +62,7 @@ def monkey_patch():
 	
 	is_permission_patched = Permission._meta.get_field('name').max_length >= MAX_PERMISSION_NAME_LENGTH #@UndefinedVariable
 	is_user_patched = User._meta.get_field('username').max_length >= MAX_USERNAME_LENGTH #@UndefinedVariable
+	is_user_patched = is_user_patched and User._meta.get_field('email').max_length >= MAX_EMAIL_LENGTH #@UndefinedVariable
 	
 	if not is_permission_patched:
 		patch_permission_model_signal(Permission)

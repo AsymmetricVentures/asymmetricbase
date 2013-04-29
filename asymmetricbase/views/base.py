@@ -141,7 +141,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 				))
 			
 			if hasattr(request, 'user'):
-				logger.debug(u'User is: {}'.format(request.user))
+				logger.debug('User is: {}'.format(request.user))
 			else:
 				logger.debug('No user in request')
 			permissions_required = self._merge_attr('permissions_required')
@@ -175,7 +175,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 				# Ignore these because they're not real exceptions
 				response = self.render_to_response()
 			except ContentNotRenderedError as e:
-				logger.exception(u"Content not rendered for template {}.".format(self.template_name))
+				logger.exception('Content not rendered for template {}.'.format(self.template_name))
 				self.template_name = '500.djhtml'
 				return self.render_to_response()
 			
