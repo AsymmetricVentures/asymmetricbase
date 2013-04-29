@@ -35,7 +35,7 @@ from django.core.validators import MaxLengthValidator
 # Patch up Permission.name
 MAX_PERMISSION_NAME_LENGTH = getattr(settings, 'MAX_PERMISSION_NAME_LENGTH', 128)
 MAX_USERNAME_LENGTH = getattr(settings, 'MAX_USERNAME_LENGTH', 255)
-MAX_EMAIL_LENGTH = getattr(settings, 'MAX_EMAIL_LENGTH', 255)
+MAX_EMAIL_LENGTH = getattr(settings, 'MAX_EMAIL_LENGTH', 254) # 254 chars == compliant with RFCs 3696 and 5321
 
 def patch_model_field_length(model, field_name, max_length):
 	field = model._meta.get_field(field_name)

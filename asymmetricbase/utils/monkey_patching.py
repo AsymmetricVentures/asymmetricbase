@@ -34,9 +34,20 @@ def patch_cached_property():
 		
 		setattr(cached_property, '__get__', cached_prop__get__)
 
+def patch_email_field_length():
+	from django.db.models.fields import EmailField
+	def emailfield__init__(self, *args, **kwargs):
+		kwargs['max_length'] = kwargs.get('max_length', 254) # 254 chars == compliant with RFCs 3696 and 5321
+		super(EmailField, self).__init__(*args, **kwargs)
+	
+	setattr(EmailField, '__init__', emailfield__init__)
+
 def monkey_patch():
 	patch_cached_property()
 	
 	# We want longer names in the permission model
 	monkey_patch_django_auth_models.monkey_patch()
+	
+	# Create compliant email fields
+	patch_email_field_length()
 	
