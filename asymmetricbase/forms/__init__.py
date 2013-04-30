@@ -65,7 +65,7 @@ class BaseFormMixin(object):
 			if HTML5_WIDGETS.get('email', False) and isinstance(field, forms.EmailField): 
 				field.widget.input_type = 'email'
 			
-			if HTML5_WIDGETS.get('number', False) and isinstance(field, forms.IntegerField):
+			if HTML5_WIDGETS.get('number', False) and isinstance(field, (forms.IntegerField, forms.DecimalField)):
 				field.widget.input_type = 'number'
 				
 				if field.max_value is not None:
@@ -73,6 +73,9 @@ class BaseFormMixin(object):
 				
 				if field.min_value is not None:
 					newattrs.update({'min' : field.min_value})
+					
+				if isinstance(field, forms.DecimalField):
+					newattrs.update(step = '0.1')
 				
 			if name in validate:
 				validate_string = validate[name]
