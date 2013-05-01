@@ -38,6 +38,12 @@
 	{%- endif -%}
 {%- endmacro -%}
 
+{%- macro attr_template_field(obj) -%}
+	{%- if kwargs -%}
+		{{- kwargs['other_macro'](getattr(obj, kwargs['attr'])) -}}
+	{%- endif -%}
+{%- endmacro -%}
+
 {% macro linkfield(obj, url_name) -%}
 	{%- if 'url_args' not in kwargs -%}
 		{%- set url_args = [obj|int()] -%}

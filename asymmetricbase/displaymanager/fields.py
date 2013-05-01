@@ -120,6 +120,23 @@ class AutoTemplateField(TemplateField, AttrGetField):
 	def __call__(self, context, instance):
 		return TemplateField.__call__(self, context, AttrGetField.__call__(self, context, instance))
 
+class AttrTemplateField(TemplateField):
+	"""
+	Renders obj.attr using a given macro
+	By default it acts the same as the AttrGetField
+	"""
+	
+	def __init__(self, header_name = None, *args, **kwargs):
+		self.attr = kwargs.pop('attr', None)
+		super(AttrTemplateField, self).__init__(header_name, *args, **kwargs)
+		
+	@contextfunction
+	def __call__(self, context, instance):
+		other_macro = self.template_macro(context)
+		return self.model.get_macro('attr_template_field', context = context)(instance, other_macro = other_macro, attr = self.attr)
+		
+		
+
 class LinkField(AutoTemplateField):
 	'''
 	'''
