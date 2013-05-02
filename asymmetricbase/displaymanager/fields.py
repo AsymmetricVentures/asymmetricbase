@@ -123,7 +123,6 @@ class AutoTemplateField(TemplateField, AttrGetField):
 class AttrTemplateField(TemplateField):
 	"""
 	Renders obj.attr using a given macro
-	By default it acts the same as the AttrGetField
 	"""
 	
 	def __init__(self, header_name = None, *args, **kwargs):
