@@ -257,7 +257,7 @@ class S3FileWithPreview(S3File):
 		
 		self._put_object_in_s3(bucket_name, preview_image_s3_key, preview_image_data)
 	
-	def _generate_thumbnail(self, image_file, output, size = [Constants.PREVIEW_IMAGE_WIDTH, Constants.PREVIEW_IMAGE_HEIGHT]):
+	def _generate_thumbnail(self, image_file, output, size = None):
 		try:
 			if Image.isImageType(image_file):
 				image = image_file
@@ -265,6 +265,8 @@ class S3FileWithPreview(S3File):
 				image = Image.open(image_file)
 			if image.mode != 'RGB':
 				image = image.convert('RGB')
+			if size is None:
+				size = [self.Constants.PREVIEW_IMAGE_WIDTH, self.Constants.PREVIEW_IMAGE_HEIGHT]
 			image.thumbnail(
 				size,
 				Image.ANTIALIAS
