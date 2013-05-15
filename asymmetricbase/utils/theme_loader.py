@@ -54,7 +54,7 @@ class ThemeLoader(BaseLoader):
 	
 	@internalcode
 	def load(self, environment, name, global_vars = None):
-		if settings.COMPILE_TEMPLATES:
+		if getattr(settings, 'COMPILE_TEMPLATES', False):
 			if settings.TEMPLATE_DEBUG:
 				sys.dont_write_bytecode = True
 			code = None
@@ -150,7 +150,7 @@ class ThemeLoader(BaseLoader):
 					
 					template_ext = os.path.splitext(template)[-1]
 					
-					if template_ext in settings.INVALID_TEMPLATE_EXTS:
+					if template_ext in getattr(settings, 'INVALID_TEMPLATE_EXTS', ('.py', '.pyc')):
 						continue
 					
 					if template[:2] == './':
