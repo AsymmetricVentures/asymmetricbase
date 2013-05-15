@@ -77,11 +77,7 @@ class BaseFormMixin(object):
 				if isinstance(field, forms.DecimalField):
 					# get step from field.decimal_places
 					newattrs.update(
-						step = '0.{}1'.format(
-							''.join(
-								['0' for _ in xrange(1,field.decimal_places)]
-							)
-						) if field.decimal_places > 0 else '1'
+						step = '0.{}1'.format('0' * (field.decimal_places - 1)) if field.decimal_places > 0 else '1'
 					)
 				
 			if name in validate:
