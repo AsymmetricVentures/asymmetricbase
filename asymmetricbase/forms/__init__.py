@@ -75,7 +75,14 @@ class BaseFormMixin(object):
 					newattrs.update({'min' : field.min_value})
 					
 				if isinstance(field, forms.DecimalField):
-					newattrs.update(step = '0.1')
+					# get step from field.decimal_places
+					newattrs.update(
+						step = '0.{}1'.format(
+							''.join(
+								['0' for _ in xrange(1,field.decimal_places)]
+							)
+						) if field.decimal_places > 0 else '1'
+					)
 				
 			if name in validate:
 				validate_string = validate[name]
