@@ -17,13 +17,14 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 
 from asymmetricbase.utils.cached_function import cached_function
 
 @cached_function
 def default_content_type():
-	return ContentType.objects.get(model = 'user')
+	return ContentType.objects.get_for_model(get_user_model())
 
 def default_content_type_appname():
 	return 'auth'

@@ -65,9 +65,13 @@ class Command(BaseCommand):
 				for k, v in entry.reverse_dict.items():
 					# class-based views are called through .as_view(), so they'll be
 					# callable here
+					# TODO: what about function based views?
 					if callable(k):
 						kwargs = v[2]
-						cls = getattr(import_module(k.__module__), k.func_name)
+						try:
+							cls = getattr(import_module(k.__module__), k.func_name)
+						except AttributeError:
+							continue
 						
 						if hasattr(cls, 'permission_name') and getattr(cls, 'login_required', None):
 							msg = ''
