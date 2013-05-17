@@ -70,6 +70,9 @@ class BoundField(forms.BoundField):
 	hseg = property(lambda self: self._render_with_template('hblock_segment'))
 	rhseg = property(lambda self: self._render_with_template('rhblock_segment'))
 	
+	bs = property(lambda self: self._render_with_template('bootstrap_default'))
+	bs_inline = property(lambda self: self._render_with_template('bootstrap_inline'))
+	bs_h = property(lambda self: self._render_with_template('bootstrap_horizontal'))
 	# methods to replace django widget_tweaks
 	
 	def _process_attributes(self, name, value, process):
