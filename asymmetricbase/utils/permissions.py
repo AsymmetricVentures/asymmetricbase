@@ -27,7 +27,7 @@ def default_content_type():
 	return ContentType.objects.get_for_model(get_user_model())
 
 def default_content_type_appname():
-	return 'auth'
+	return default_content_type().app_label
 
 def create_codename(module_path, cls_name, suffix = ''):
 	# Remove the repeated parts of the path
