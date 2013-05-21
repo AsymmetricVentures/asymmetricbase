@@ -43,7 +43,7 @@ def currency_format(num):
 		num = 0
 	return locale.currency(num, grouping = True)
 
-def get_filters():
+def get_filters(jinja_env):
 	return {
 		# modified django date filter
 		'date' : jinja_date_filter,

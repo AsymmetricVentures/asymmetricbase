@@ -17,6 +17,8 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from functools import partial
+
 from collections import OrderedDict
 
 from django.utils import timezone
@@ -24,18 +26,13 @@ from django.core.urlresolvers import reverse
 
 from jinja2.utils import contextfunction
 
-from . import environment
-
-# TODO: this needs to be removed, and jinja_getattr needs a work around.
-dummy_env = environment.JinjaEnvironment(undefined = environment.UndefinedVar)
-
 def jinja_url(view_name, *args, **kwargs):
 	return reverse(view_name, args = args, kwargs = kwargs)
 
 def jinja_getdate():
 	return timezone.localtime(timezone.now())
 
-def jinja_getattr(obj, attr_string):
+def jinja_getattr(env, obj, attr_string):
 	"""
 	Resolve attributes using jinja's getattr() rather than the default python method.
 	
@@ -49,7 +46,7 @@ def jinja_getattr(obj, attr_string):
 		return obj
 	attrs = attr_string.split(".")
 	for attr in attrs:
-		obj = dummy_env.getattr(obj, attr)
+		obj = env.getattr(obj, attr)
 	return obj
 
 
@@ -58,7 +55,7 @@ def jinja_context_getattr(context, attr_string):
 	"""
 	Tries to get attribute by name from context
 	"""
-	return jinja_getattr(context, attr_string)
+	return jinja_getattr(context.environment, context, attr_string)
 
 @contextfunction
 def jinja_batch_context_getattr(context, *args, **kwargs):
@@ -103,13 +100,13 @@ def jinja_gridlayout(ctx, layout):
 def jinja_display(ctx, layout):
 	return ctx.environment.get_template_module('asymmetricbase/displaymanager/base.djhtml', ctx).display(layout)
 
-def get_functions():
+def get_functions(jinja_env):
 	return {
 		'url' : jinja_url,
 		'getdatetime' : jinja_getdate,
 		'type' : type,
 		'dir' : dir,
-		'getattr' : jinja_getattr,
+		'getattr' : partial(jinja_getattr, jinja_env),
 		'context_getattr' : jinja_context_getattr,
 		'batch_context_getattr' : jinja_batch_context_getattr,
 		

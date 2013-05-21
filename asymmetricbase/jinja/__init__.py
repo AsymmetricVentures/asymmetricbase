@@ -45,8 +45,8 @@ jinja_env = environment.JinjaEnvironment(
 	],
 )
 
-jinja_env.globals.update(global_functions.get_functions())
+jinja_env.globals.update(global_functions.get_functions(jinja_env))
 
-jinja_env.filters.update(filters.get_filters())
+jinja_env.filters.update(filters.get_filters(jinja_env))
 
 monkey_patch_jinja()
