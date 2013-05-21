@@ -19,9 +19,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import re
 
-from jinja2._markupsafe import Markup, escape
-
 from asymmetricbase.logging import logger #@UnusedImport
+from markupsafe import escape, Markup
 
 def highlighter_wrapper(*queries):
 	matchers = []

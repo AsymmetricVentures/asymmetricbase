@@ -33,7 +33,8 @@ class IntegerRangeField(IntegerField):
 	def formfield(self, **kwargs):
 		defaults = {
 			'min_value': self.min_value,
-			'max_value': self.max_value, }
+			'max_value': self.max_value,
+		}
 		defaults.update(kwargs)
 		return super(IntegerRangeField, self).formfield(**defaults)
 

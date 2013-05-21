@@ -20,7 +20,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 def patch_conditional_escape():
 	from django.utils import html as django_html_utils
 	
-	from jinja2._markupsafe import Markup
+	from markupsafe import Markup
 	
 	old_conditional_escape = django_html_utils.conditional_escape
 	def conditional_escape(html):

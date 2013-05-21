@@ -48,23 +48,22 @@
 	{%- if 'url_args' not in kwargs -%}
 		{%- set url_args = [obj|int()] -%}
 	{%- else -%}
-		{%- set url_args = resolve_recursive(kwargs['url_args']) -%}
+		{%- set url_args = resolve_contextattributes(kwargs['url_args'], obj=obj, url_name=url_name) -%}
 	{%- endif -%}
-	
 	{%- if 'url_kwargs' not in kwargs -%}
 		{%- set url_kwargs = {} -%}
 	{%- else -%}
-		{%- set url_kwargs = resolve_recursive(kwargs['url_kwargs']) -%}
+		{%- set url_kwargs = resolve_contextattributes(kwargs['url_kwargs'], obj=obj, url_name=url_name) -%}
 	{%- endif -%}
 	
 	{%- if 'url_text' not in kwargs -%}
 		{%- set url_text = obj -%}
 	{%- else-%}
-		{%- set url_text = resolve_recursive(kwargs['url_text']) -%}
+		{%- set url_text = resolve_contextattributes(kwargs['url_text'], obj=obj, url_name=url_name) -%}
 	{%- endif -%}
 	
 	{%- if 'get_args' in kwargs -%}
-		{%- set get_args = resolve_recursive(kwargs.pop('get_args', None)) -%}
+		{%- set get_args = resolve_contextattributes(kwargs.pop('get_args', None), obj=obj, url_name=url_name) -%}
 	{%- else -%}
 		{%- set get_args = None -%}
 	{%- endif -%}

@@ -71,22 +71,22 @@ def jinja_batch_context_getattr(context, *args, **kwargs):
 		return new_kwargs
 
 @contextfunction
-def jinja_recursive_resolve_display(context, obj):
+def jinja_resolve_contextattributes(context, __obj, **kwargs):
 	from asymmetricbase.displaymanager import ContextAttribute
 	
-	if isinstance(obj, ContextAttribute):
-		return obj(context, jinja_context_getattr(context, obj.attr_name))
+	if isinstance(__obj, ContextAttribute):
+		return __obj(context, **kwargs)
 	
-	elif isinstance(obj, (list, tuple)):
-		return (jinja_recursive_resolve_display(context, item) for item in obj)
+	elif isinstance(__obj, (list, tuple)):
+		return (jinja_resolve_contextattributes(context, item, **kwargs) for item in __obj)
 	
-	elif isinstance(obj, (set, frozenset)):
-		return {jinja_recursive_resolve_display(context, item) for item in obj}
+	elif isinstance(__obj, (set, frozenset)):
+		return { jinja_resolve_contextattributes(context, item, **kwargs) for item in __obj }
 	
-	elif isinstance(obj, (dict, OrderedDict)):
-		return { k : jinja_recursive_resolve_display(context, item) for k, item in obj.items()}
+	elif isinstance(__obj, (dict, OrderedDict)):
+		return { k : jinja_resolve_contextattributes(context, item, **kwargs) for k, item in __obj.items() }
 	
-	return obj
+	return __obj
 
 @contextfunction
 def jinja_vtable(ctx, table, header = '', tail = '', title = ''):
@@ -110,7 +110,7 @@ def get_functions(jinja_env):
 		'context_getattr' : jinja_context_getattr,
 		'batch_context_getattr' : jinja_batch_context_getattr,
 		
-		'resolve_recursive' : jinja_recursive_resolve_display,
+		'resolve_contextattributes' : jinja_resolve_contextattributes,
 		
 		'vtable' : jinja_vtable,
 		'gridlayout' : jinja_gridlayout,

@@ -17,14 +17,28 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from jinja2.utils import contextfunction
+
 class ContextAttribute(object):
 	
 	def __init__(self, attr_name, on_undefined = lambda x:x):
 		self.on_undefined = on_undefined
 		self.attr_name = attr_name
 	
-	def __call__(self, context, attr):
-		if not attr:
-			return self.on_undefined(attr)
-		return attr
+	@contextfunction
+	def __call__(self, context, **other_names):
+		
+		if self.attr_name == '':
+			return ''
+		
+		attrs = self.attr_name.split('.')
+		attr_base = attrs.pop(0)
+		obj = other_names.get(attr_base, context.environment.getattr(context, attr_base))
+		
+		for attr in attrs:
+			obj = context.environment.getattr(obj, attr)
+		
+		if not obj:
+			return self.on_undefined(obj)
+		return obj
 		
