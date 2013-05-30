@@ -15,6 +15,7 @@ class AbstractBaseAddress(models.AsymBaseModel):
 	city = models.CharField(max_length = 30, default = "")
 	province = models.CharField(max_length = 50, default = "")
 	postal_code = models.CharField(max_length = 10, default = "")
+	country = models.CharField(max_length = 25, default = "")
 	phone = models.CharField(max_length = 25, default = "")
 	fax = models.CharField(max_length = 25, default = "")
 	
