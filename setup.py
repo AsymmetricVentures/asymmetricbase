@@ -16,7 +16,7 @@
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from datetime import datetime
-from distutils.core import setup
+from setuptools import setup
 
 classifiers = """
 Development Status :: 4 - Beta
@@ -64,7 +64,7 @@ setup(
 	classifiers = filter(None, classifiers.split('\n')),
 	
 	requires = (
-		'django(==1.4.5)',
+		'django(>=1.4.5)',
 		'jinja2(==2.7)',
 		'pytz',  # most recent
 		'south(==0.7.6)',
