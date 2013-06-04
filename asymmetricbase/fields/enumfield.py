@@ -23,8 +23,6 @@ from django.db.models.fields import NOT_PROVIDED
 from django.db.models.fields.subclassing import SubfieldBase
 from django.utils.encoding import smart_unicode
 
-from south.modelsinspector import add_introspection_rules
-
 from asymmetricbase.logging import logger # @UnusedImport
 from asymmetricbase.utils.enum import Enum, EnumItem
 from asymmetricbase import forms
@@ -142,33 +140,38 @@ class EnumField(models.IntegerField):
 		defaults.update(**kwargs)
 		
 		return EnumFormField(**defaults)
+
+try:
+	from south.modelsinspector import add_introspection_rules
+	
+	def enum_converter(value):
+		if issubclass(value, Enum):
+			return 'Migration().gf("{}.{}")'.format(value.__module__, value.__name__)
 		
-def enum_converter(value):
-	if issubclass(value, Enum):
-		return 'Migration().gf("{}.{}")'.format(value.__module__, value.__name__)
+		raise ValueError("Unknown value type `{!r}` for enum argument".format(value))
 	
-	raise ValueError("Unknown value type `{!r}` for enum argument".format(value))
-
-def default_converter(value):
-	if isinstance(value, NOT_PROVIDED) or value is NOT_PROVIDED:
-		return None
+	def default_converter(value):
+		if isinstance(value, NOT_PROVIDED) or value is NOT_PROVIDED:
+			return None
+		
+		elif isinstance(value, EnumItem):
+			#return 'getattr(Migration().gf("{}.{}"), "{}")'.format(value._enum_type_.__module__, value._enum_type_.__name__, value._enum_name_)
+			return repr(value.value)
+		
+		raise ValueError(repr(value))
 	
-	elif isinstance(value, EnumItem):
-		#return 'getattr(Migration().gf("{}.{}"), "{}")'.format(value._enum_type_.__module__, value._enum_type_.__name__, value._enum_name_)
-		return repr(value.value)
-	
-	raise ValueError(repr(value))
-
-add_introspection_rules(
-	[
-		(
-			[EnumField], # Field Name 
-			[], # Args
-			{ # kwargs
-				'enum' : ['enum', {'converter' : enum_converter, 'is_django_function' : True}],
-				'default' : ['default', {'converter' : default_converter, 'is_django_function' : True}],
-			}
-		)
-	],
-	['^asymmetricbase\.fields\.enumfield\.EnumField']
-)
+	add_introspection_rules(
+		[
+			(
+				[EnumField], # Field Name 
+				[], # Args
+				{ # kwargs
+					'enum' : ['enum', {'converter' : enum_converter, 'is_django_function' : True}],
+					'default' : ['default', {'converter' : default_converter, 'is_django_function' : True}],
+				}
+			)
+		],
+		['^asymmetricbase\.fields\.enumfield\.EnumField']
+	)
+except ImportError:
+	pass

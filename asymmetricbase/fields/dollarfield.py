@@ -21,8 +21,6 @@ from decimal import Decimal
 
 from django.db import models
 
-from south.modelsinspector import add_introspection_rules
-
 from asymmetricbase.logging import logger # @UnusedImport
 
 ZERO_DOLLARS = Decimal('0.00')
@@ -36,4 +34,9 @@ class DollarField(models.DecimalField):
 		
 		super(DollarField, self).__init__(*args, **kwargs)
 
-add_introspection_rules([], ['^asymmetricbase\.fields\.dollarfield\.DollarField'])
+try:
+	from south.modelsinspector import add_introspection_rules
+	
+	add_introspection_rules([], ['^asymmetricbase\.fields\.dollarfield\.DollarField'])
+except ImportError:
+	pass

@@ -22,8 +22,6 @@ import uuid
 from django.db import models
 from django.db.utils import IntegrityError
 
-from south.modelsinspector import add_introspection_rules
-
 from asymmetricbase.logging import logger # @UnusedImport
 
 class UUIDField(models.CharField):
@@ -48,4 +46,9 @@ class UUIDField(models.CharField):
 		else:
 			return super(UUIDField, self).pre_save(model_instance, add)
 
-add_introspection_rules([], ['^asymmetricbase\.fields\.uuidfield\.UUIDField'])
+try:
+	from south.modelsinspector import add_introspection_rules
+	
+	add_introspection_rules([], ['^asymmetricbase\.fields\.uuidfield\.UUIDField'])
+except ImportError:
+	pass

@@ -21,8 +21,6 @@ from decimal import Decimal
 
 from django.db import models
 
-from south.modelsinspector import add_introspection_rules
-
 from asymmetricbase.logging import logger # @UnusedImport
 
 ZERO_QTY = Decimal('0.00')
@@ -36,4 +34,9 @@ class QtyField(models.DecimalField):
 		
 		super(QtyField, self).__init__(*args, **kwargs)
 
-add_introspection_rules([], ['^asymmetricbase\.fields\.quantityfield\.QtyField'])
+try:
+	from south.modelsinspector import add_introspection_rules
+	
+	add_introspection_rules([], ['^asymmetricbase\.fields\.quantityfield\.QtyField'])
+except ImportError:
+	pass

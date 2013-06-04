@@ -19,8 +19,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.db import models
 
-from south.modelsinspector import add_introspection_rules
-
 from asymmetricbase.logging import logger # @UnusedImport
 
 '''
@@ -59,10 +57,15 @@ class CommentField(models.CharField):
 		kwargs.setdefault('max_length', COMMENT_LENGTH)
 		super(CommentField, self).__init__(*args, **kwargs)
 
-add_introspection_rules([], [
-	'^asymmetricbase\.fields\.textfields\.ShortMessageField',
-	'^asymmetricbase\.fields\.textfields\.LongMessageField',
-	'^asymmetricbase\.fields\.textfields\.ShortNameField',
-	'^asymmetricbase\.fields\.textfields\.LongNameField',
-	'^asymmetricbase\.fields\.textfields\.CommentField',
-])
+try:
+	from south.modelsinspector import add_introspection_rules
+
+	add_introspection_rules([], [
+		'^asymmetricbase\.fields\.textfields\.ShortMessageField',
+		'^asymmetricbase\.fields\.textfields\.LongMessageField',
+		'^asymmetricbase\.fields\.textfields\.ShortNameField',
+		'^asymmetricbase\.fields\.textfields\.LongNameField',
+		'^asymmetricbase\.fields\.textfields\.CommentField',
+	])
+except ImportError:
+	pass

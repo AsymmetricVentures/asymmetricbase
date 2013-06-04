@@ -19,8 +19,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.db.models import IntegerField
 
-from south.modelsinspector import add_introspection_rules
-
 from asymmetricbase.logging import logger #@UnusedImport
 
 class IntegerRangeField(IntegerField):
@@ -38,5 +36,9 @@ class IntegerRangeField(IntegerField):
 		defaults.update(kwargs)
 		return super(IntegerRangeField, self).formfield(**defaults)
 
-
-add_introspection_rules([], ['^asymmetricbase\.fields\.rangefield\.IntegerRangeField'])
+try:
+	from south.modelsinspector import add_introspection_rules
+	
+	add_introspection_rules([], ['^asymmetricbase\.fields\.rangefield\.IntegerRangeField'])
+except ImportError:
+	pass
