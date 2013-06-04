@@ -18,7 +18,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 from asymmetricbase.utils.cached_function import cached_function
 
-__all__ = ('Role', 'AssignedRole', 'RoleTransfer')
+__all__ = ('Role', 'AssignedRole', 'RoleTransfer', 'TypeAwareRoleManager')
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
@@ -29,6 +29,7 @@ from django.db import models
 
 from asymmetricbase.logging import logger
 from .base import AsymBaseModel
+from asymmetricbase.fields import LongNameField
 
 # UserModel should have a field called "groups" which returns the queryset
 # of all the groups the model is attached to. Or, just inherit from PermissionsMixin
@@ -107,7 +108,7 @@ class Role(AsymBaseModel):
 		)
 		app_label = 'shared'
 	
-	name = models.LongNameField()
+	name = LongNameField()
 	defined_for = models.ForeignKey(ContentType)
 	# limit permitted groups to those groups that are not permission_groups for other Roles
 	permitted_groups = models.ManyToManyField(Group, limit_choices_to = {'role__isnull' : True}, related_name = 'possible_roles')
@@ -134,7 +135,7 @@ class AssignedRole(AsymBaseModel):
 	"""
 	For adding Users in specific roles to models.
 	"""
-	user = models.ForeignKey(get_user_role_model(), related_name = 'assigned_roles')
+	user = models.ForeignKey(UserModel, related_name = 'assigned_roles')
 	role = models.ForeignKey(Role, related_name = 'assignments')
 	
 	content_type = models.ForeignKey(ContentType)
@@ -163,7 +164,7 @@ class AssignedRole(AsymBaseModel):
 		
 		super(AssignedRole, self).save(*args, **kwargs)
 
-class RoleTransfer(models.AsymBaseModel):
+class RoleTransfer(AsymBaseModel):
 	role_from = models.ForeignKey(Role, related_name = '+')
 	role_to = models.ForeignKey(Role, related_name = '+')
 	
