@@ -17,8 +17,33 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from .logger_models import *
-from .base import *
-from .s3file import *
-from .named_groups import *
-from .roles import *
+__all__ = ('DefaultGroup', 'NamedGroupSet')
+
+from django.contrib.auth.models import Group
+from django.db import models
+
+from .base import AsymBaseModel
+
+class NamedGroupSetManager(models.Manager):
+	
+	def get_groups(self, group_set_identifier):
+		return self.get_query_set().get(identifier = group_set_identifier).group_set.all()
+
+class DefaultGroup(AsymBaseModel):
+	"""
+	Couple a static Group name defined in settings with a Group object.
+	
+	This allows renaming of the Group while still being able to access it
+	by name in the code.
+	"""
+	identifier = models.IntegerField(unique = True)
+	group = models.ForeignKey(Group)
+
+class NamedGroupSet(AsymBaseModel):
+	"""
+	Couple a set of Group objects with a static name defined in settings.
+	"""
+	identifier = models.IntegerField()
+	group_set = models.ManyToManyField(Group)
+	
+	objects = NamedGroupSetManager()
