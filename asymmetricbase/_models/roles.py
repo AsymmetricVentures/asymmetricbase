@@ -18,7 +18,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 from asymmetricbase.utils.cached_function import cached_function
 
-__all__ = ('Role', 'AssignedRole', 'RoleTransfer', 'TypeAwareRoleManager')
+__all__ = ('Role', 'AssignedRole', 'RoleTransfer', 'TypeAwareRoleManager', 'DefaultRole', 'OnlyRoleGroupProxy')
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
@@ -31,8 +31,11 @@ from asymmetricbase.logging import logger
 from .base import AsymBaseModel
 from asymmetricbase.fields import LongNameField
 
-# UserModel should have a field called "groups" which returns the queryset
-# of all the groups the model is attached to. Or, just inherit from PermissionsMixin
+# UserModel implement get_groups_query_string()
+# this method should return a string that can be used in a queryset
+# filter to access the user's groups. For example, the default User class
+# would return 'groups', since if we want to filter by groups we would
+# do User.objecst.filter('groups__in' = foo)
 UserModel = getattr(settings, 'ASYM_ROLE_USER_MODEL')
 
 @cached_function
@@ -79,8 +82,6 @@ class NotRoleGroupProxy(Group):
 		proxy = True
 	
 	objects = RoleGroupProxyManager(role_is_null = True)
-	
-	
 
 class OnlyRoleGroupProxy(Group):
 	"""
@@ -91,8 +92,6 @@ class OnlyRoleGroupProxy(Group):
 		proxy = True
 	
 	objects = RoleGroupProxyManager(role_is_null = False)
-	
-	
 
 class Role(AsymBaseModel):
 	"""
@@ -121,15 +120,14 @@ class Role(AsymBaseModel):
 	def permitted_users(self):
 		# looking at the .query for this QuerySet shows that you can, in fact,
 		# do a .filter(set_of_things__in = another_set_of_things)
-		return UserModel.objects.filter(groups__id__in = self.permitted_groups.all()).distinct()
+		user_role_model = get_user_role_model()
+		return user_role_model.objects.filter(**{user_role_model.get_groups_query_string() + '__id__in': self.permitted_groups.all()}).distinct()
 		# the above is equivalent to:
 #		users = set()
 #		for g in self.permitted_groups.all():
 #			for u in g.user_set.all():
 #				users.add(u)
 #		return users
-	
-	
 
 class AssignedRole(AsymBaseModel):
 	"""
@@ -221,3 +219,13 @@ class RoleTransfer(AsymBaseModel):
 				The {group} group is not a Permitted Group on the {role} role defined on {to_model}. The role transfer could fail if created.
 				""".format(group = from_group.name, role = to_role.name, to_model = str(to_role.defined_for).title()))
 		return msg_list if len(msg_list) > 0 else None
+
+class DefaultRole(AsymBaseModel):
+	"""
+	Couple a static Role name defined in settings with a Role object.
+	
+	This allows renaming of the Roles while still being able to access it
+	by name in the code.
+	"""
+	identifier = models.IntegerField(unique = True)
+	role = models.ForeignKey(Role)
