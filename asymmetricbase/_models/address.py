@@ -29,8 +29,3 @@ class AbstractBaseAddress(AsymBaseModel):
 	@property
 	def address_summary(self):
 		return u'{self.address_line_1}, {self.city}, {self.postal_code}'.format(self = self)
-	
-
-class Address(AbstractBaseAddress):
-	class Meta(object):
-		app_label = 'shared'
