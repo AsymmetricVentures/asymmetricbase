@@ -1,13 +1,16 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from asymmetricbase import models
-from asymmetricbase.logging import logger # @UnusedImport
+from django.db import models
 
-class AbstractBaseAddress(models.AsymBaseModel):
+from .base import AsymBaseModel
+from asymmetricbase.logging import logger # @UnusedImport
+from asymmetricbase.fields.textfields import LongNameField
+
+class AbstractBaseAddress(AsymBaseModel):
 	class Meta(object):
 		abstract = True
 	
-	name = models.LongNameField() # For easier searching
+	name = LongNameField() # For easier searching
 	
 	# Standard contact detail
 	address_line_1 = models.CharField("Address", max_length = 255, default = "")
