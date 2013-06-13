@@ -38,7 +38,6 @@ setup(
 	
 	author = 'Richard Eames',
 	author_email = 'reames@asymmetricventures.com',
-	
 	packages = (
 		'asymmetricbase',
 		'asymmetricbase._models',
@@ -72,12 +71,6 @@ setup(
 		'Pillow',
 	),
 	
-	include_package_data=True,
 	package_dir = {'asymmetricbase' : 'asymmetricbase'},
-	package_data = {
-		'asymmetricbase' : [
-			'templates/asymmetricbase/boundfield/*.djhtml',
-			'templates/asymmetricbase/displaymanager/*.djhtml',
-			'templates/asymmetricbase/forms/*.djhtml',
-		]},
 )
+
