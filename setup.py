@@ -55,6 +55,11 @@ setup(
 		'asymmetricbase.middleware',
 		'asymmetricbase.migrations',
 		'asymmetricbase.pagination',
+		'asymmetricbase.templates',
+		'asymmetricbase.templates.asymmetricbase',
+		'asymmetricbase.templates.asymmetricbase.boundfield',
+		'asymmetricbase.templates.asymmetricbase.displaymanager',
+		'asymmetricbase.templates.asymmetricbase.forms',
 		'asymmetricbase.testing',
 		'asymmetricbase.utils',
 		'asymmetricbase.views',
@@ -62,15 +67,16 @@ setup(
 	),
 	classifiers = filter(None, classifiers.split('\n')),
 	
-	requires = (
-		'django(>=1.4.5)',
-		'jinja2(==2.7)',
+	install_requires = (
+		'django>=1.4.5',
+		'jinja2==2.7',
 		'pytz',  # most recent
-		'south(==0.7.6)',
+		'south==0.7.6',
 		'hamlpy',  # most recent,
 		'Pillow',
 	),
 	
 	package_dir = {'asymmetricbase' : 'asymmetricbase'},
+	package_data = {'' : ['*.djhtml']}
 )
 

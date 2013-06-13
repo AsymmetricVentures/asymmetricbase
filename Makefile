@@ -18,9 +18,9 @@
 
 all: clean build sync
 	
-	
+
 clean:
-	rm -rf build dist *.deb MANIFEST
+	rm -rf build dist *.deb MANIFEST asymmetricbase.egg-info
 	- sudo rm -rf asymmetricbase.egg-info
 
 build: clean
