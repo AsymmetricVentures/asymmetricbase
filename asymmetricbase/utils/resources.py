@@ -133,16 +133,15 @@ def _get_resources():
 		for file_path in _list_files_of_type(rootdir, resource_type.extension):
 			deps = _get_file_dependencies(file_path)
 			relfile = _normalize_resource_filename(file_path)
-			class_name = os.path.basename(file_path)
-			resources[class_name] = Resource(resource_type, relfile, deps)
+			resources[_normalize_resource_filename(relfile, resource_type.folder)] = Resource(resource_type, relfile, deps)
 	
 	_validate_dependencies(resources)
 	
 	return resources
 
-def _normalize_resource_filename(file_path):
-	if file_path.startswith(static_dir):
-		relfile = os.path.relpath(file_path, static_dir)
+def _normalize_resource_filename(file_path, normalize_base = static_dir):
+	if file_path.startswith(normalize_base):
+		relfile = os.path.relpath(file_path, normalize_base)
 	else:
 		relfile = file_path
 	return relfile.replace('\\', '/')
@@ -180,7 +179,10 @@ class MissingResourceException(ResourceException):
 def _list_files_of_type(rootdir, ext):
 	dotext = '.' + ext
 	
-	for r, _, files in os.walk(rootdir):
+	for r, dirs, files in os.walk(rootdir):
+		for d in dirs:
+			for f in _list_files_of_type(os.path.join(rootdir, d), ext):
+				yield f
 		for file_name in files:
 			if file_name.endswith(dotext):
 				yield os.path.join(r, file_name)
