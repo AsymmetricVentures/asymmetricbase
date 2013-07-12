@@ -34,27 +34,27 @@ COMMENT_LENGTH = 1024
 
 class ShortMessageField(models.CharField):
 	def __init__(self, *args, **kwargs):
-		kwargs.setdefault('max_length', SHORT_MESSAGE_LENGTH)
+		kwargs.setdefault('max_length', SHORT_MESSAGE_LENGTH) # 140 chars
 		super(ShortMessageField, self).__init__(*args, **kwargs)
 
 class LongMessageField(models.CharField):
 	def __init__(self, *args, **kwargs):
-		kwargs.setdefault('max_length', LONG_MESSAGE_LENGTH)
+		kwargs.setdefault('max_length', LONG_MESSAGE_LENGTH) # 255 Chars
 		super(LongMessageField, self).__init__(*args, **kwargs)
 
 class ShortNameField(models.CharField):
 	def __init__(self, *args, **kwargs):
-		kwargs.setdefault('max_length', SHORT_NAME_LENGTH)
+		kwargs.setdefault('max_length', SHORT_NAME_LENGTH) # 50 Chars
 		super(ShortNameField, self).__init__(*args, **kwargs)
 
 class LongNameField(models.CharField):
 	def __init__(self, *args, **kwargs):
-		kwargs.setdefault('max_length', LONG_NAME_LENGTH)
+		kwargs.setdefault('max_length', LONG_NAME_LENGTH) # 1285 Chars
 		super(LongNameField, self).__init__(*args, **kwargs)
 
 class CommentField(models.CharField):
 	def __init__(self, *args, **kwargs):
-		kwargs.setdefault('max_length', COMMENT_LENGTH)
+		kwargs.setdefault('max_length', COMMENT_LENGTH) # 1024
 		super(CommentField, self).__init__(*args, **kwargs)
 
 try:
