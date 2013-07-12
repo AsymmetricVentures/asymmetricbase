@@ -23,6 +23,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.query import QuerySet
 
 from asymmetricbase.logging import logger
+from asymmetricbase.utils.enum import EnumItem
 
 class AsymJSONEncoder(DjangoJSONEncoder):
 	
@@ -35,6 +36,8 @@ class AsymJSONEncoder(DjangoJSONEncoder):
 		elif isinstance(o, (types.FunctionType, types.LambdaType)):
 			logger.debug("Tried to jsonify a function or lambda")
 			return str(o)
+		elif isinstance(o, EnumItem):
+			return int(o)
 		else:
 			return super(AsymJSONEncoder, self).default(o)
 
