@@ -10,17 +10,17 @@ class AbstractBaseAddress(AsymBaseModel):
 	class Meta(object):
 		abstract = True
 	
-	name = LongNameField() # For easier searching
+	name = LongNameField(default = "", blank = True) # For easier searching
 	
 	# Standard contact detail
-	address_line_1 = models.CharField("Address", max_length = 255, default = "")
-	address_line_2 = models.CharField(max_length = 255, default = "")
-	city = models.CharField(max_length = 30, default = "")
-	province = models.CharField(max_length = 50, default = "")
-	postal_code = models.CharField(max_length = 10, default = "")
-	country = models.CharField(max_length = 25, default = "")
-	phone = models.CharField(max_length = 25, default = "")
-	fax = models.CharField(max_length = 25, default = "")
+	address_line_1 = models.CharField("Address", max_length = 255, default = "", blank = True)
+	address_line_2 = models.CharField(max_length = 255, default = "", blank = True)
+	city = models.CharField(max_length = 30, default = "", blank = True)
+	province = models.CharField(max_length = 50, default = "", blank = True)
+	postal_code = models.CharField(max_length = 10, default = "", blank = True)
+	country = models.CharField(max_length = 25, default = "", blank = True)
+	phone = models.CharField(max_length = 25, default = "", blank = True)
+	fax = models.CharField(max_length = 25, default = "", blank = True)
 	
 	
 	def __str__(self):
