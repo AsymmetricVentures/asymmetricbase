@@ -18,7 +18,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 from asymmetricbase.utils.cached_function import cached_function
 
-__all__ = ('Role', 'AssignedRole', 'RoleTransfer', 'TypeAwareRoleManager', 'DefaultRole', 'OnlyRoleGroupProxy')
+__all__ = ('Role', 'AssignedRole', 'RoleTransfer', 'TypeAwareRoleManager', 'DefaultRole', 'OnlyRoleGroupProxy', 'HasTypeAwareRoleManager')
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
@@ -59,6 +59,19 @@ class TypeAwareRoleManager(models.Manager):
 	def get_query_set(self):
 		return Role.objects.get_query_set() \
 			.filter(defined_for = self.model_content_type)
+
+def HasTypeAwareRoleManager(content_type_model_name):
+	""" If a model has a TypeAwareRoleManager (TARM) as a field, and its baseclass defines "objects",
+	    then the TARM will override this as the default manager. In some cases this is not what is wanted,
+	    if, for example, the primary key of the model is a CharField. In this case, the TARM causes an insert
+	    to fail as it uses AutoField() instead of CharField() causing it to issue an int() on the field.
+	"""
+	attrs = {
+		'assigned_roles' : generic.GenericRelation(AssignedRole),
+		'roles' : TypeAwareRoleManager(model_content_type = ContentType.objects.filter(model = content_type_model_name))
+	}
+	
+	return type(str('{}TypeAwareRoleManager'.format(content_type_model_name.title())), (object,), attrs)
 
 class RoleGroupProxyManager(GroupManager):
 	"""
