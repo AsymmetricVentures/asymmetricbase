@@ -26,6 +26,7 @@ def cached_function(func):
 	
 	Similar to django's "cached_property"
 	
+	Note: Assumes that the function will be called with the same arguments each time
 	
 	>>> def myfunc():
 	...   print("HELLO")
@@ -46,9 +47,9 @@ def cached_function(func):
 	"""
 	
 	@wraps(func)
-	def wrapper():
+	def wrapper(*args, **kwargs):
 		if not hasattr(func, '__cached_result__'):
-			func.__cached_result__ = func()
+			func.__cached_result__ = func(*args, **kwargs)
 		
 		return func.__cached_result__
 	
