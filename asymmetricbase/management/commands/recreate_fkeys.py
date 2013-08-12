@@ -19,8 +19,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.core.management.base import BaseCommand
 from django.db.models import get_models
-from django.db import connections, DEFAULT_DB_ALIAS, transaction
-from django.core.management.color import color_style
+from django.db import connections#, transaction
+#from django.core.management.color import color_style
 from django.db.backends.util import truncate_name
 
 from south.db.generic import DatabaseOperations
@@ -31,7 +31,6 @@ class Command(BaseCommand):
 	def handle(self, *args, **options):
 		connection_name = options.get('database', 'default')
 		connection = connections[connection_name]
-		style = color_style()
 		
 		d = DatabaseOperations('default')
 		qn = connection.ops.quote_name
@@ -40,7 +39,7 @@ class Command(BaseCommand):
 		
 		for model in get_models():
 			opts = model._meta
-			db_table = opts.db_table
+			#db_table = opts.db_table
 			if not opts.managed or opts.proxy:
 				continue
 			
@@ -51,7 +50,7 @@ class Command(BaseCommand):
 				if col_type is None:
 					continue
 				if f.rel:
-					fkey_name = '{}_{}_fkey'.format(db_table, f.column)
+					#fkey_name = '{}_{}_fkey'.format(db_table, f.column)
 					
 					pending_references.setdefault(f.rel.to, []).append((model, f))
 		
@@ -73,7 +72,7 @@ class Command(BaseCommand):
 					rel_opts = rel_class._meta
 					r_table = rel_opts.db_table
 					r_col = f.column
-					table = opts.db_table
+					#table = opts.db_table
 					col = opts.get_field(f.rel.field_name).column
 					
 					r_name = '{}_refs_{}_{}_fkey'.format(r_col, table_name, col)

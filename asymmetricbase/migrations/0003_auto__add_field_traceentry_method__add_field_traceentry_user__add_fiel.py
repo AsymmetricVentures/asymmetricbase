@@ -1,3 +1,4 @@
+#@PydevCodeAnalysisIgnore
 # -*- coding: utf-8 -*-
 import datetime
 from south.db import db
@@ -10,23 +11,23 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'TraceEntry.method'
         db.add_column('asymmetricbase_traceentry', 'method',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=10, blank=True),
-                      keep_default=False)
+                      self.gf('django.db.models.fields.CharField')(default = '', max_length = 10, blank = True),
+                      keep_default = False)
 
         # Adding field 'TraceEntry.user'
         db.add_column('asymmetricbase_traceentry', 'user',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=100, blank=True),
-                      keep_default=False)
+                      self.gf('django.db.models.fields.CharField')(default = '', max_length = 100, blank = True),
+                      keep_default = False)
 
         # Adding field 'TraceEntry.request_meta'
         db.add_column('asymmetricbase_traceentry', 'request_meta',
-                      self.gf('django.db.models.fields.TextField')(default='', blank=True),
-                      keep_default=False)
+                      self.gf('django.db.models.fields.TextField')(default = '', blank = True),
+                      keep_default = False)
 
         # Adding field 'TraceEntry.request_data'
         db.add_column('asymmetricbase_traceentry', 'request_data',
-                      self.gf('django.db.models.fields.TextField')(default='', blank=True),
-                      keep_default=False)
+                      self.gf('django.db.models.fields.TextField')(default = '', blank = True),
+                      keep_default = False)
 
 
     def backwards(self, orm):
