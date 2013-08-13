@@ -37,6 +37,7 @@ from asymmetricbase.fields import LongNameField
 # would return 'groups', since if we want to filter by groups we would
 # do User.objecst.filter('groups__in' = foo)
 UserModel = getattr(settings, 'ASYM_ROLE_USER_MODEL')
+usermodel_related_fields = getattr(settings, 'ASYM_ROLE_USER_MODEL_SELECT_RELATED', None)
 
 @cached_function
 def get_user_role_model():
@@ -134,7 +135,11 @@ class Role(AsymBaseModel):
 		# looking at the .query for this QuerySet shows that you can, in fact,
 		# do a .filter(set_of_things__in = another_set_of_things)
 		user_role_model = get_user_role_model()
-		return user_role_model.objects.filter(**{user_role_model.get_groups_query_string() + '__id__in': self.permitted_groups.all()}).distinct()
+		queryset = user_role_model.objects.filter(**{user_role_model.get_groups_query_string() + '__id__in': self.permitted_groups.all()}).distinct()
+		if usermodel_related_fields is not None:
+			return queryset.select_related(*usermodel_related_fields)
+		else:
+			return queryset
 		# the above is equivalent to:
 #		users = set()
 #		for g in self.permitted_groups.all():
