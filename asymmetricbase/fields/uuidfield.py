@@ -29,6 +29,7 @@ class UUIDField(models.CharField):
 	def __init__(self, *args, **kwargs):
 		kwargs['max_length'] = 40
 		kwargs['blank'] = True
+		kwargs['db_index'] = True
 		self.auto_add = kwargs.pop('auto_add', True)
 		
 		super(UUIDField, self).__init__(*args, **kwargs)
