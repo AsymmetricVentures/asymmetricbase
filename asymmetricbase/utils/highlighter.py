@@ -36,7 +36,7 @@ def highlighter_wrapper(*queries):
 		for matcher in matchers:
 			match = matcher.search(phrase)
 			if match is not None:
-				phrase = str(escape(phrase))
-				phrase = Markup(matcher.sub(r"<strong>\1</strong>", phrase))
+				phrase = escape(phrase).encode('utf-8')
+				phrase = Markup(matcher.sub(r"<strong>\1</strong>", phrase), encoding = 'utf-8')
 		return phrase
 	return highlighter
