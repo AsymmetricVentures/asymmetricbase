@@ -143,7 +143,6 @@ EnumBase = EnumMeta(str('EnumBase'), (), {'__doc__' : ''})
 class Enum(EnumBase):
 	'''Baseclass for Enums. 
 	   ** DO NOT define methods in here'''
-	__metaclass__ = EnumMeta
 	Choices = {}
 	
 	def __new__(cls, value):

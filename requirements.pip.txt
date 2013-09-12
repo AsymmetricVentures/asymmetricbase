@@ -1,7 +1,7 @@
 -e git://github.com/jessemiller/HamlPy.git#egg=hamlpy
 Jinja2==2.7
-django==1.5
-pytz  # most recent
-south==0.7.6
+django>1.5
+pytz>dev  # most recent
+south<2.0
 Pillow
-django-localflavor-ca
+django-localflavor

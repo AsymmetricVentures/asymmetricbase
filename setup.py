@@ -71,7 +71,7 @@ setup(
 		'django>=1.4.5',
 		'jinja2==2.7',
 		'pytz',  # most recent
-		'south==0.7.6',
+		'south<2.0',
 		'hamlpy',  # most recent,
 		'Pillow',
 	),
