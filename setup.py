@@ -74,6 +74,7 @@ setup(
 		'south<2.0',
 		'hamlpy',  # most recent,
 		'Pillow',
+		'boto',
 	),
 	
 	package_dir = {'asymmetricbase' : 'asymmetricbase'},

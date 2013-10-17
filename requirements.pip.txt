@@ -5,3 +5,4 @@ pytz>dev  # most recent
 south<2.0
 Pillow
 django-localflavor
+boto
