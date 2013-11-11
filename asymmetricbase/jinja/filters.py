@@ -43,6 +43,15 @@ def currency_format(num):
 		num = 0
 	return locale.currency(num, grouping = True)
 
+def percent_format(num):
+	if not isinstance(num, (int, float, long, Decimal)):
+		num = 0
+	st = "{0:.5f}".format(num * 100).rstrip('0')
+	parts = st.split('.')
+	dec = parts[1].zfill(2)
+	full = '.'.join([parts[0], dec])
+	return full
+
 def get_filters(jinja_env):
 	return {
 		# modified django date filter
@@ -65,4 +74,5 @@ def get_filters(jinja_env):
 		# Locale dependant
 		'currency' : currency_format,
 		'filter' : jinja_filter_empty,
+		'varlen_percent': percent_format
 	}
