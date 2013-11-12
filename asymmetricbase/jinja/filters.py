@@ -48,7 +48,8 @@ def percent_format(num):
 		num = 0
 	st = "{0:.5f}".format(num * 100).rstrip('0')
 	parts = st.split('.')
-	dec = parts[1].zfill(2)
+	# zfill adds 0s on left, so reverse string twice using [::-1]
+	dec = parts[1][::-1].zfill(2)[::-1]
 	full = '.'.join([parts[0], dec])
 	return full
 
