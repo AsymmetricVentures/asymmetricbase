@@ -68,6 +68,12 @@ class EnumField(models.IntegerField):
 		
 		super(EnumField, self).__init__(*args, **kwargs)
 	
+	def __copy__(self):
+		return self
+	
+	def __deepcopy__(self):
+		return self
+	
 	def get_default(self):
 		"""
 		Returns the default value for this field.
