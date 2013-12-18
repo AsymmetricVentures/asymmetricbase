@@ -68,10 +68,10 @@ class EnumField(models.IntegerField):
 		
 		super(EnumField, self).__init__(*args, **kwargs)
 	
-	def __copy__(self):
+	def __copy__(self, *args, **kwargs):
 		return self
 	
-	def __deepcopy__(self):
+	def __deepcopy__(self, *args, **kwargs):
 		return self
 	
 	def get_default(self):
