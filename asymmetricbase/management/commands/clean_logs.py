@@ -23,6 +23,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.conf import settings
 from django.core import serializers
+from django.db.transaction import commit_on_success
 
 class Command(BaseCommand):
 	
@@ -57,16 +58,17 @@ class Command(BaseCommand):
 			{'prefix': audits_prefix, 'qs': audits},
 		]
 		
-		for parms in to_archive:
-			# write objects to file
-			filename = '{}{}_archive_{}_keep_{}_days.json'.format(
-				path,
-				parms['prefix'],
-				timezone.now(),
-				keep_days,
-			)
-			with open(filename, 'w') as out:
-				json_serializer.serialize(parms['qs'], stream = out)
-			
-			# delete objects from DB
-			parms['qs'].delete()
+		with commit_on_success():
+			for parms in to_archive:
+				# write objects to file
+				filename = '{}{}_archive_{}_keep_{}_days.json'.format(
+					path,
+					parms['prefix'],
+					timezone.now(),
+					keep_days,
+				)
+				with open(filename, 'w') as out:
+					json_serializer.serialize(parms['qs'], stream = out)
+				
+				# delete objects from DB
+				parms['qs'].delete()
