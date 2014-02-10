@@ -49,6 +49,7 @@ class BaseFormMixin(object):
 		
 		validate = getattr(self.Meta, 'validate', {})
 		field_info = getattr(self.Meta, 'field_info', {})
+		widgets = getattr(self.Meta, 'widgets', {})
 		
 		for name, field in self.fields.items():
 			newattrs = {}
@@ -62,11 +63,11 @@ class BaseFormMixin(object):
 				field.localize = True
 				field.widget.is_localized = True
 			
-			if HTML5_WIDGETS.get('email', False) and isinstance(field, forms.EmailField): 
-				field.widget.input_type = 'email'
+			if HTML5_WIDGETS.get('email', False) and isinstance(field, forms.EmailField):
+				field.widget.input_type = widgets.get(name, 'email')
 			
 			if HTML5_WIDGETS.get('number', False) and isinstance(field, (forms.IntegerField, forms.DecimalField)):
-				field.widget.input_type = 'number'
+				field.widget.input_type = widgets.get(name, 'number')
 				
 				if field.max_value is not None:
 					newattrs.update({'max' : field.max_value})
