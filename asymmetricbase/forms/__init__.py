@@ -63,23 +63,24 @@ class BaseFormMixin(object):
 				field.localize = True
 				field.widget.is_localized = True
 			
-			if HTML5_WIDGETS.get('email', False) and isinstance(field, forms.EmailField):
-				field.widget.input_type = widgets.get(name, 'email')
-			
-			if HTML5_WIDGETS.get('number', False) and isinstance(field, (forms.IntegerField, forms.DecimalField)):
-				field.widget.input_type = widgets.get(name, 'number')
+			if getattr(widgets.get(name, {}), 'input_type', '') != 'hidden':
+				if HTML5_WIDGETS.get('email', False) and isinstance(field, forms.EmailField):
+					field.widget.input_type = 'email'
 				
-				if field.max_value is not None:
-					newattrs.update({'max' : field.max_value})
-				
-				if field.min_value is not None:
-					newattrs.update({'min' : field.min_value})
+				if HTML5_WIDGETS.get('number', False) and isinstance(field, (forms.IntegerField, forms.DecimalField)):
+					field.widget.input_type = 'number'
 					
-				if isinstance(field, forms.DecimalField):
-					# get step from field.decimal_places
-					newattrs.update(
-						step = '0.{}1'.format('0' * (field.decimal_places - 1)) if field.decimal_places > 0 else '1'
-					)
+					if field.max_value is not None:
+						newattrs.update({'max' : field.max_value})
+					
+					if field.min_value is not None:
+						newattrs.update({'min' : field.min_value})
+						
+					if isinstance(field, forms.DecimalField):
+						# get step from field.decimal_places
+						newattrs.update(
+							step = '0.{}1'.format('0' * (field.decimal_places - 1)) if field.decimal_places > 0 else '1'
+						)
 				
 			if name in validate:
 				validate_string = validate[name]
