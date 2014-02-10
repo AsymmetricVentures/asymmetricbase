@@ -45,8 +45,8 @@ class Command(BaseCommand):
 		
 		try:
 			urls = imp.load_source('urls', urls_path)
-		except (ImportError, IOError):
-			raise CommandError("Could not import file {}".format(urls_path))
+		except (ImportError, IOError) as e:
+			raise CommandError("Could not import file {}: {}".format(urls_path, e))
 		
 		# all view permissions will be assigned to User content type
 		self.ctype = default_content_type()
