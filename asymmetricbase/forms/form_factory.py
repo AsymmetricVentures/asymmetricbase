@@ -94,9 +94,8 @@ class FormFactory(object):
 	
 	def process_callbacks(self):
 		is_valid = self.form_instance.is_valid()
-		for callback in self.callbacks:
-			if callback is not None:
-				callback(self.form_instance, is_valid)
+		for callback in filter(None, self.callbacks):
+			callback(self.form_instance, is_valid)
 	
 	def __deepcopy__(self, memo):
 		form = deepcopy(self.form, memo)
