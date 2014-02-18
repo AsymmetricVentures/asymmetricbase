@@ -17,7 +17,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import locale
+import calendar, locale
 from decimal import Decimal
 
 from django.utils import timezone
@@ -28,7 +28,11 @@ from asymmetricbase.jinja.tags.fielditerator import checkboxiterator, checkboxit
 def jinja_date_filter(d, fmt = "%d/%b/%y %I:%M%p"):
 	if not d:
 		return ''
-	return timezone.template_localtime(d).strftime(fmt)
+	d = timezone.template_localtime(d)
+	
+	if fmt == '%s':
+		return calendar.timegm(d.utctimetuple())
+	return d.strftime(fmt)
 
 def jinja_fmt(fmt, *args, **kwargs):
 	return fmt.format(*args, **kwargs)
