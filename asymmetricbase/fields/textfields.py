@@ -28,7 +28,7 @@ This file adds model fields for character fields of various lengths
 SHORT_MESSAGE_LENGTH = 140
 LONG_MESSAGE_LENGTH = 255
 SHORT_NAME_LENGTH = 50
-LONG_NAME_LENGTH = (SHORT_MESSAGE_LENGTH * 2) + 5
+LONG_NAME_LENGTH = (SHORT_MESSAGE_LENGTH * 2) + 5 #285
 
 COMMENT_LENGTH = 1024
 
@@ -49,7 +49,7 @@ class ShortNameField(models.CharField):
 
 class LongNameField(models.CharField):
 	def __init__(self, *args, **kwargs):
-		kwargs.setdefault('max_length', LONG_NAME_LENGTH) # 1285 Chars
+		kwargs.setdefault('max_length', LONG_NAME_LENGTH) # 285 Chars
 		super(LongNameField, self).__init__(*args, **kwargs)
 
 class CommentField(models.CharField):
