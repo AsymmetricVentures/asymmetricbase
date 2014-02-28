@@ -37,10 +37,6 @@ class JinjaTemplateResponse(TemplateResponse):
 		context = super(JinjaTemplateResponse, self).resolve_context(context)
 		
 		if isinstance(context, RequestContext):
-			merged_context = {}
-			for d in reversed(context.dicts):
-				merged_context.update(d)
-				
-			context = merged_context
+			context = jinja_env.context_to_dict(context)
 			
 		return context

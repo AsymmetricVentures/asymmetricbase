@@ -17,11 +17,12 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from django.template import TemplateDoesNotExist, loaders
+from django.template import TemplateDoesNotExist
+from django.template.loaders import filesystem
 
 import jinja2
 
-class JinjaLoader(loaders.filesystem.Loader):
+class JinjaLoader(filesystem.Loader):
 	is_usable = True
 	
 	def load_template(self, template_name, template_dirs = None):
