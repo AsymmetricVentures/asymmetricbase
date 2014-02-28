@@ -19,6 +19,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from collections import OrderedDict
 from copy import deepcopy
+import functools
 
 from django.views.generic.base import View
 from django.http import HttpResponseForbidden, HttpResponseNotFound
@@ -329,3 +330,24 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 	@staticmethod
 	def commit_on_success():
 		return transaction.commit_on_success()
+
+def wrap_view_function(fn, *args, **kwargs):
+	@functools.wraps(fn)
+	def handle_dispatch(self, request, *args_inner, **kwargs_inner):
+		kwargs_inner.setdefault('extra_context', self.get_context_data())
+		return fn(request, *args_inner, **kwargs_inner)
+	
+	attrs = {
+		'login_required' : kwargs.get('login_required', AsymBaseView.login_required),
+		'permission_name' : kwargs.get('permission_name', ''),
+		
+		'get' : handle_dispatch,
+		'post' : handle_dispatch,
+		'put' : handle_dispatch,
+		'delete' : handle_dispatch,
+	}
+	
+	view_class = type(str('WrappedFn{}View'.format(fn.__name__)), (AsymBaseView,), attrs)
+	
+	return view_class
+		

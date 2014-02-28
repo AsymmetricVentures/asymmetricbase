@@ -43,22 +43,27 @@ class MultiFormatResponseMixin(MergeAttrMixin):
 		
 		self.context = dd()
 	
+	def get_context_data(self, **kwargs):
+		css_files = self._merge_attr_signal('css_files', lambda x:  x.replace('scss', 'css'))
+		css_resources = ResourceSet()
+		css_resources.add(css_files)
+		
+		kwargs['css_files'] = css_resources 
+		
+		js_files = self._merge_attr_signal('js_files')
+		js_resources = ResourceSet()
+		js_resources.add(js_files)
+		
+		kwargs['js_files'] = js_resources
+		
+		return kwargs
+	
 	def render_to_response(self, **response_kwargs):
 		""" Returns a response with a template rendered with the given context. """
 		
 		if self.output_type == 'html':
-			css_files = self._merge_attr_signal('css_files', lambda x:  x.replace('scss', 'css'))
-			css_resources = ResourceSet()
-			css_resources.add(css_files)
 			
-			self.context['css_files'] = css_resources 
-			
-			js_files = self._merge_attr_signal('js_files')
-			js_resources = ResourceSet()
-			js_resources.add(js_files)
-			
-			self.context['js_files'] = js_resources
-			
+			self.context.update(self.get_context_data())
 			return self.response_class(
 				request = self.request,
 				template = self.get_template_names(),
