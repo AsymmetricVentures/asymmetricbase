@@ -19,7 +19,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import warnings
 
 from django.conf import settings
-from django.template.context import RequestContext
+from django.template.context import RequestContext, Context
 
 import jinja2
 
@@ -64,7 +64,7 @@ class JinjaTemplate(jinja2.Template):
 	
 	def render(self, *args, **kwargs):
 		ctx = {}
-		if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], RequestContext):
+		if len(args) == 1 and len(kwargs) == 0 and isinstance(args[0], (RequestContext, Context)):
 			ctx = JinjaEnvironment.context_to_dict(args[0])
 		else:
 			ctx.update(*args, **kwargs)
