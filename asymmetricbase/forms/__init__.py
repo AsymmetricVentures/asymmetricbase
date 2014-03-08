@@ -29,6 +29,7 @@ import jinja2
 
 from asymmetricbase.jinja import jinja_env
 from asymmetricbase.forms.monkey_patch_django import monkey_patch_django
+from .datetimetzfield import DateTimeTZField
 
 HTML5 = getattr(settings, 'ASYM_HTML5', False)
 HTML5_WIDGETS = getattr(settings, 'ASYM_HTML5_WIDGETS', {})
