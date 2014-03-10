@@ -69,7 +69,8 @@ class EnumMeta(type):
 			properties = ('value',) + properties
 		
 		item_attrs = {
-			'__repr__' : lambda self: '{}.{}'.format(name, self._enum_name_)
+			'__repr__' : lambda self: '{}.{}'.format(name, self._enum_name_),
+			'__reduce__' : lambda self: (self._enum_type_, (self.value,))
 		}
 		
 		for k, v in attributes.items():
@@ -264,3 +265,10 @@ if __name__ == '__main__':
 	hash(MyEnum6.A)
 	d = {MyEnum6.A : 'a'}
 	assert d[MyEnum6.A] == 'a'
+	
+	import pickle
+	
+	d = pickle.dumps(MyEnum6.A, pickle.HIGHEST_PROTOCOL)
+	r = pickle.loads(d)
+	
+	assert r == MyEnum6.A
