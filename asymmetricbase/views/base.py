@@ -328,7 +328,14 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 		return urlencode(*args, **kwargs)
 	
 	@staticmethod
+	def atomic():
+		return transaction.atomic()
+	
+	@staticmethod
 	def commit_on_success():
+		if hasattr(transaction, 'atomic'):
+			import warnings
+			warnings.warn("transaction.commit_on_success has been deprecated in favour of transaction.atomic ", DeprecationWarning)
 		return transaction.commit_on_success()
 
 def wrap_view_function(fn, *args, **kwargs):
