@@ -27,6 +27,18 @@ from asymmetricbase.logging import logger # @UnusedImport
 from asymmetricbase.utils.enum import Enum, EnumItem
 from asymmetricbase import forms
 
+def _enum_coerce(self, enum, value):
+	if value is None:
+		return None
+	
+	elif value in enum:
+		return value
+	
+	try:
+		return enum(int(value))
+	except ValueError:
+		raise exceptions.ValidationError(self.error_messages['invalid'] % value)
+
 class EnumFormField(forms.TypedChoiceField):
 	
 	def __init__(self, enum, *args, **kwargs):
@@ -41,17 +53,26 @@ class EnumFormField(forms.TypedChoiceField):
 		
 		return data
 	
+	def valid_value(self, value):
+		for k, _ in self._get_flat_choices():
+			if not k and not value:
+				return True
+			
+			if isinstance(value, EnumItem):
+				if value.value == k:
+					return True
+		return False
+	
 	def to_python(self, value):
-		if value is None:
-			return None
-		
-		elif value in self.enum:
-			return value
-		
-		try:
-			return self.enum(int(value))
-		except ValueError:
-			raise exceptions.ValidationError(self.error_messages['invalid'] % value)
+		return _enum_coerce(self, self.enum, value)
+	
+	def _get_flat_choices(self):
+		for k, v in self.choices:
+			if isinstance(v, (list, tuple)):
+				for k2, v2 in v:
+					yield k2, v2
+			else:
+				yield k, v
 
 class EnumField(models.IntegerField):
 	__metaclass__ = SubfieldBase
@@ -100,14 +121,7 @@ class EnumField(models.IntegerField):
 		return super(EnumField, self).get_default()
 	
 	def to_python(self, value):
-		if value is None:
-			return None
-		elif value in self.enum:
-			return value
-		try:
-			return self.enum(int(value))
-		except ValueError:
-			raise exceptions.ValidationError(self.error_messages['invalid'] % value)
+		return _enum_coerce(self, self.enum, value)
 	
 	def validate(self, value, model_instance):
 		return value in self.enum
