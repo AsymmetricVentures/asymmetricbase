@@ -69,7 +69,7 @@ def HasTypeAwareRoleManager(content_type_model_name):
 	"""
 	attrs = {
 		'assigned_roles' : generic.GenericRelation(AssignedRole),
-		'roles' : TypeAwareRoleManager(model_content_type = ContentType.objects.filter(model = content_type_model_name))
+		'roles' : property(lambda self: TypeAwareRoleManager(model_content_type = ContentType.objects.filter(model = content_type_model_name)))
 	}
 	
 	return type(str('{}TypeAwareRoleManager'.format(content_type_model_name.title())), (object,), attrs)
