@@ -71,12 +71,14 @@ class GridLayoutDisplay(Display):
 			else:
 				raise AttributeError('Grid elements at row {}, col {} already defined.'.format(field.row, field.col))
 		# sort rows and columns
+		# the sort key is the row and col number, which must be converted to int
+		# to avoid lexicographical sort (which places 12 before 2...)
 		# TODO: efficiency optimization
 		# if there's a data structure that can do ordered insert based on the row and col
 		# index, this would be more efficient than sorting
-		ordered_rows = OrderedDict(sorted(grid.items(), key = operator.itemgetter(0)))
+		ordered_rows = OrderedDict(sorted(grid.items(), key = lambda obj: int(obj[0].replace('row-', ''))))
 		for row_num, col_dict in ordered_rows.items():
-			ordered_rows[row_num] = OrderedDict(sorted(col_dict.items(), key = operator.itemgetter(0)))
+			ordered_rows[row_num] = OrderedDict(sorted(col_dict.items(), key = lambda obj: int(obj[0].replace('col-', ''))))
 		
 		return ordered_rows
 		
