@@ -21,7 +21,7 @@ from django.db import models
 from django.core import exceptions
 from django.db.models.fields import NOT_PROVIDED
 from django.db.models.fields.subclassing import SubfieldBase
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 
 from asymmetricbase.logging import logger # @UnusedImport
 from asymmetricbase.utils.enum import Enum, EnumItem
@@ -49,7 +49,7 @@ class EnumFormField(forms.TypedChoiceField):
 	
 	def prepare_value(self, data):
 		if isinstance(data, EnumItem):
-			return smart_unicode(data.value)
+			return smart_text(data.value)
 		
 		return data
 	

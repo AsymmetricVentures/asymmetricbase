@@ -21,7 +21,7 @@ import django
 from . import monkey_patch_django_auth_models
 
 def patch_cached_property():
-	if cmp(django.VERSION[:3], (1, 5, 0)) < 0:
+	if django.get_version() < '1.5':
 		# Cached property is broken in django < 1.5
 		
 		from django.utils.functional import cached_property

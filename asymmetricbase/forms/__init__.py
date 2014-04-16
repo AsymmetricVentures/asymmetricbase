@@ -21,7 +21,7 @@ from django.forms import * # @UnusedWildImport pylint: disable-msg=W0401
 from django import forms # @Reimport
 from django.forms.models import modelformset_factory, BaseModelFormSet, \
 	inlineformset_factory
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
 from django.utils.html import conditional_escape
 from django.conf import settings
 
@@ -143,13 +143,13 @@ class ModelForm(BaseFormMixin, forms.ModelForm):
 			}
 			
 			bf_errors = self.error_class([conditional_escape(error) for error in bf.errors])
-			macro_args['errors'] = force_unicode(bf_errors)
+			macro_args['errors'] = force_text(bf_errors)
 			
 			macro_args['required_mark'] = required_mark if field.required else u''
 			
 			if bf.is_hidden:
 				if bf.errors:
-					top_errors.extend([u'(Hidden field {}) {}'.format(name, force_unicode(e)) for e in bf_errors])
+					top_errors.extend([u'(Hidden field {}) {}'.format(name, force_text(e)) for e in bf_errors])
 				hidden_fields.append(unicode(bf))
 			
 			else:
@@ -161,7 +161,7 @@ class ModelForm(BaseFormMixin, forms.ModelForm):
 					output.append(template_macro(**macro_args))
 				
 				if bf.label:
-					label = conditional_escape(force_unicode(bf.label))
+					label = conditional_escape(force_text(bf.label))
 					
 					if self.label_suffix:
 						if label[-1] not in ':?.!':
@@ -175,7 +175,7 @@ class ModelForm(BaseFormMixin, forms.ModelForm):
 					macro_args['label'] = u''
 				
 				if field.help_text:
-					macro_args['help_text'] = force_unicode(field.help_text)
+					macro_args['help_text'] = force_text(field.help_text)
 				else:
 					macro_args['help_text'] = u''
 				

@@ -69,7 +69,7 @@ class HamlpyExtension(Extension):
 				
 				try:
 					ret_source += source[start_pos : tag_match.start()] + h.process(haml_source)
-				except TemplateSyntaxError, e:
+				except TemplateSyntaxError as e:
 					raise TemplateSyntaxError(e.message, e.lineno, name = name, filename = filename)
 				
 				start_pos = end_tag.end()

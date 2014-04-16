@@ -46,7 +46,7 @@ HOW TO USE:
 """
 from django import template
 from django.utils.html import conditional_escape
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
 from django.forms.util import flatatt
 import django.forms
@@ -75,7 +75,7 @@ class _RadioInput(django.forms.widgets.RadioInput):
 
 	def render(self):
 		"""Outputs the <input> for this radio field"""
-		return mark_safe(u'%s' % force_unicode(self.tag()))
+		return mark_safe(u'%s' % force_text(self.tag()))
 
 
 
@@ -183,9 +183,9 @@ def _iterator(bound_field, widget_type, display_name):
 	if values is None:
 		values = set()
 	elif type(values) is list:
-		values = set([force_unicode(v) for v in values])
+		values = set([force_text(v) for v in values])
 	else:
-		values = set([force_unicode(values)])
+		values = set([force_text(values)])
 
 	widget_id = attrs and attrs.get('id', False)
 	partial_attrs = widget.build_attrs(attrs, name = name)
@@ -194,14 +194,14 @@ def _iterator(bound_field, widget_type, display_name):
 		extra = None
 		if isinstance(option_value, (list, tuple)):
 			extra, option_value = option_value
-		option_value = force_unicode(option_value)
+		option_value = force_text(option_value)
 		final_attrs = partial_attrs
 		if widget_id is not False:
 			final_attrs = dict(partial_attrs,
 							   id = u'%s_%s' % (widget_id, i))
 		yield widget_type(
 			name = name,
-			option_label = conditional_escape(force_unicode(option_label)),
+			option_label = conditional_escape(force_text(option_label)),
 			option_value = option_value,
 			attrs = final_attrs,
 			checked = option_value in values,

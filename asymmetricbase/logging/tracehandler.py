@@ -22,7 +22,7 @@ from logging import CRITICAL, DEBUG, ERROR, FATAL, INFO, WARN
 import re
 from pprint import pformat
 
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_str
 
 class DBTraceHandler(logging.Handler):
 	def __init__(self):
@@ -48,7 +48,7 @@ class DBTraceHandler(logging.Handler):
 		if dict_process is not None:
 			d = dict_process(d)
 		safe_d = self._get_safe_dict(d)
-		return force_unicode(pformat(safe_d))
+		return force_str(pformat(safe_d))
 	
 	def _trim_meta_dict(self, d):
 		new_dict = {}

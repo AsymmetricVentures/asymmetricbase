@@ -2,26 +2,32 @@ import os
 import imp
 import sys
 
+import six
+
 from django.conf import settings
 
 from jinja2.exceptions import TemplateNotFound
 from jinja2.loaders import split_template_path, BaseLoader
 from jinja2.utils import open_if_exists, internalcode
 
-from hamlpy import hamlpy
-from hamlpy import nodes as hamlpynodes
-
-hamlpy.VALID_EXTENSIONS.append('djhaml')
-
-# add jinja tags
-hamlpynodes.TagNode.self_closing.update({
-	'macro' : 'endmacro',
-	'call' : 'endcall',
-})
-# update for django->jinja
-hamlpynodes.TagNode.may_contain.update({
-	'for' : 'else',
-})
+try:
+	from hamlpy import hamlpy
+	from hamlpy import nodes as hamlpynodes
+	
+	hamlpy.VALID_EXTENSIONS.append('djhaml')
+	
+	# add jinja tags
+	hamlpynodes.TagNode.self_closing.update({
+		'macro' : 'endmacro',
+		'call' : 'endcall',
+	})
+	# update for django->jinja
+	hamlpynodes.TagNode.may_contain.update({
+		'for' : 'else',
+	})
+except ImportError:
+	# hamlpy doesn't work in python3
+	hamlpy = None
 
 class ThemeLoader(BaseLoader):
 	is_usable = True
@@ -31,7 +37,7 @@ class ThemeLoader(BaseLoader):
 			from django.template.loaders.app_directories import app_template_dirs
 			search_paths = app_template_dirs
 		
-		if isinstance(search_paths, basestring):
+		if isinstance(search_paths, six.string_types):
 			search_paths = [search_paths]
 		self.search_paths = search_paths
 		super(ThemeLoader, self).__init__()
@@ -110,7 +116,7 @@ class ThemeLoader(BaseLoader):
 			#print("Loading: {}".format(filename))
 			contents = fp.read().decode('utf-8')
 			
-			if ext[1:] in hamlpy.VALID_EXTENSIONS:
+			if hamlpy and ext[1:] in hamlpy.VALID_EXTENSIONS:
 				haml_parser = hamlpy.Compiler()
 				contents = haml_parser.process(contents)
 		except UnicodeDecodeError:

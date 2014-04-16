@@ -19,7 +19,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.forms import forms
 from django.utils.html import conditional_escape
-from django.utils.encoding import force_unicode
+from django.utils.encoding import force_text
 from django.dispatch import Signal
 
 from asymmetricbase.jinja import jinja_env
@@ -34,7 +34,7 @@ class BoundField(forms.BoundField):
 			return self
 		
 		if self.label:
-			label = conditional_escape(force_unicode(self.label))
+			label = conditional_escape(force_text(self.label))
 			
 			label_css = ('required',) if self.field.required else ('',)
 			label_css = self.css_classes(label_css)

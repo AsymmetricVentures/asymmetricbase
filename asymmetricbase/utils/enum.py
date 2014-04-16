@@ -18,7 +18,11 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from functools import total_ordering
-from itertools import izip_longest
+try:
+	from itertools import zip_longest
+except ImportError:
+	from itertools import izip_longest as zip_longest
+
 from collections import OrderedDict
 
 """
@@ -96,7 +100,7 @@ class EnumMeta(type):
 			if len(v) > len(properties):
 				raise ValueError('Too many items for the properties')
 			
-			attr_updates = dict(izip_longest(properties, v))
+			attr_updates = dict(zip_longest(properties, v))
 			if attr_updates.get('label', -1) is None:
 				attr_updates.pop('label')
 			
@@ -272,3 +276,4 @@ if __name__ == '__main__':
 	r = pickle.loads(d)
 	
 	assert r == MyEnum6.A
+
