@@ -17,13 +17,15 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from collections import OrderedDict
 from functools import total_ordering
+import six
+
 try:
 	from itertools import zip_longest
 except ImportError:
 	from itertools import izip_longest as zip_longest
 
-from collections import OrderedDict
 
 """
 Inspired by flufl.enum
@@ -109,7 +111,7 @@ class EnumMeta(type):
 			if item_type_attrs['value'] is None:
 				raise ValueError('Enum values cannot be None')
 			
-			if not isinstance(item_type_attrs['value'], (int, long)):
+			if not isinstance(item_type_attrs['value'], six.integer_types):
 				raise TypeError('Enum ordinals must be integers')
 			
 			if item_type_attrs['display_order'] is None:
@@ -143,9 +145,17 @@ class EnumMeta(type):
 	def __iter__(self):
 		return iter(self.reverse.values())
 
-EnumBase = EnumMeta(str('EnumBase'), (), {'__doc__' : ''})
+def with_metaclass(meta, *bases):
+	class metaclass(meta):
+		__call__ = type.__call__
+		__init__ = type.__init__
+		def __new__(cls, name, this_bases, d):
+			if this_bases is None:
+				return type.__new__(cls, str(name), (), d)
+			return meta(str(name), bases, d)
+	return metaclass(str('temp'), None, {})
 
-class Enum(EnumBase):
+class Enum(with_metaclass(EnumMeta)):
 	'''Baseclass for Enums. 
 	   ** DO NOT define methods in here'''
 	Choices = {}
