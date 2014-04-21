@@ -32,9 +32,9 @@ Topic :: Software Development :: Libraries :: Application Frameworks
 """
 
 setup(
-	name = 'asymmetricbase.views',
+	name = 'asymmetricbase.enum',
 	version = datetime.now().strftime('%Y%m%d%H%M'),
-	url = 'https://github.com/AsymmetricVentures/asym-views',
+	url = 'https://github.com/AsymmetricVentures/asym-enum',
 	
 	author = 'Richard Eames',
 	author_email = 'reames@asymmetricventures.com',
@@ -44,13 +44,12 @@ setup(
 	
 	install_requires = (
 		'django>=1.4.5',
-		'jinja2>=2.7',
-		'pytz',  # most recent
-		
-		'asymmetricbase.utils',
-		
+		'six',
+		'asymmetricbase.forms'
 	),
-	dependency_links = ['https://github.com/AsymmetricVentures/asym-utils.git'],
+	
+	dependency_links = ['https://github.com/AsymmetricVentures/asym-fields.git#egg=asymmetricbase.forms'],
+	
 	package_dir = {
 		'asymmetricbase' : 	'asymmetricbase',
 	},
