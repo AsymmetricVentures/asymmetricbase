@@ -15,15 +15,17 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-all: clean build
+from __future__ import absolute_import, division, print_function, unicode_literals
+import django
 
-clean:
-	rm -rf build dist *.deb MANIFEST asymmetricbase.egg-info
-	- sudo rm -rf asymmetricbase.egg-info
+from .base import *
+from .fields import *
+from .field_position import *
+from .displays import *
+from .utils import *
 
-build: clean
-	python setup.py bdist_rpm
-	sudo alien -dc dist/*.noarch.rpm
+default_app_config = 'asymmetricbase.displaymanager.app_config.DisplayManagerAppConfig'
 
-clean_compiled_templates:
-	find . -name "*_compiled.py" -print |xargs rm
+if django.get_version() < '1.7':
+	from .app_config import DisplayManagerAppConfig
+	DisplayManagerAppConfig.ready()

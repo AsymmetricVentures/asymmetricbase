@@ -14,16 +14,13 @@
 #    You should have received a copy of the GNU General Public License along
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-all: clean build
+try:
+	from django.apps import AppConfig
+except ImportError:
+	AppConfig = object
 
-clean:
-	rm -rf build dist *.deb MANIFEST asymmetricbase.egg-info
-	- sudo rm -rf asymmetricbase.egg-info
-
-build: clean
-	python setup.py bdist_rpm
-	sudo alien -dc dist/*.noarch.rpm
-
-clean_compiled_templates:
-	find . -name "*_compiled.py" -print |xargs rm
+class DisplayManagerAppConfig(AppConfig):
+	def ready(self):
+		pass

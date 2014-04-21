@@ -15,15 +15,10 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-all: clean build
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-clean:
-	rm -rf build dist *.deb MANIFEST asymmetricbase.egg-info
-	- sudo rm -rf asymmetricbase.egg-info
+class ForceRollback(Exception):
+	""" Thrown to force a rollback within a commit_on_succes block """
 
-build: clean
-	python setup.py bdist_rpm
-	sudo alien -dc dist/*.noarch.rpm
-
-clean_compiled_templates:
-	find . -name "*_compiled.py" -print |xargs rm
+class DeveloperTODO(Exception):
+	""" Tell the user that the action is a work in progress""" 

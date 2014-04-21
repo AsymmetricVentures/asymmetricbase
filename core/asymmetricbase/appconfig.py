@@ -15,15 +15,20 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-all: clean build
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-clean:
-	rm -rf build dist *.deb MANIFEST asymmetricbase.egg-info
-	- sudo rm -rf asymmetricbase.egg-info
+try:
+	from django.apps import AppConfig
+except ImportError:
+	AppConfig = object
 
-build: clean
-	python setup.py bdist_rpm
-	sudo alien -dc dist/*.noarch.rpm
+from .utils import monkey_patching as util_monkey
+from .jinja import monkey_patching as jinja_monkey
 
-clean_compiled_templates:
-	find . -name "*_compiled.py" -print |xargs rm
+class AsymmetricAppConfig(AppConfig):
+	name = 'asymmetricbase'
+	
+	def ready(self):
+		util_monkey.monkey_patch()
+		jinja_monkey.monkey_patch_jinja()
+

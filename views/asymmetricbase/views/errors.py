@@ -15,15 +15,30 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-all: clean build
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-clean:
-	rm -rf build dist *.deb MANIFEST asymmetricbase.egg-info
-	- sudo rm -rf asymmetricbase.egg-info
+from django.http import HttpResponseRedirect
 
-build: clean
-	python setup.py bdist_rpm
-	sudo alien -dc dist/*.noarch.rpm
+from .base import AsymBaseView
 
-clean_compiled_templates:
-	find . -name "*_compiled.py" -print |xargs rm
+class ErrorBaseView(AsymBaseView):
+	login_required = False
+	@classmethod
+	def as_view(cls, **initkwargs):
+		v = super(AsymBaseView, cls).as_view(**initkwargs)
+		
+		def view(request, *args, **kwargs):
+			response = v(request, *args, **kwargs)
+			if not isinstance(response, HttpResponseRedirect):
+				response.render()
+			return response
+		return view
+
+class PermissionDeniedView(ErrorBaseView):
+	template_name = '403.djhtml'
+
+class NotFoundView(ErrorBaseView):
+	template_name = '404.djhtml'
+
+class ServerErrorView(ErrorBaseView):
+	template_name = '500.djhtml'

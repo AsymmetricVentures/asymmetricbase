@@ -15,15 +15,26 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-all: clean build
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-clean:
-	rm -rf build dist *.deb MANIFEST asymmetricbase.egg-info
-	- sudo rm -rf asymmetricbase.egg-info
+from decimal import Decimal
 
-build: clean
-	python setup.py bdist_rpm
-	sudo alien -dc dist/*.noarch.rpm
+from django.db import models
 
-clean_compiled_templates:
-	find . -name "*_compiled.py" -print |xargs rm
+ZERO_QTY = Decimal('0.00')
+
+class QtyField(models.DecimalField):
+	
+	def __init__(self, *args, **kwargs):
+		kwargs.setdefault('default', ZERO_QTY)
+		kwargs.setdefault('max_digits', 15)
+		kwargs.setdefault('decimal_places', 2)
+		
+		super(QtyField, self).__init__(*args, **kwargs)
+
+try:
+	from south.modelsinspector import add_introspection_rules
+	
+	add_introspection_rules([], ['^asymmetricbase\.fields\.quantityfield\.QtyField'])
+except ImportError:
+	pass

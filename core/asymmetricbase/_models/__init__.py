@@ -15,15 +15,13 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-all: clean build
+from __future__ import absolute_import, division, print_function, unicode_literals
+import sys
 
-clean:
-	rm -rf build dist *.deb MANIFEST asymmetricbase.egg-info
-	- sudo rm -rf asymmetricbase.egg-info
+from .base import *
+from .named_groups import *
+from .roles import *
+from .address import *
 
-build: clean
-	python setup.py bdist_rpm
-	sudo alien -dc dist/*.noarch.rpm
-
-clean_compiled_templates:
-	find . -name "*_compiled.py" -print |xargs rm
+if sys.version[0] < '3':
+	from .s3file import *

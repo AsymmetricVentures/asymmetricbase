@@ -15,15 +15,17 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-all: clean build
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-clean:
-	rm -rf build dist *.deb MANIFEST asymmetricbase.egg-info
-	- sudo rm -rf asymmetricbase.egg-info
+from django import forms
 
-build: clean
-	python setup.py bdist_rpm
-	sudo alien -dc dist/*.noarch.rpm
-
-clean_compiled_templates:
-	find . -name "*_compiled.py" -print |xargs rm
+class ExtendedModelMultipleChoiceField(forms.ModelMultipleChoiceField):
+	''' Works the same as a ModelMultipleChoiceField except that it works
+		in tandom with fielditerator to provide the model instance that the
+		choice is representing
+	'''
+	
+	def prepare_value(self, value):
+		if hasattr(value, '_meta'):
+			return (value, super(ExtendedModelMultipleChoiceField, self).prepare_value(value))
+		return super(ExtendedModelMultipleChoiceField, self).prepare_value(value)

@@ -15,15 +15,12 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-all: clean build
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-clean:
-	rm -rf build dist *.deb MANIFEST asymmetricbase.egg-info
-	- sudo rm -rf asymmetricbase.egg-info
-
-build: clean
-	python setup.py bdist_rpm
-	sudo alien -dc dist/*.noarch.rpm
-
-clean_compiled_templates:
-	find . -name "*_compiled.py" -print |xargs rm
+from .dollarfield import DollarField, ZERO_DOLLARS
+from .quantityfield import QtyField, ZERO_QTY
+from .enumfield import EnumField, EnumFormField
+from .rangefield import IntegerRangeField
+from .textfields import COMMENT_LENGTH, LONG_MESSAGE_LENGTH, LONG_NAME_LENGTH, SHORT_MESSAGE_LENGTH, SHORT_NAME_LENGTH, \
+	CommentField, LongMessageField, LongNameField, ShortMessageField, ShortNameField
+from .uuidfield import UUIDField

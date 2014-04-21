@@ -15,15 +15,28 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-all: clean build
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-clean:
-	rm -rf build dist *.deb MANIFEST asymmetricbase.egg-info
-	- sudo rm -rf asymmetricbase.egg-info
+from django.db.models import IntegerField
 
-build: clean
-	python setup.py bdist_rpm
-	sudo alien -dc dist/*.noarch.rpm
+class IntegerRangeField(IntegerField):
+	def __init__(self, *args, **kwargs):
+		self.min_value = kwargs.pop('min_value', 0)
+		self.max_value = kwargs.pop('max_value', None)
+		
+		super(IntegerRangeField, self).__init__(*args, **kwargs)
+		
+	def formfield(self, **kwargs):
+		defaults = {
+			'min_value': self.min_value,
+			'max_value': self.max_value,
+		}
+		defaults.update(kwargs)
+		return super(IntegerRangeField, self).formfield(**defaults)
 
-clean_compiled_templates:
-	find . -name "*_compiled.py" -print |xargs rm
+try:
+	from south.modelsinspector import add_introspection_rules
+	
+	add_introspection_rules([], ['^asymmetricbase\.fields\.rangefield\.IntegerRangeField'])
+except ImportError:
+	pass

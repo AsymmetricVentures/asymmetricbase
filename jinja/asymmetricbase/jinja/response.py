@@ -15,15 +15,27 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-all: clean build
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-clean:
-	rm -rf build dist *.deb MANIFEST asymmetricbase.egg-info
-	- sudo rm -rf asymmetricbase.egg-info
+from django.template.response import TemplateResponse
+from django.template.context import RequestContext
 
-build: clean
-	python setup.py bdist_rpm
-	sudo alien -dc dist/*.noarch.rpm
+from . import jinja_env
 
-clean_compiled_templates:
-	find . -name "*_compiled.py" -print |xargs rm
+class JinjaTemplateResponse(TemplateResponse):
+	
+	def resolve_template(self, template):
+		if isinstance(template, (list, tuple)):
+			return jinja_env.select_template(template)
+		elif isinstance(template, basestring):
+			return jinja_env.get_template(template)
+		else:
+			return template
+	
+	def resolve_context(self, context):
+		context = super(JinjaTemplateResponse, self).resolve_context(context)
+		
+		if isinstance(context, RequestContext):
+			context = jinja_env.context_to_dict(context)
+			
+		return context

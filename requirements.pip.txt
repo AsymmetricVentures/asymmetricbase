@@ -1,8 +1,0 @@
--e git://github.com/jessemiller/HamlPy.git#egg=hamlpy
-Jinja2==2.7
-django>1.5
-pytz>dev  # most recent
-south<2.0
-Pillow
-django-localflavor
-boto

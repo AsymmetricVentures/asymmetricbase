@@ -15,15 +15,28 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-all: clean build
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-clean:
-	rm -rf build dist *.deb MANIFEST asymmetricbase.egg-info
-	- sudo rm -rf asymmetricbase.egg-info
+from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 
-build: clean
-	python setup.py bdist_rpm
-	sudo alien -dc dist/*.noarch.rpm
+from .cached_function import cached_function
 
-clean_compiled_templates:
-	find . -name "*_compiled.py" -print |xargs rm
+@cached_function
+def default_content_type():
+	return ContentType.objects.get_for_model(get_user_model())
+
+def default_content_type_appname():
+	return default_content_type().app_label
+
+def create_codename(module_path, cls_name, suffix = ''):
+	# Remove the repeated parts of the path
+	module_path = module_path.replace('.views', '').replace('project.', '')
+	
+	# return only the first 100 characters, since that's
+	# all that fits in the DB
+	return 'view_{}.{}{}'.format(
+		module_path,
+		cls_name,
+		suffix
+	)[:100]

@@ -15,15 +15,27 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-all: clean build
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-clean:
-	rm -rf build dist *.deb MANIFEST asymmetricbase.egg-info
-	- sudo rm -rf asymmetricbase.egg-info
+from django.core.management import call_command
+from django.db.models import loading
+from django.conf import settings
 
-build: clean
-	python setup.py bdist_rpm
-	sudo alien -dc dist/*.noarch.rpm
+from .base import BaseTestCase
 
-clean_compiled_templates:
-	find . -name "*_compiled.py" -print |xargs rm
+class BaseTestCaseWithModels(BaseTestCase):
+	
+	def _pre_setup(self):
+		loading.cache.loaded = False
+		self._original_installed_apps = list(settings.INSTALLED_APPS)
+		settings.INSTALLED_APPS = self._original_installed_apps + ['asymmetricbase.tests', ]
+		
+		call_command('syncdb', interactive = False, verbosity = 0, migrate = False)
+		
+		super(BaseTestCaseWithModels, self)._pre_setup()
+	
+	def _post_teardown(self):
+		super(BaseTestCaseWithModels, self)._post_teardown()
+		# restore settings
+		settings.INSTALLED_APPS = self._original_installed_apps
+		loading.cache.loaded = False

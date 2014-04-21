@@ -15,15 +15,27 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-all: clean build
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-clean:
-	rm -rf build dist *.deb MANIFEST asymmetricbase.egg-info
-	- sudo rm -rf asymmetricbase.egg-info
+import re
 
-build: clean
-	python setup.py bdist_rpm
-	sudo alien -dc dist/*.noarch.rpm
+from markupsafe import escape, Markup
 
-clean_compiled_templates:
-	find . -name "*_compiled.py" -print |xargs rm
+def highlighter_wrapper(*queries):
+	matchers = []
+	
+	for query in queries:
+		if not query:
+			continue
+		rx = "({})".format(re.escape(query))
+		matchers.append(re.compile(rx, re.I | re.UNICODE))
+	
+	def highlighter(phrase):
+		phrase = unicode(phrase)
+		phrase = unicode(escape(phrase))
+		for matcher in matchers:
+			match = matcher.search(phrase)
+			if match is not None:
+				phrase = matcher.sub(r"<strong>\1</strong>", phrase)
+		return Markup(phrase)
+	return highlighter
