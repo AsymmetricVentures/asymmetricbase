@@ -6,3 +6,4 @@ south<2.0
 Pillow
 django-localflavor
 boto
+six
