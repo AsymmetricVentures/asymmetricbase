@@ -17,15 +17,16 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from django import forms
 from django.db import models
-from django.core import exceptions
 from django.db.models.fields import NOT_PROVIDED
 from django.db.models.fields.subclassing import SubfieldBase
 from django.utils.encoding import smart_text
 
+from django.core import exceptions
+
 from asymmetricbase.logging import logger # @UnusedImport
 from asymmetricbase.utils.enum import Enum, EnumItem
-from asymmetricbase import forms
 
 def _enum_coerce(self, enum, value):
 	if value is None:
@@ -160,6 +161,11 @@ class EnumField(models.IntegerField):
 		defaults.update(**kwargs)
 		
 		return EnumFormField(**defaults)
+	
+	def deconstruct(self):
+		name, path, args, kwargs = super(EnumField, self).deconstruct()
+		kwargs['enum'] = self.enum
+		return name, path, args, kwargs
 
 try:
 	from south.modelsinspector import add_introspection_rules

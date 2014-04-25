@@ -43,8 +43,8 @@ class ObjectContent(models.Model):
 	time_stamp = models.DateTimeField('action time', auto_now = True, default = timezone.now)
 	content_in_json = models.TextField('Object Content in JSON format')
 	
-	class Meta(object):
-		app_label = 'asymmetricbase'
+	#class Meta(object):
+	#	app_label = 'asymmetricbase'
 	
 	def __unicode__(self):
 		return u'content_in_json: {self.content_in_json} '.format(self = self)
@@ -68,7 +68,7 @@ class AuditEntry(models.Model):
 	
 	class Meta(object):
 		ordering = ('time_stamp',)
-		app_label = 'asymmetricbase'
+		#app_label = 'asymmetricbase'
 		
 	def __unicode__(self):
 		return u"""Time: {time_stamp}
@@ -103,8 +103,8 @@ class LogEntry(models.Model):
 	exc_info = models.TextField(blank = True)
 	func = models.TextField(blank = True)
 	
-	class Meta(object):
-		app_label = 'asymmetricbase'
+	#class Meta(object):
+	#	app_label = 'asymmetricbase'
 
 class TraceEntry(models.Model):
 	date_created = models.DateTimeField(default = timezone.now)
@@ -117,6 +117,6 @@ class TraceEntry(models.Model):
 	request_meta = models.TextField(blank = True, default = '')
 	request_data = models.TextField(blank = True, default = '') # Either POST or GET
 	
-	class Meta(object):
-		app_label = 'asymmetricbase'
+	#class Meta(object):
+	#	app_label = 'asymmetricbase'
 	

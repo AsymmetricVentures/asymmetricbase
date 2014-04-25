@@ -25,7 +25,7 @@ from asymmetricbase.forms.formset_factoryfactory import FormSetFactoryFactory, \
 	ModelFormSetFactoryFactory, InlineFormSetFactoryFactory
 from asymmetricbase.forms.nested_formset import BaseNestedFormSet
 from asymmetricbase import forms
-from asymmetricbase.tests.models import TestModel, FKTestModel, FKFKTestModel
+from asymmetricbase.tests.test_models import TestModel, FKTestModel, FKFKTestModel
 
 class TestForm(forms.Form):
 	field1 = forms.BooleanField(required = False)

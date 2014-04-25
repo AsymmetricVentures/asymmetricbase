@@ -17,14 +17,16 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from copy import deepcopy
 from django.forms.formsets import formset_factory, BaseFormSet
 
-from asymmetricbase.logging import logger  # @UnusedImport
-from asymmetricbase.forms.form_factory import FormFactory
-from asymmetricbase.forms import ModelForm, make_modelformset_factory, \
-	make_inlineformset_factory
-from copy import deepcopy
 from django.forms.models import BaseModelFormSet, BaseInlineFormSet
+
+from asymmetricbase.logging import logger  # @UnusedImport
+
+from .form_factory import FormFactory
+from .forms import ModelForm, make_modelformset_factory, \
+	make_inlineformset_factory
 
 class AsymFormFactoryFactoryDeepcopier(object):
 	form = None

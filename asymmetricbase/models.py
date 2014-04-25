@@ -18,8 +18,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.db.models import * # @UnusedWildImport
-from .fields import (QtyField, DollarField, IntegerRangeField, EnumField, ZERO_DOLLARS, ZERO_QTY, #@UnusedImport
-	COMMENT_LENGTH, LONG_MESSAGE_LENGTH, LONG_NAME_LENGTH, SHORT_MESSAGE_LENGTH, SHORT_NAME_LENGTH, #@UnusedImport
-	CommentField, LongMessageField, LongNameField, ShortMessageField, ShortNameField, UUIDField) #@UnusedImport
-from ._models import * # @UnusedWildImport
 
+from asymmetricbase.fields.dollarfield import DollarField, ZERO_DOLLARS #@UnusedImport
+from asymmetricbase.fields.enumfield import EnumField #@UnusedImport
+from asymmetricbase.fields.quantityfield import QtyField, ZERO_QTY #@UnusedImport
+from asymmetricbase.fields.rangefield import IntegerRangeField #@UnusedImport
+from asymmetricbase.fields.textfields import COMMENT_LENGTH, LONG_MESSAGE_LENGTH, LONG_NAME_LENGTH, SHORT_MESSAGE_LENGTH, \
+	SHORT_NAME_LENGTH, CommentField, LongMessageField, LongNameField, ShortMessageField, ShortNameField #@UnusedImport
+from asymmetricbase.fields.uuidfield import UUIDField #@UnusedImport
+
+from ._models import * # @UnusedWildImport

@@ -21,7 +21,7 @@ from django.test.client import RequestFactory
 from django.forms.formsets import formset_factory
 
 from asymmetricbase.testing.base_with_models import BaseTestCaseWithModels
-from asymmetricbase.tests.models import TestEnum, TestEnumModel, TestEnumModelWithDefault, TestEnumModel1
+from asymmetricbase.tests.test_models import TestEnum, TestEnumModel, TestEnumModelWithDefault, TestEnumModel1
 from asymmetricbase import forms
 from asymmetricbase.fields.enumfield import EnumField
 

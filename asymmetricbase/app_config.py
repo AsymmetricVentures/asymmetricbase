@@ -17,4 +17,24 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+__author__ = "Richard Eames <reames@asymmetricventures.com"
+__date__ = "Apr 25, 2014"
+__updated__ = "Apr 25, 2014"
+__rev__ = "$Id$"
 
+try:
+	from django.apps import AppConfig
+except ImportError:
+	AppConfig = object
+
+
+class AsymBaseAppConfig(AppConfig):
+	name = 'asymmetricbase'
+	
+	def ready(self):
+		from .utils import monkey_patching, monkey_patch_django
+		from .jinja import monkey_patching as jinja_monkey
+		
+		monkey_patching.monkey_patch()
+		jinja_monkey.monkey_patch_jinja()
+		monkey_patch_django.monkey_patch_django()

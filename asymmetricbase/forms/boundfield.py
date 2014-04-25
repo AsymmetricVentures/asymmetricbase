@@ -18,16 +18,19 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.forms import forms
-from django.utils.html import conditional_escape
 from django.utils.encoding import force_text
+
 from django.dispatch import Signal
+from django.utils.html import conditional_escape
 
 from asymmetricbase.jinja import jinja_env
 
 boundfield_props = Signal() 
 
 class BoundField(forms.BoundField):
-	template_module = jinja_env.get_template('asymmetricbase/boundfield/default.djhtml').module
+	@property
+	def template_module(self):
+		return jinja_env.get_template('asymmetricbase/boundfield/default.djhtml').module
 	
 	def _get_fields(self):
 		if self.is_hidden:

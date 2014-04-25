@@ -18,15 +18,17 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.db import models
-from django.utils import timezone
-from django.dispatch.dispatcher import receiver
-from django.db.models import signals
-from django.forms.models import model_to_dict
-from django.contrib.contenttypes.models import ContentType
 
-from asymmetricbase.logging import audit_logger
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import signals
+from django.dispatch.dispatcher import receiver
+from django.forms.models import model_to_dict
+from django.utils import timezone
+
 from asymmetricbase._models.logger_models import LogEntryType, AccessType
-from asymmetricbase.fields import UUIDField
+from asymmetricbase.fields.uuidfield import UUIDField
+from asymmetricbase.logging import audit_logger
+
 
 class AsymBaseModel(models.Model):
 	# The next two lines for for eclipse so that it stops reporting _meta as unknown
@@ -40,7 +42,7 @@ class AsymBaseModel(models.Model):
 	
 	class Meta(object):
 		abstract = True
-		app_label = 'shared'
+		#app_label = 'shared'
 	
 	def _audit_log(self, access_type, success):
 		msg = 'Model Access'

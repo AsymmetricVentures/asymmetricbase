@@ -16,20 +16,22 @@
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
-from asymmetricbase.utils.cached_function import cached_function
 
-__all__ = ('Role', 'AssignedRole', 'RoleTransfer', 'TypeAwareRoleManager', 'DefaultRole', 'OnlyRoleGroupProxy', 'HasTypeAwareRoleManager')
-
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
 from django.contrib.auth.models import Group, GroupManager
+from django.contrib.contenttypes import generic
 from django.core.exceptions import ValidationError, ImproperlyConfigured
-from django.conf import settings
 from django.db import models
 
+from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+
+from asymmetricbase.fields.textfields import LongNameField
 from asymmetricbase.logging import logger
+from asymmetricbase.utils.cached_function import cached_function
+
 from .base import AsymBaseModel
-from asymmetricbase.fields import LongNameField
+
+__all__ = ('Role', 'AssignedRole', 'RoleTransfer', 'TypeAwareRoleManager', 'DefaultRole', 'OnlyRoleGroupProxy', 'HasTypeAwareRoleManager')
 
 # UserModel implement get_groups_query_string()
 # this method should return a string that can be used in a queryset
@@ -57,11 +59,11 @@ class TypeAwareRoleManager(models.Manager):
 		super(TypeAwareRoleManager, self).__init__(*args, **kwargs)
 		self.model_content_type = model_content_type
 	
-	def get_query_set(self):
-		return Role.objects.get_query_set() \
+	def get_queryset(self):
+		return Role.objects.getquery_set() \
 			.filter(defined_for = self.model_content_type)
 
-def HasTypeAwareRoleManager(content_type_model_name):
+def HasTypeAwareRoleManager(content_type_model_name, module = __name__):
 	""" If a model has a TypeAwareRoleManager (TARM) as a field, and its baseclass defines "objects",
 	    then the TARM will override this as the default manager. In some cases this is not what is wanted,
 	    if, for example, the primary key of the model is a CharField. In this case, the TARM causes an insert
@@ -69,7 +71,8 @@ def HasTypeAwareRoleManager(content_type_model_name):
 	"""
 	attrs = {
 		'assigned_roles' : generic.GenericRelation(AssignedRole),
-		'roles' : property(lambda self: TypeAwareRoleManager(model_content_type = ContentType.objects.filter(model = content_type_model_name)))
+		'roles' : property(lambda self: TypeAwareRoleManager(model_content_type = ContentType.objects.filter(model = content_type_model_name))),
+		'__module__' : module
 	}
 	
 	return type(str('{}TypeAwareRoleManager'.format(content_type_model_name.title())), (object,), attrs)
@@ -84,7 +87,7 @@ class RoleGroupProxyManager(GroupManager):
 		self.role_is_null = role_is_null
 		super(RoleGroupProxyManager, self).__init__(*args, **kwargs)
 	
-	def get_query_set(self):
+	def get_queryset(self):
 		return Group.objects.filter(role__isnull = self.role_is_null)
 
 class NotRoleGroupProxy(Group):
@@ -119,7 +122,7 @@ class Role(AsymBaseModel):
 		unique_together = (
 			('name', 'defined_for',),
 		)
-		app_label = 'shared'
+		#app_label = 'shared'
 	
 	name = LongNameField()
 	defined_for = models.ForeignKey(ContentType)

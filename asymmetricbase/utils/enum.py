@@ -56,6 +56,10 @@ class EnumItem(object):
 		if isinstance(other, type(self)):
 			return self.value < other.value
 		return False
+	
+	def deconstruct(self):
+		name = '{}.{}'.format(self._enum_type_.__module__, self._enum_type_.__name__)
+		return name, (self.value,), {}
 
 class EnumMeta(type):
 	

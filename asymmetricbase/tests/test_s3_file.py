@@ -22,7 +22,7 @@ import StringIO
 import os
 import random
 
-from asymmetricbase.tests.models import TestS3FileModel, TestS3FileWithPreviewModel
+from asymmetricbase.tests.test_models import TestS3FileModel, TestS3FileWithPreviewModel
 from asymmetricbase.testing.base_with_models import BaseTestCaseWithModels
 
 try:

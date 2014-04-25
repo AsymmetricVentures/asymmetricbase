@@ -16,7 +16,11 @@
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
+import django
 
-from .utils import monkey_patching
+default_app_config = 'asymmetricbase.app_config.AsymBaseAppConfig'
 
-monkey_patching.monkey_patch()
+if django.get_version() < '1.7':
+	from .app_config import AsymBaseAppConfig
+	AsymBaseAppConfig().ready()
+
