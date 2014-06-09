@@ -53,7 +53,6 @@ setup(
 		'asymmetricbase.management',
 		'asymmetricbase.management.commands',
 		'asymmetricbase.middleware',
-		'asymmetricbase.migrations',
 		'asymmetricbase.pagination',
 		'asymmetricbase.templates',
 		'asymmetricbase.templates.asymmetricbase',
