@@ -61,15 +61,16 @@ class TypeAwareRoleManager(models.Manager):
 		return Role.objects.get_query_set() \
 			.filter(defined_for = self.model_content_type)
 
-def HasTypeAwareRoleManager(content_type_model_name):
+def HasTypeAwareRoleManager(content_type_model_name, module = None):
 	""" If a model has a TypeAwareRoleManager (TARM) as a field, and its baseclass defines "objects",
-	    then the TARM will override this as the default manager. In some cases this is not what is wanted,
-	    if, for example, the primary key of the model is a CharField. In this case, the TARM causes an insert
-	    to fail as it uses AutoField() instead of CharField() causing it to issue an int() on the field.
+		then the TARM will override this as the default manager. In some cases this is not what is wanted,
+		if, for example, the primary key of the model is a CharField. In this case, the TARM causes an insert
+		to fail as it uses AutoField() instead of CharField() causing it to issue an int() on the field.
 	"""
 	attrs = {
 		'assigned_roles' : generic.GenericRelation(AssignedRole),
-		'roles' : property(lambda self: TypeAwareRoleManager(model_content_type = ContentType.objects.filter(model = content_type_model_name)))
+		'roles' : property(lambda self: TypeAwareRoleManager(model_content_type = ContentType.objects.filter(model = content_type_model_name))),
+		'__module__' : module
 	}
 	
 	return type(str('{}TypeAwareRoleManager'.format(content_type_model_name.title())), (object,), attrs)

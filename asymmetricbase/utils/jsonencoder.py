@@ -25,6 +25,11 @@ from django.db.models.query import QuerySet
 from asymmetricbase.logging import logger
 from asymmetricbase.utils.enum import EnumItem
 
+try:
+	from asymm_enum.enum import EnumItem as EEI
+except ImportError:
+	EEI = None
+
 class AsymJSONEncoder(DjangoJSONEncoder):
 	
 	def default(self, o):
@@ -37,6 +42,8 @@ class AsymJSONEncoder(DjangoJSONEncoder):
 			logger.debug("Tried to jsonify a function or lambda")
 			return str(o)
 		elif isinstance(o, EnumItem):
+			return int(o)
+		elif EEI is not None and isinstance(o, EEI):
 			return int(o)
 		else:
 			return super(AsymJSONEncoder, self).default(o)
