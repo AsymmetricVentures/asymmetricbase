@@ -33,7 +33,6 @@ def get_jinja_env():
 
 	if callable(template_loader):
 		template_loader = template_loader()
-	return template_loader
 
 	jinja_env = environment.JinjaEnvironment(
 		loader = template_loader,
@@ -49,5 +48,7 @@ def get_jinja_env():
 	jinja_env.globals.update(global_functions.get_functions(jinja_env))
 	
 	jinja_env.filters.update(filters.get_filters(jinja_env))
+	
+	return jinja_env
 
 jinja_env = get_jinja_env()
