@@ -73,9 +73,11 @@ setup(
 		'pytz',  # most recent
 		'south<2.0',
 		'hamlpy',  # most recent,
-		'Pillow',
-		'boto',
 	),
+	
+	extras_require = {
+		's3field' : ['Pillow', 'boto']
+	},
 	
 	package_dir = {'asymmetricbase' : 'asymmetricbase'},
 	package_data = {'' : ['*.djhtml']}

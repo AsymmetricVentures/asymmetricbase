@@ -103,5 +103,5 @@ class RequestCacheMiddleware(object):
 	def process_request(self, request):
 		cache = _request_cache.get(currentThread()) or RequestCache()
 		_request_cache[currentThread()] = cache
-
+		
 		cache.clear()

@@ -41,9 +41,12 @@ from django.conf import settings
 
 from django_extensions.db.fields.json import JSONField
 
-from boto.s3.connection import S3Connection
-from boto.s3.key import Key
-from boto import exception as boto_exceptions
+try:
+	from boto.s3.connection import S3Connection
+	from boto.s3.key import Key
+	from boto import exception as boto_exceptions
+except ImportError:
+	boto = None
 
 from asymmetricbase.logging import logger
 
