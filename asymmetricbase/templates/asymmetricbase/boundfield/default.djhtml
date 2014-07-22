@@ -18,8 +18,8 @@
 #}
 -->
 
-{% macro help_text(test) %}
-	<span class="help-text"><br />{{test}}</span>
+{% macro help_text(text) %}
+	<span class="help-text">{{text}}</span>
 {% endmacro %}
 
 {% macro required_text(marker = '* ') %}
