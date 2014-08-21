@@ -25,6 +25,8 @@ from django.core.exceptions import FieldError
 from jinja2.runtime import Macro
 from jinja2.utils import contextfunction
 
+import six
+
 from asymmetricbase.jinja import jinja_env
 from asymmetricbase.utils.orderedset import OrderedSet
 from asymmetricbase.middleware.request_cache import get_request_cache
@@ -55,6 +57,8 @@ class DisplayOptions(object):
 				template_names = meta_attrs.pop('template_name')
 			elif hasattr(self.meta, 'template_name'):
 				template_names = self.meta.template_name
+			else:
+				template_names = ()
 			
 			if isinstance(template_names, (list, tuple, OrderedSet, set)):
 				self.template_name.update(template_names)
@@ -121,7 +125,7 @@ class DisplayMeta(type):
 #			else:
 #				if template_name not in template_dict:
 #					template_dict.update({template_name : jinja_env.get_template(template_name).module})
-#		
+#
 		return template_dict
 	
 	def __new__(cls, name, bases, attrs):
@@ -132,12 +136,10 @@ class DisplayMeta(type):
 		new_class = super(DisplayMeta, cls).__new__(cls, name, bases, {'__module__': module})
 		attr_meta = attrs.pop('Meta', None)
 		if not attr_meta:
-			meta = getattr(attr_meta, 'Meta', None)
+			meta = getattr(new_class, 'Meta', None)
 		else:
 			meta = attr_meta
-		
-		# base_meta = getattr(new_class, '_meta', None)
-		
+		base_meta = getattr(new_class, '_meta', None)
 		new_class.add_to_class('_meta', DisplayOptions(meta))
 		
 		for obj_name, obj in attrs.items():
@@ -186,9 +188,8 @@ class DisplayMeta(type):
 		else:
 			setattr(cls, name, value)
 
-class Display(object):
+class Display(six.with_metaclass(DisplayMeta)):
 	''' Per "model" '''
-	__metaclass__ = DisplayMeta
 	
 	USE_CACHE = False
 	
@@ -232,7 +233,7 @@ class Display(object):
 			template_dict = Display._load_templates(OrderedDict(), getattr(cls._meta, 'template_name', None), context)
 			
 			# Now find all the macros
-			for template_module in reversed(template_dict.values()):
+			for template_module in reversed(list(template_dict.values())):
 				for macro_name, macro in template_module.__dict__.items():
 					if isinstance(macro, Macro):
 						if macro_name == name:

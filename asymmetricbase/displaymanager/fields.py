@@ -111,7 +111,7 @@ class AutoTemplateField(TemplateField, AttrGetField):
 	
 	def __init__(self, *args, **kwargs):
 		macro_name = self.__class__.__name__.lower()
-		# We're calling the supers separately because otherwise c3 doesn't 
+		# We're calling the supers separately because otherwise c3 doesn't
 		# get to the second super.
 		TemplateField.__init__(self, macro_name = macro_name, *args, **kwargs)
 		AttrGetField.__init__(self, *args, **kwargs)
