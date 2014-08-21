@@ -20,9 +20,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from copy import deepcopy
 
 from django.http import QueryDict
+from django import forms
 
 from asymmetricbase.logging import logger # @UnusedImport
-from asymmetricbase import forms
 
 class FormFactory(object):
 	"""
@@ -68,9 +68,9 @@ class FormFactory(object):
 		
 		if not self.always_bound:
 			# if form_data or request.FILES are empty, pass in None otherwise form is instantiated as bound form
-			self.args = (form_data or None, request.FILES or None) + filter(lambda x: x is not None, self.args)
+			self.args = (form_data or None, request.FILES or None) + tuple(filter(lambda x: x is not None, self.args))
 		else:
-			self.args = (form_data, request.FILES or None) + filter(lambda x: x is not None, self.args)
+			self.args = (form_data, request.FILES or None) + tuple(filter(lambda x: x is not None, self.args))
 		
 		if 'initial' in self.kwargs:
 			if isinstance(self.kwargs['initial'], dict):
@@ -116,7 +116,9 @@ class FormFactory(object):
 		
 		return ret
 	
-	def change_field_properties(self, field_name, field_data = {}, *callables, **new_attrs):
+	def change_field_properties(self, field_name, field_data = None, *callables, **new_attrs):
+		if field_data is None:
+			field_data = {}
 		@form_callback(self, is_init = True)
 		def property_update_callback(form):
 			field = form.fields[field_name]
