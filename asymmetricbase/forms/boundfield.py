@@ -78,6 +78,10 @@ class BoundField(forms.BoundField):
 	bs = property(lambda self: self._render_with_template('bootstrap_default'))
 	bs_inline = property(lambda self: self._render_with_template('bootstrap_inline'))
 	bs_h = property(lambda self: self._render_with_template('bootstrap_horizontal'))
+	
+	bs3 = property(lambda self: self._render_with_template('bootstrap3_default'))
+	bs3_inline = property(lambda self: self._render_with_template('bootstrap3_inline'))
+	bs3_h = property(lambda self: self._render_with_template('bootstrap3_horizontal'))
 	# methods to replace django widget_tweaks
 	
 	def _process_attributes(self, name, value, process):
@@ -116,7 +120,6 @@ class BoundField(forms.BoundField):
 		return self.attr('data-' + name, value)
 	
 	
-
 # Give other parts of the code a chance to register custom functions on boundfield
 boundfield_props.send(sender = BoundField)
 

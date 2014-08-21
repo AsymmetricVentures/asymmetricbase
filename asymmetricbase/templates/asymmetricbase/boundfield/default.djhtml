@@ -19,7 +19,7 @@
 -->
 
 {% macro help_text(test) %}
-	<span class="help-text"><br />{{test}}</span>
+	<span class="help-text help-block"><br />{{test}}</span>
 {% endmacro %}
 
 {% macro required_text(marker = '* ') %}
@@ -59,4 +59,33 @@
 			{{field}} {{help_text}}
 		</div>
 	</div>
+{% endmacro %}
+
+{% macro bootstrap3_default(label, required, field, help_text) %}
+	<div class="form-group {% if field.errors %}has-error{% endif %}}">
+		<label class="control-label" for="{{ field.id_for_label }}">
+			{{- field.label.add_class("form-control") }}{{ required -}}
+		</label>
+		{{ field }}
+	</div>>
+{% endmacro %}
+
+
+{% macro bootstrap3_inline(label, required, field, help_text) %}
+	<div class="form-group {% if field.errors %}has-error{% endif %}}">
+		<label class="control-label" for="{{ field.id_for_label }}">
+			{{- field.label.add_class("form-control") }}{{ required -}}
+		</label>
+		{{ field }}
+	</div>>
+{% endmacro %}
+
+
+{% macro bootstrap3_horizontal(label, required, field, help_text) %}
+	<div class="form-group {% if field.errors %}has-error{% endif %}}">
+		<label class="control-label" for="{{ field.id_for_label }}">
+			{{- field.label.add_class("form-control") }}{{ required -}}
+		</label>
+		{{ field }}
+	</div>>
 {% endmacro %}
