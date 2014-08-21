@@ -191,7 +191,7 @@ def _get_file_dependencies(file_path):
 	deps = []
 	
 	for line in open(file_path, 'rb'):
-		m = re.search(r'^\s*\/\/\s*import\s+(\S+);', line)
+		m = re.search(r'^\s*\/\/\s*import\s+(\S+);', line.decode('utf-8'))
 		if m:
 			deps.append(m.group(1))
 	
