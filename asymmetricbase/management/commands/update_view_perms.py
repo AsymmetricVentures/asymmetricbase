@@ -69,7 +69,7 @@ class Command(BaseCommand):
 					if callable(k):
 						kwargs = v[2]
 						try:
-							cls = getattr(import_module(k.__module__), k.func_name)
+							cls = getattr(import_module(k.__module__), k.__name__)
 						except AttributeError:
 							continue
 						
