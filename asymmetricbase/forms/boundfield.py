@@ -17,6 +17,8 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import sys
+
 from django.forms import forms
 from django.utils.encoding import force_text
 
@@ -118,4 +120,4 @@ class BoundField(forms.BoundField):
 # Give other parts of the code a chance to register custom functions on boundfield
 boundfield_props.send(sender = BoundField)
 
-setattr(forms, 'BoundField', BoundField)
+setattr(sys.modules['django.forms.forms'], 'BoundField', BoundField)

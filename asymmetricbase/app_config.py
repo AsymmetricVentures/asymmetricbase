@@ -34,6 +34,7 @@ class AsymBaseAppConfig(AppConfig):
 	def ready(self):
 		from .utils import monkey_patching, monkey_patch_django
 		from .jinja import monkey_patching as jinja_monkey
+		from .forms import boundfield
 		
 		monkey_patching.monkey_patch()
 		jinja_monkey.monkey_patch_jinja()
