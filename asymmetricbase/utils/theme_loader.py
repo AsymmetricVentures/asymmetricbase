@@ -11,20 +11,23 @@ from jinja2.loaders import split_template_path, BaseLoader
 from jinja2.utils import open_if_exists, internalcode
 
 try:
-	from hamlpy import hamlpy
-	from hamlpy import nodes as hamlpynodes
+	if six.PY2:
+		from hamlpy import hamlpy
+		from hamlpy import nodes as hamlpynodes
 	
-	hamlpy.VALID_EXTENSIONS.append('djhaml')
+		hamlpy.VALID_EXTENSIONS.append('djhaml')
 	
-	# add jinja tags
-	hamlpynodes.TagNode.self_closing.update({
-		'macro' : 'endmacro',
-		'call' : 'endcall',
-	})
-	# update for django->jinja
-	hamlpynodes.TagNode.may_contain.update({
-		'for' : 'else',
-	})
+		# add jinja tags
+		hamlpynodes.TagNode.self_closing.update({
+			'macro' : 'endmacro',
+			'call' : 'endcall',
+		})
+		# update for django->jinja
+		hamlpynodes.TagNode.may_contain.update({
+			'for' : 'else',
+		})
+	else:
+		hamlpy = None
 except ImportError:
 	# hamlpy doesn't work in python3
 	hamlpy = None
