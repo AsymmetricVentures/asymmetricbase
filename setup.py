@@ -68,12 +68,12 @@ setup(
 	
 	install_requires = (
 		'django>=1.4.5',
-		'jinja2==2.7',
+		'jinja2>=2.7',
 		'pytz',  # most recent
 		'south<2.0',
-		'hamlpy',  # most recent,
 		'Pillow',
 		'boto',
+		'django-jinja'
 	),
 	
 	package_dir = {'asymmetricbase' : 'asymmetricbase'},
