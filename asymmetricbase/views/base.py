@@ -174,6 +174,8 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			try:
 				logger.debug('AsymBaseView: dispatch')
 				response = super(AsymBaseView, self).dispatch(request, *args, **kwargs)
+				if response is None:
+					response = self.render_to_response()
 			except ForceRollback:
 				# Ignore these because they're not real exceptions
 				response = self.render_to_response()
