@@ -37,8 +37,9 @@ class UndefinedVar(jinja2.Undefined):
 		class EmptyIter(object):
 			def __iter__(self):
 				return self
-			def next(self): # @ReservedAssignment
+			def __next__(self):
 				raise StopIteration()
+			next = __next__
 			
 		return EmptyIter()
 		
