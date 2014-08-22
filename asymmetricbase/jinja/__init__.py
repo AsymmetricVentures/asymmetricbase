@@ -54,14 +54,21 @@ def get_jinja_env():
 	try:
 		import types
 		from django_jinja.base import env as jinja_env
+		from django_jinja.library import global_function, filter as jfilter
 		jinja_env.undefined = environment.UndefinedVar
 		jinja_env.djjj = True
 		jinja_env.get_template_module = types.MethodType(get_template_module, jinja_env)
+		
+		for name, fn in global_functions.get_functions(jinja_env).items():
+			global_function(name, fn)
+		
+		for name, fn in filters.get_filters(jinja_env).items():
+			jfilter(name, fn)
+		
 	except ImportError:
 		jinja_env = get_asym_jina_env()
-	
-	jinja_env.globals.update(global_functions.get_functions(jinja_env))
-	jinja_env.filters.update(filters.get_filters(jinja_env))
+		jinja_env.globals.update(global_functions.get_functions(jinja_env))
+		jinja_env.filters.update(filters.get_filters(jinja_env))
 	
 	return jinja_env
 
