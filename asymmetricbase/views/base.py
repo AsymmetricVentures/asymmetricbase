@@ -32,6 +32,8 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.utils.http import urlencode
 from django.template.response import ContentNotRenderedError
 
+import six
+
 from asymmetricbase.views.mixins.multi_format_response import MultiFormatResponseMixin
 from asymmetricbase.utils.exceptions import DeveloperTODO, ForceRollback
 from asymmetricbase.logging import logger #@UnusedImport
@@ -79,7 +81,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			
 			if self.output_type in ('json', 'jsontree'):
 				# Forms aren't json serializable, so we just want pertinent
-				# values for the form. 
+				# values for the form.
 				self.context[form_name] = {
 					'is_valid' : form_instance.is_valid(),
 					'errors' : self._get_error_list(form_instance.errors)
@@ -239,11 +241,11 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 		error_messages = None
 		# check if error_list is a dict or list of dicts
 		if isinstance(error_list, dict):
-			error_messages = { unicode(err) for error in error_list.values() for err in error }
+			error_messages = { six.text_type(err) for error in error_list.values() for err in error }
 		elif len(error_list) and isinstance(error_list[0], dict):
-			error_messages = { unicode(e) for error in error_list for err in error.values() for e in err }
+			error_messages = { six.text_type(e) for error in error_list for err in error.values() for e in err }
 		else:
-			error_messages = { unicode(error) for error in error_list }
+			error_messages = { six.text_type(error) for error in error_list }
 		
 		return error_messages
 		
@@ -258,7 +260,7 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 			self.error(error)
 	
 	def enum(self, enum_class):
-		""" Shortcut for adding enums to the context 
+		""" Shortcut for adding enums to the context
 			>>> class MyEnum(Enum):
 			...     P1 = 1
 			...     P2 = 2
