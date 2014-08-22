@@ -23,6 +23,8 @@ from decimal import Decimal
 from django.utils import timezone
 from django.template.defaultfilters import floatformat, yesno, urlencode
 
+import six
+
 from asymmetricbase.jinja.tags.fielditerator import checkboxiterator, checkboxiterator_named, radioiterator, radioiterator_named
 
 def jinja_date_filter(d, fmt = "%d/%b/%y %I:%M%p"):
@@ -43,12 +45,12 @@ def jinja_filter_empty(seq):
 	return seq
 
 def currency_format(num):
-	if not isinstance(num, (int, float, long, Decimal)):
+	if not isinstance(num, six.integer_types + (float, Decimal)):
 		num = 0
 	return locale.currency(num, grouping = True)
 
 def percent_format(num):
-	if not isinstance(num, (int, float, long, Decimal)):
+	if not isinstance(num, six.integer_types + (float, Decimal)):
 		num = 0
 	st = "{0:.5f}".format(num * 100).rstrip('0')
 	parts = st.split('.')
