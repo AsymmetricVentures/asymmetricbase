@@ -62,30 +62,28 @@
 {% endmacro %}
 
 {% macro bootstrap3_default(label, required, field, help_text) %}
-	<div class="form-group {% if field.errors %}has-error{% endif %}}">
+	<div class="form-group {% if field.errors %}has-error{% endif %}">
 		<label class="control-label" for="{{ field.id_for_label }}">
-			{{- field.label.add_class("form-control") }}{{ required -}}
+			{{- field.label }}{{ required -}}
 		</label>
-		{{ field }}
-	</div>>
+		{{ field.add_class('form-control') }}
+	</div>
 {% endmacro %}
-
 
 {% macro bootstrap3_inline(label, required, field, help_text) %}
-	<div class="form-group {% if field.errors %}has-error{% endif %}}">
+	<div class="form-group {% if field.errors %}has-error{% endif %}">
 		<label class="control-label" for="{{ field.id_for_label }}">
-			{{- field.label.add_class("form-control") }}{{ required -}}
+			{{- field.label }}{{ required -}}
 		</label>
-		{{ field }}
-	</div>>
+		{{ field.add_class('form-control') }}
+	</div>
 {% endmacro %}
 
-
 {% macro bootstrap3_horizontal(label, required, field, help_text) %}
-	<div class="form-group {% if field.errors %}has-error{% endif %}}">
+	<div class="form-group {% if field.errors %}has-error{% endif %}">
 		<label class="control-label" for="{{ field.id_for_label }}">
-			{{- field.label.add_class("form-control") }}{{ required -}}
+			{{- field.label }}{{ required -}}
 		</label>
-		{{ field }}
-	</div>>
+		{{ field.add_class('form-control') }}
+	</div>
 {% endmacro %}
