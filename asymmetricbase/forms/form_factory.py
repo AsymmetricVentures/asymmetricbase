@@ -36,7 +36,7 @@ class FormFactory(object):
 		self.form = form
 		self.args = args
 		self.data = {}
-		# TODO: see if always_bound can be replaced with use_GET
+		# TODO(done): see if always_bound can be replaced with use_GET: No it can't
 		self.always_bound = kwargs.pop('always_bound', False)
 		
 		self.callbacks = kwargs.pop('callbacks', [])
@@ -59,7 +59,8 @@ class FormFactory(object):
 		if self.use_GET:
 			form_data.update(request.GET)
 		elif self.use_REQUEST:
-			form_data.update(request.REQUEST)
+			form_data.update(request.POST)
+			form_data.update(request.GET)
 		else:
 			form_data.update(request.POST)
 		
