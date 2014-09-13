@@ -21,5 +21,4 @@ from .logger_models import *
 from .base import *
 from .s3file import *
 from .named_groups import *
-from .roles import *
 from .address import *

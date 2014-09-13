@@ -29,7 +29,6 @@ from asymmetricbase._models.logger_models import LogEntryType, AccessType
 from asymmetricbase.fields.uuidfield import UUIDField
 from asymmetricbase.logging import audit_logger
 
-
 class AsymBaseModel(models.Model):
 	# The next two lines for for eclipse so that it stops reporting _meta as unknown
 	_meta = models.options.Options
