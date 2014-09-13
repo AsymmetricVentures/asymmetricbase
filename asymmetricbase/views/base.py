@@ -40,6 +40,7 @@ from asymmetricbase.logging import logger #@UnusedImport
 from asymmetricbase.jinja import jinja_env
 from asymmetricbase.utils.permissions import create_codename, \
 	default_content_type_appname
+from django.http.response import HttpResponse
 
 class AsymBaseView(MultiFormatResponseMixin, View):
 	""" Base class for all views """
@@ -314,6 +315,10 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 	@staticmethod
 	def not_found():
 		return HttpResponseNotFound()
+	
+	@staticmethod
+	def response(status_code, content = b''):
+		return HttpResponse(content = content, status = status_code)
 	
 	@staticmethod
 	def redirect(to_string, *args, **kwargs):
