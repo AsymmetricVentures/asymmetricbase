@@ -20,17 +20,61 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import sys
 
 from django.forms import forms
+from django.forms.utils import flatatt
+from django.utils.functional import cached_property
 from django.utils.encoding import force_text
-
 from django.dispatch import Signal
-from django.utils.html import conditional_escape
+from django.utils.html import conditional_escape, format_html
 
 from asymmetricbase.jinja import jinja_env
 
-boundfield_props = Signal() 
+boundfield_props = Signal()
+
+class BoundLabel:
+	def __init__(self, bound_field, field, form, **kwargs):
+		self.bound_field = bound_field
+		self.field = field
+		self.form = form
+		self.attrs = kwargs
+		super(BoundLabel, self).__init__()
+	
+	def attr(self, name, value = None):
+		self.attrs[name] = value
+		return self
+	
+	def append_classes(self, *values):
+		current = set(self.attrs.get('class', '').split(' '))
+		current.update(values)
+		self.attrs['class'] = ' '.join(current)
+		return self
+	
+	def render(self):
+		contents = self.attrs.pop('contents', None)
+		if contents is None:
+			contents = self.bound_field.label
+		label_suffix = self.attrs.pop('label_suffix', None)
+		if label_suffix is None:
+			label_suffix = self.form.label_suffix
+		if label_suffix and contents and contents[-1] not in ':?.!':
+			contents = format_html('{}{}'.format(contents, label_suffix))
+		widget = self.field.widget
+		id_ = widget.attrs.get('id') or self.bound_field.auto_id
+		if id_:
+			id_for_label = widget.id_for_label(id_)
+			if id_for_label:
+				attrs = dict(self.attrs or {}, **{'for' : id_for_label})
+			attrs = flatatt(attrs) if attrs else ''
+		else:
+			contents = conditional_escape(contents)
+		return format_html(
+			'<label{}>{}</label>', attrs, contents
+		)
+	
+	def __str__(self):
+		return self.render()
 
 class BoundField(forms.BoundField):
-	@property
+	@cached_property
 	def template_module(self):
 		return jinja_env.get_template('asymmetricbase/boundfield/default.djhtml').module
 	
@@ -71,6 +115,17 @@ class BoundField(forms.BoundField):
 	def _render_from_module(self, template_module_call):
 		return template_module_call(**self._get_fields())
 	
+	def label_tag(self, contents = None, attrs = None, label_suffix = None):
+		if attrs is None:
+			attrs = {}
+		attrs.setdefault('contents', contents)
+		return BoundLabel(
+			bound_field = self, field = self.field, form = self.form,
+			label_suffix = label_suffix, **attrs
+		)
+	
+	just_field = property(lambda self: self._render_with_template('just_field'))
+	
 	vseg = property(lambda self: self._render_with_template('vblock_segment'))
 	hseg = property(lambda self: self._render_with_template('hblock_segment'))
 	rhseg = property(lambda self: self._render_with_template('rhblock_segment'))
@@ -82,6 +137,7 @@ class BoundField(forms.BoundField):
 	bs3 = property(lambda self: self._render_with_template('bootstrap3_default'))
 	bs3_inline = property(lambda self: self._render_with_template('bootstrap3_inline'))
 	bs3_h = property(lambda self: self._render_with_template('bootstrap3_horizontal'))
+	bs3_field = property(lambda self: self._render_with_template('bs3_field'))
 	# methods to replace django widget_tweaks
 	
 	def _process_attributes(self, name, value, process):
@@ -120,7 +176,8 @@ class BoundField(forms.BoundField):
 		return self.attr('data-' + name, value)
 	
 	
+setattr(sys.modules['django.forms.forms'], 'BoundField', BoundField)
+
 # Give other parts of the code a chance to register custom functions on boundfield
 boundfield_props.send(sender = BoundField)
 
-setattr(sys.modules['django.forms.forms'], 'BoundField', BoundField)
