@@ -122,7 +122,7 @@ class Role(AsymBaseModel):
 		unique_together = (
 			('name', 'defined_for',),
 		)
-		#app_label = 'shared'
+		db_table = 'shared_role'
 	
 	name = LongNameField()
 	defined_for = models.ForeignKey(ContentType)
@@ -154,6 +154,9 @@ class AssignedRole(AsymBaseModel):
 	"""
 	For adding Users in specific roles to models.
 	"""
+	class Meta:
+		db_table = 'shared_assignedrole'
+	
 	user = models.ForeignKey(UserModel, related_name = 'assigned_roles')
 	role = models.ForeignKey(Role, related_name = 'assignments')
 	
@@ -184,6 +187,9 @@ class AssignedRole(AsymBaseModel):
 		super(AssignedRole, self).save(*args, **kwargs)
 
 class RoleTransfer(AsymBaseModel):
+	class Meta:
+		db_table = 'shared_roletransfer'
+	
 	role_from = models.ForeignKey(Role, related_name = '+')
 	role_to = models.ForeignKey(Role, related_name = '+')
 	
@@ -248,5 +254,8 @@ class DefaultRole(AsymBaseModel):
 	This allows renaming of the Roles while still being able to access it
 	by name in the code.
 	"""
+	class Meta:
+		db_table = 'shared_defaultrole'
+	
 	identifier = models.IntegerField(unique = True)
 	role = models.ForeignKey(Role)

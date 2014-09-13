@@ -36,6 +36,9 @@ class DefaultGroup(AsymBaseModel):
 	This allows renaming of the Group while still being able to access it
 	by name in the code.
 	"""
+	class Meta:
+		db_table = 'shared_defaultgroup'
+	
 	identifier = models.IntegerField(unique = True)
 	group = models.ForeignKey(Group)
 
@@ -43,6 +46,9 @@ class NamedGroupSet(AsymBaseModel):
 	"""
 	Couple a set of Group objects with a static name defined in settings.
 	"""
+	class Meta:
+		db_table = 'shared_namedgroupset'
+	
 	identifier = models.IntegerField()
 	group_set = models.ManyToManyField(Group)
 	
