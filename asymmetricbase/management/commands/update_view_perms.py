@@ -20,7 +20,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import imp
 
 from django.core.management.base import BaseCommand, CommandError
-from django.core.urlresolvers import RegexURLResolver
+from django.core.urlresolvers import RegexURLResolver, RegexURLPattern
 from django.utils.importlib import import_module
 from django.contrib.auth.models import Permission
 
@@ -59,6 +59,62 @@ class Command(BaseCommand):
 		# insert permissions into DB
 		Permission.objects.bulk_create(self.objs)
 	
+	def _handle_pattern(self, pattern):
+		assert isinstance(pattern, RegexURLPattern)
+		
+	
+	def _handle_callback(self, cls, k, kwargs):
+		if hasattr(cls, 'permission_name') and getattr(cls, 'login_required', None):
+			msg = ''
+			suffix = ''
+			# if name is not given, use default name from class name:
+			if getattr(cls, 'permission_name') is '':
+				name = 'Can Access {}'.format(cls.__name__)
+				msg = 'Default: Default'
+			else:
+				name = getattr(cls, 'permission_name')
+				msg = 'Add: Named'
+				
+				# For view classes that are used in more than one
+				# view but are distinguished by kwargs, we can create
+				# separate permissions by requiring that the view's
+				# permission_name attribute be a dictionary in the following format:
+				# permission_name[kwarg_key][kwarg_value] = { permission_name : '<name>', permission_codename : '<codename>' }
+				if isinstance(name, dict):
+					name, suffix = AsymBaseView.get_view_name_and_suffix(name, **kwargs)
+						
+				
+			codename = create_codename(k.__module__, cls.__name__, suffix)
+			
+			# check for name conflicts
+			if name in self.names and codename != self.names[name] and self.verbose:
+				print('Duplicate: Permission at {} with name \'{}\' already defined at {}.'.format(codename, name, self.names[name]))
+			# check that permission is not already defined for this class
+			if (codename,) not in self.db_perms:
+				if codename not in self.codenames:
+					self.codenames.add(codename)
+					self.objs.append(
+						Permission(
+							name = name,
+							codename = codename,
+							content_type = self.ctype,
+						)
+					)
+				if self.verbose:
+					print('{} Permission: {} at {}.'.format(msg, name, codename))
+			else:
+				perm = Permission.objects.get(content_type = self.ctype, codename = codename)
+				perm.name = name
+				perm.save()
+				if self.verbose:
+					print('Update: Permission \'{}\' updated at {}.'.format(name, codename))
+			
+			self.names[name] = codename
+		elif getattr(cls, 'login_required', True) is False and self.verbose:
+			print('Skip: Login not required for {}.{} so permission not added.'.format(k.__module__, cls.__name__))
+		elif self.verbose:
+			print('Warning: permission_name not defined on {}.{}.'.format(k.__module__, cls.__name__))
+	
 	def traverse(self, patterns):
 		for entry in patterns:
 			if isinstance(entry, RegexURLResolver):
@@ -73,56 +129,12 @@ class Command(BaseCommand):
 						except AttributeError:
 							continue
 						
-						if hasattr(cls, 'permission_name') and getattr(cls, 'login_required', None):
-							msg = ''
-							suffix = ''
-							# if name is not given, use default name from class name:
-							if getattr(cls, 'permission_name') is '':
-								name = 'Can Access {}'.format(cls.__name__)
-								msg = 'Default: Default'
-							else:
-								name = getattr(cls, 'permission_name')
-								msg = 'Add: Named'
-								
-								# For view classes that are used in more than one
-								# view but are distinguished by kwargs, we can create
-								# separate permissions by requiring that the view's
-								# permission_name attribute be a dictionary in the following format:
-								# permission_name[kwarg_key][kwarg_value] = { permission_name : '<name>', permission_codename : '<codename>' }
-								if isinstance(name, dict):
-									name, suffix = AsymBaseView.get_view_name_and_suffix(name, **kwargs)
-										
-								
-							codename = create_codename(k.__module__, cls.__name__, suffix)
-							
-							# check for name conflicts
-							if name in self.names and codename != self.names[name] and self.verbose:
-								print('Duplicate: Permission at {} with name \'{}\' already defined at {}.'.format(codename, name, self.names[name]))
-							# check that permission is not already defined for this class
-							if (codename,) not in self.db_perms:
-								if codename not in self.codenames:
-									self.codenames.add(codename)
-									self.objs.append(
-										Permission(
-											name = name,
-											codename = codename,
-											content_type = self.ctype,
-										)
-									)
-								if self.verbose:
-									print('{} Permission: {} at {}.'.format(msg, name, codename))
-							else:
-								perm = Permission.objects.get(content_type = self.ctype, codename = codename)
-								perm.name = name
-								perm.save()
-								if self.verbose:
-									print('Update: Permission \'{}\' updated at {}.'.format(name, codename))
-							
-							self.names[name] = codename
-						elif getattr(cls, 'login_required', True) is False and self.verbose:
-							print('Skip: Login not required for {}.{} so permission not added.'.format(k.__module__, cls.__name__))
-						elif self.verbose:
-							print('Warning: permission_name not defined on {}.{}.'.format(k.__module__, cls.__name__))
-						
+						self._handle_callback(cls, k, kwargs)
+			elif isinstance(entry, RegexURLPattern):
+				try:
+					cls = getattr(import_module(entry.callback.__module__), entry.callback.__name__)
+					self._handle_callback(cls, entry.callback, {})
+				except AttributeError:
+					continue
 			if hasattr(entry, 'url_patterns'):
 				self.traverse(entry.url_patterns)
