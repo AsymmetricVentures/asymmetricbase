@@ -309,12 +309,12 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 		return (name, suffix)
 	
 	@staticmethod
-	def forbidden():
-		return HttpResponseForbidden()
+	def forbidden(*args, **kwargs):
+		return HttpResponseForbidden(*args, **kwargs)
 	
 	@staticmethod
-	def not_found():
-		return HttpResponseNotFound()
+	def not_found(*args, **kwargs):
+		return HttpResponseNotFound(*args, **kwargs)
 	
 	@staticmethod
 	def response(status_code, content = b''):

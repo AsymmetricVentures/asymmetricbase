@@ -51,7 +51,7 @@ class Command(BaseCommand):
 		# all view permissions will be assigned to User content type
 		self.ctype = default_content_type()
 		# get existing permissions
-		self.db_perms = Permission.objects.filter(content_type = self.ctype).values_list('codename')
+		self.db_perms = list(Permission.objects.filter(content_type = self.ctype).values_list('codename'))
 		
 		# traverse defined url patterns to get all views
 		self.traverse(urls.urlpatterns)
