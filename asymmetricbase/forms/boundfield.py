@@ -26,8 +26,6 @@ from django.utils.encoding import force_text
 from django.dispatch import Signal
 from django.utils.html import conditional_escape, format_html
 
-from asymmetricbase.jinja import jinja_env
-
 boundfield_props = Signal()
 
 class BoundLabel:
@@ -76,6 +74,7 @@ class BoundLabel:
 class BoundField(forms.BoundField):
 	@cached_property
 	def template_module(self):
+		from asymmetricbase.jinja import jinja_env
 		return jinja_env.get_template('asymmetricbase/boundfield/default.djhtml').module
 	
 	def _get_fields(self):

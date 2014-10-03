@@ -317,8 +317,8 @@ class AsymBaseView(MultiFormatResponseMixin, View):
 		return HttpResponseNotFound(*args, **kwargs)
 	
 	@staticmethod
-	def response(status_code, content = b''):
-		return HttpResponse(content = content, status = status_code)
+	def response(status_code, content = b'', *args, **kwargs):
+		return HttpResponse(content = content, status = status_code, *args, **kwargs)
 	
 	@staticmethod
 	def redirect(to_string, *args, **kwargs):
